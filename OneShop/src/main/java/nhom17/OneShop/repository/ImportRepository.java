@@ -1,8 +1,8 @@
 package nhom17.OneShop.repository;
 
-import nhom17.OneShop.entity.Category;
+import nhom17.OneShop.entity.Import;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-public interface CategoryRepository extends JpaRepository<Category, Integer>, JpaSpecificationExecutor<Category> {
+public interface ImportRepository extends JpaRepository<Import, Integer>, JpaSpecificationExecutor<Import> {
 }

@@ -4,13 +4,13 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Entity
 @Table(name = "SanPham")
-public class SanPham {
+public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer maSanPham;
@@ -26,11 +26,14 @@ public class SanPham {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MaDanhMuc")
-    private DanhMuc danhMuc;
+    private Category danhMuc;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MaThuongHieu")
-    private ThuongHieu thuongHieu;
+    private Brand thuongHieu;
+
+    @OneToMany(mappedBy = "sanPham", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Rating> danhSachRating;
 
     @PrePersist
     protected void onCreate() {

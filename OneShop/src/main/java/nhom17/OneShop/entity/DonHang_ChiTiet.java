@@ -26,5 +26,5 @@ public class DonHang_ChiTiet {
     @Id
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MaSanPham")
-    private SanPham sanPham;
+    private Product sanPham;
 }

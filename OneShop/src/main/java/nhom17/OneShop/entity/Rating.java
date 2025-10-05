@@ -8,17 +8,16 @@ import java.time.LocalDateTime;
 @Data
 @Entity
 @Table(name = "DanhGia")
-@IdClass(DanhGiaId.class)
-public class DanhGia {
+@IdClass(RatingId.class)
+public class Rating {
     private Integer diemDanhGia;
-    @Lob
     private String binhLuan;
     private LocalDateTime ngayTao;
 
     @Id
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MaSanPham")
-    private SanPham sanPham;
+    private Product sanPham;
 
     @Id
     @ManyToOne(fetch = FetchType.LAZY)

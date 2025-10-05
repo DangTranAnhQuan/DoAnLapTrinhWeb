@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 @Data
 @Entity
 @Table(name = "KhoHang")
-public class KhoHang {
+public class Inventory {
 
     @Id
     private Integer maSanPham; // Khóa chính giờ là MaSanPham
@@ -20,5 +20,5 @@ public class KhoHang {
     @OneToOne(fetch = FetchType.LAZY)
     @MapsId // Đánh dấu rằng thuộc tính này cũng là một phần của khóa chính
     @JoinColumn(name = "MaSanPham")
-    private SanPham sanPham;
+    private Product sanPham;
 }

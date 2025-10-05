@@ -25,5 +25,5 @@ public class GioHang {
     @Id
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MaSanPham")
-    private SanPham sanPham;
+    private Product sanPham;
 }

@@ -1,12 +1,12 @@
 package nhom17.OneShop.service;
 
-import nhom17.OneShop.entity.SanPham;
+import nhom17.OneShop.entity.Product;
 import nhom17.OneShop.request.ProductRequest;
 import org.springframework.data.domain.Page;
 
 public interface ProductService {
-    Page<SanPham> searchProducts(String keyword, Boolean status, String sort, int page, int size);
-    SanPham findById(int id);
+    Page<Product> searchProducts(String keyword, Boolean status, Integer categoryId, Integer brandId, String sort, int page, int size);
+    Product findById(int id);
     void save(ProductRequest productRequest);
     void delete(int id);
 }
