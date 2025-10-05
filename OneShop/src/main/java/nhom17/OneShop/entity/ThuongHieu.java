@@ -1,0 +1,18 @@
+package nhom17.OneShop.entity;
+
+import jakarta.persistence.*;
+import lombok.Data;
+
+@Data
+@Entity
+@Table(name = "ThuongHieu")
+public class ThuongHieu {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer maThuongHieu;
+    private String tenThuongHieu;
+    private String hinhAnh;
+    @Lob
+    private String moTa;
+    private boolean kichHoat;
+}

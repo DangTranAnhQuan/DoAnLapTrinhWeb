@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="vi" 
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{/layouts/admin}">
+
+<head>
+    <title>Quản lý vận chuyển | OneShop</title>
+    <link rel="stylesheet" th:href="@{/assets/vendor/fonts/boxicons.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendor/libs/apex-charts/apex-charts.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendor/libs/datatables-bs5/datatables.bootstrap5.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendor/libs/select2/select2.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendor/libs/flatpickr/flatpickr.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/order.css}">
+    <style>
+        .badge {
+            font-size: 0.85em;
+            font-weight: 500;
+        }
+        .badge.bg-label-success { color: #28a745; background-color: #d4edda; }
+        .badge.bg-label-warning { color: #ffc107; background-color: #fff3cd; }
+        .badge.bg-label-info { color: #17a2b8; background-color: #d1ecf1; }
+        .badge.bg-label-danger { color: #dc3545; background-color: #f8d7da; }
+        .badge.bg-label-primary { color: #007bff; background-color: #d1e7ff; }
+    </style>
+</head>
+
+<body class="order-management-page">
+<h4 class="fw-bold py-3 mb-4" layout:fragment="page_title">
+    <span class="text-muted fw-light">Quản lý /</span> Vận chuyển
+</h4>
+<main layout:fragment="content">
+    <div class="container-xxl flex-grow-1 container-p-y">
+        <!-- Bộ lọc đơn hàng -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <form id="filterForm" class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label">Mã đơn hàng</label>
+                        <input type="text" class="form-control" id="orderCode" placeholder="Nhập mã đơn hàng">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Khách hàng</label>
+                        <input type="text" class="form-control" id="customerName" placeholder="Tên khách hàng">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Trạng thái</label>
+                        <select class="form-select" id="orderStatus">
+                            <option value="">Tất cả trạng thái</option>
+                            <option value="PENDING">Chờ xử lý</option>
+                            <option value="PROCESSING">Đang xử lý</option>
+                            <option value="SHIPPING">Đang giao hàng</option>
+                            <option value="DELIVERED">Đã giao hàng</option>
+                            <option value="CANCELLED">Đã hủy</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Đơn vị VC</label>
+                        <select class="form-select" id="shippingMethod">
+                            <option value="">Tất cả đơn vị</option>
+                            <option value="GHN">Giao Hàng Nhanh</option>
+                            <option value="GHTK">Giao Hàng Tiết Kiệm</option>
+                            <option value="VIETTEL_POST">Viettel Post</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Ngày tạo đơn</label>
+                        <input type="text" class="form-control flatpickr-range" id="orderDateRange" placeholder="Chọn khoảng ngày">
+                    </div>
+                    <div class="col-md-12 text-end">
+                        <button type="button" class="btn btn-outline-secondary me-2" id="btnReset">
+                            <i class="bx bx-reset me-1"></i> Đặt lại
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bx bx-search me-1"></i> Tìm kiếm
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Danh sách đơn hàng vận chuyển -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Danh sách đơn hàng vận chuyển</h5>
+                <a th:href="@{/admin/orders/create}?type=shipping" class="btn btn-primary btn-sm">
+                    <i class="bx bx-plus"></i> Tạo đơn vận chuyển
+                </a>
+            </div>
+            <div class="card-datatable table-responsive">
+                <table class="datatables-orders table border-top">
+                    <thead>
+                        <tr>
+                            <th>Mã đơn hàng</th>
+                            <th>Khách hàng</th>
+                            <th>Ngày tạo</th>
+                            <th>Đơn vị VC</th>
+                            <th>Trạng thái</th>
+                            <th>Ngày giao dự kiến</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="order : ${orders}">
+                            <td>
+                                <a th:href="@{/admin/orders/{id}(id=${order.id})}" class="fw-medium">
+                                    [[${'#' + order.code}]]
+                                </a>
+                            </td>
+                            <td>[[${order.customerName}]]</td>
+                            <td>[[${#temporals.format(order.orderDate, 'dd/MM/yyyy')}]]</td>
+                            <td>[[${order.shippingMethod}]]</td>
+                            <td>
+                                <span th:classappend="${'badge ' + order.status.badgeClass}">
+                                    [[${order.status.displayName}]]
+                                </span>
+                            </td>
+                            <td>[[${#temporals.format(order.estimatedDeliveryDate, 'dd/MM/yyyy')}]]</td>
+                            <td>
+                                <div class="dropdown">
+                                    <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                        <i class="bx bx-dots-vertical-rounded"></i>
+                                    </button>
+                                    <div class="dropdown-menu">
+                                        <a th:href="@{/admin/orders/{id}(id=${order.id})}" class="dropdown-item">
+                                            <i class="bx bx-show me-1"></i> Xem chi tiết
+                                        </a>
+                                        <a th:if="${order.status == 'PENDING' || order.status == 'PROCESSING'}" 
+                                           th:href="@{/admin/orders/{id}/edit(id=${order.id})}" class="dropdown-item">
+                                            <i class="bx bx-edit me-1"></i> Cập nhật
+                                        </a>
+                                        <a th:if="${order.status == 'SHIPPING'}" href="#" class="dropdown-item text-success" 
+                                           th:data-id="${order.id}" data-status="DELIVERED">
+                                            <i class="bx bx-check-double me-1"></i> Xác nhận đã giao
+                                        </a>
+                                        <a th:if="${order.status == 'PROCESSING'}" href="#" class="dropdown-item text-primary" 
+                                           th:data-id="${order.id}" data-status="SHIPPING">
+                                            <i class="bx bx-truck me-1"></i> Xác nhận đang giao
+                                        </a>
+                                        <a th:if="${order.status == 'PENDING'}" href="#" class="dropdown-item text-info" 
+                                           th:data-id="${order.id}" data-status="PROCESSING">
+                                            <i class="bx bx-cog me-1"></i> Bắt đầu xử lý
+                                        </a>
+                                        <div class="dropdown-divider"></div>
+                                        <a th:if="${order.status != 'CANCELLED' && order.status != 'DELIVERED'}" 
+                                           href="#" class="dropdown-item text-danger" 
+                                           th:onclick="'return confirm(\'Bạn có chắc chắn muốn hủy đơn hàng này?\')'"
+                                           th:data-id="${order.id}" data-status="CANCELLED">
+                                            <i class="bx bx-x me-1"></i> Hủy đơn hàng
+                                        </a>
+                                        <a th:if="${order.status == 'CANCELLED' || order.status == 'DELIVERED'}" 
+                                           href="#" class="dropdown-item text-secondary" 
+                                           th:onclick="'return confirm(\'Bạn có chắc chắn muốn xóa đơn hàng này?\')'"
+                                           th:data-id="${order.id}">
+                                            <i class="bx bx-trash me-1"></i> Xóa
+                                        </a>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Core JS -->
+<script th:src="@{/assets/vendor/libs/jquery/jquery.js}"></script>
+<script th:src="@{/assets/vendor/libs/popper/popper.js}"></script>
+<script th:src="@{/assets/vendor/js/bootstrap.js}"></script>
+<script th:src="@{/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js}"></script>
+<script th:src="@{/assets/vendor/libs/apex-charts/apexcharts.js}"></script>
+
+<!-- DataTables -->
+<script th:src="@{/assets/vendor/libs/datatables-bs5/datatables-bootstrap5.js}"></script>
+
+<!-- Select2 -->
+<script th:src="@{/assets/vendor/libs/select2/select2.full.min.js}"></script>
+
+<!-- Moment -->
+<script th:src="@{/assets/vendor/libs/moment/moment.js}"></script>
+
+<!-- Flatpickr -->
+<script th:src="@{/assets/vendor/libs/flatpickr/flatpickr.js}"></script>
+<script th:src="@{/assets/vendor/libs/flatpickr/l10n/vi.js}"></script>
+
+<!-- Main JS -->
+<script th:src="@{/assets/js/main.js}"></script>
+
+<!-- Page JS -->
+<script th:src="@{/assets/js/order.js}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Khởi tạo date range picker
+        if (typeof flatpickr !== 'undefined') {
+            flatpickr('.flatpickr-range', {
+                mode: 'range',
+                dateFormat: 'd/m/Y',
+                locale: 'vi',
+                allowInput: true
+            });
+        }
+        
+        // Khởi tạo select2 nếu tồn tại
+        if ($.fn.select2) {
+            $('.form-select').select2({
+                width: '100%',
+                placeholder: 'Chọn một tùy chọn',
+                allowClear: true,
+                dropdownAutoWidth: true,
+                width: 'style'
+            });
+        }
+
+        // Xử lý sự kiện nút đặt lại
+        $('#btnReset').on('click', function() {
+            $('#filterForm')[0].reset();
+            if ($.fn.select2) {
+                $('.form-select').val('').trigger('change');
+            }
+            if (typeof flatpickr !== 'undefined') {
+                $('.flatpickr-range').val('').trigger('change');
+            }
+        });
+    });
+</script>
+</body>
+</html>

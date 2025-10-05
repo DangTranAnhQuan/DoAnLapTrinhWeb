@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="vi" 
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{/layouts/admin}">
+
+<head>
+    <title>Quản lý đơn hàng | OneShop</title>
+</head>
+
+<body class="order-management-page">
+<h4 class="fw-bold py-3 mb-4" layout:fragment="page_title">
+    <span class="text-muted fw-light">Quản lý /</span> Đơn hàng
+</h4>
+<main layout:fragment="content">
+    <div class="container-xxl flex-grow-1 container-p-y">
+        <!-- Bộ lọc đơn hàng -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <form id="filterForm" class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label">Mã đơn hàng</label>
+                        <input type="text" class="form-control" id="orderCode" placeholder="Nhập mã đơn hàng">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Khách hàng</label>
+                        <input type="text" class="form-control" id="customerName" placeholder="Tên khách hàng">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Trạng thái</label>
+                        <select class="form-select" id="orderStatus">
+                            <option value="">Tất cả trạng thái</option>
+                            <option value="PENDING">Chờ xử lý</option>
+                            <option value="PROCESSING">Đang xử lý</option>
+                            <option value="SHIPPING">Đang giao hàng</option>
+                            <option value="DELIVERED">Đã giao hàng</option>
+                            <option value="CANCELLED">Đã hủy</option>
+                            <option value="RETURNED">Đổi/Trả hàng</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Ngày đặt hàng</label>
+                        <input type="text" class="form-control" id="orderDateRange" placeholder="Chọn khoảng ngày">
+                    </div>
+                    <div class="col-md-12 text-end">
+                        <button type="button" class="btn btn-outline-secondary me-2" id="btnReset">
+                            <i class="bx bx-reset me-1"></i> Đặt lại
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bx bx-search me-1"></i> Tìm kiếm
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Bảng danh sách đơn hàng -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Danh sách đơn hàng</h5>
+                <a th:href="@{/admin/orders/create}" class="btn btn-primary btn-sm">
+                    <i class="bx bx-plus"></i> Tạo đơn hàng
+                </a>
+            </div>
+            <div class="card-datatable table-responsive">
+                <table class="datatables-orders table border-top">
+                    <thead>
+                    <tr>
+                        <th>Mã đơn hàng</th>
+                        <th>Khách hàng</th>
+                        <th>Ngày đặt</th>
+                        <th>Tổng tiền</th>
+                        <th>Trạng thái</th>
+                        <th>Thanh toán</th>
+                        <th>Thao tác</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="order : ${orders}">
+                        <td>
+                            <a th:href="@{/admin/orders/{id}(id=${order.id})}" class="fw-medium">
+                                [[${'#' + order.code}]]
+                            </a>
+                        </td>
+                        <td>[[${order.customerName}]]</td>
+                        <td>[[${#temporals.format(order.orderDate, 'dd/MM/yyyy HH:mm')}]]</td>
+                        <td>[[${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')}]]₫</td>
+                        <td>
+                            <span th:classappend="${'order-status ' + order.status.badgeClass}">
+                                [[${order.status.displayName}]]
+                            </span>
+                        </td>
+                        <td>
+                            <span th:classappend="${'payment-status ' + (order.paid ? 'payment-badge-paid' : 'payment-badge-pending')}">
+                                [[${order.paid ? 'Đã thanh toán' : 'Chưa thanh toán'}]]
+                            </span>
+                        </td>
+                        <td>
+                            <div class="dropdown">
+                                <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                    <i class="bx bx-dots-vertical-rounded"></i>
+                                </button>
+                                <div class="dropdown-menu">
+                                    <a th:href="@{/admin/orders/{id}(id=${order.id})}" class="dropdown-item">
+                                        <i class="bx bx-show me-1"></i> Xem chi tiết
+                                    </a>
+                                    <a th:href="@{/admin/orders/{id}/edit(id=${order.id})}" class="dropdown-item">
+                                        <i class="bx bx-edit me-1"></i> Cập nhật
+                                    </a>
+                                    <div class="dropdown-divider"></div>
+                                    <a href="#" class="dropdown-item text-danger" 
+                                       th:onclick="'return confirm(\'Bạn có chắc chắn muốn xóa đơn hàng này?\')'">
+                                        <i class="bx bx-trash me-1"></i> Xóa
+                                    </a>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>

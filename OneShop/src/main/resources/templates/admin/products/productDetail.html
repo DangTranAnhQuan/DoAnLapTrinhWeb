@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{/layouts/admin}">
+<head>
+    <title>Chi tiết sản phẩm</title>
+</head>
+<body>
+<h4 class="fw-bold py-3 mb-4" layout:fragment="page_title">
+    <span class="text-muted fw-light">Sản phẩm /</span> Chi tiết
+</h4>
+
+<main layout:fragment="content" class="product-detail-page">
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-5 text-center">
+                    <img th:src="@{'/uploads/' + ${product.hinhAnh}}" class="img-fluid rounded border p-2"
+                         alt="Ảnh sản phẩm" style="max-height: 400px;">
+                </div>
+
+                <div class="col-md-7">
+                    <h2 class="card-title" th:text="${product.tenSanPham}"></h2>
+                    <div>
+                        <span th:if="${product.kichHoat}" class="badge bg-label-success fs-6">
+                            <i class="bx bx-check-circle me-1"></i>Đang hoạt động
+                        </span>
+                        <span th:unless="${product.kichHoat}" class="badge bg-label-danger fs-6">
+                             <i class="bx bx-x-circle me-1"></i>Ngừng hoạt động
+                        </span>
+                    </div>
+
+                    <hr>
+
+                    <div class="price-section mb-4">
+                        <span class="selling-price" th:text="${#numbers.formatDecimal(product.giaBan, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></span>
+                        <span class="list-price ms-2" th:if="${product.giaNiemYet != null and product.giaNiemYet.doubleValue() > 0}"
+                              th:text="${#numbers.formatDecimal(product.giaNiemYet, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></span>
+                    </div>
+
+                    <div class="info-details">
+                        <div class="row mb-2">
+                            <div class="col-sm-4 info-label"><i class="bx bx-purchase-tag-alt"></i> Danh mục:</div>
+                            <div class="col-sm-8"><span class="badge bg-label-primary" th:text="${product.danhMuc.tenDanhMuc}"></span></div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-sm-4 info-label"><i class="bx bxl-bootstrap"></i> Thương hiệu:</div>
+                            <div class="col-sm-8"><span class="badge bg-label-info" th:text="${product.thuongHieu.tenThuongHieu}"></span></div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-sm-4 info-label"><i class="bx bx-barcode-reader"></i> Mã sản phẩm:</div>
+                            <div class="col-sm-8" th:text="${product.maSanPham}"></div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-sm-4 info-label"><i class="bx bx-calendar-x"></i> Hạn sử dụng:</div>
+                            <div class="col-sm-8" th:text="${product.hanSuDung} + ' ngày'"></div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-sm-4 info-label"><i class="bx bx-calendar-plus"></i> Ngày tạo:</div>
+                            <div class="col-sm-8" th:text="${#temporals.format(product.ngayTao, 'dd/MM/yyyy HH:mm')}"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-4">
+                <div class="col-12">
+                    <hr>
+                    <h5 class="mb-3">Mô tả chi tiết</h5>
+                    <p th:text="${product.moTa}" style="white-space: pre-wrap;"></p>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer d-flex justify-content-end">
+            <a th:href="@{/admin/product}" class="btn btn-outline-secondary me-2">
+                <i class="bx bx-arrow-back me-1"></i> Quay lại danh sách
+            </a>
+            <a th:href="@{/admin/product/edit/{id}(id=${product.maSanPham})}" class="btn btn-warning">
+                <i class="bx bx-edit-alt me-1"></i> Chỉnh sửa sản phẩm
+            </a>
+        </div>
+    </div>
+</main>
+</body>
+</html>

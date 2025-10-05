@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{/layouts/admin}">
+
+<head>
+    <title>Dashboard | OneShop</title>
+</head>
+
+<body>
+<h1 class="h2" layout:fragment="page_title">Trang chủ</h1>
+<main layout:fragment="content">
+    <!-- Content wrapper -->
+    <div class="content-wrapper">
+        <!-- Content -->
+        <div class="container-xxl flex-grow-1 container-p-y">
+            <!-- Welcome Card -->
+            <div class="row">
+                <div class="col-12 mb-4">
+                    <div class="card welcome-card">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <h2 class="text-white mb-3">Chào mừng trở lại, Admin! 👋</h2>
+                                    <p class="text-white-50 mb-4">
+                                        Hệ thống OneShop đang hoạt động <span class="fw-bold text-white">tốt</span>.
+                                        <span class="d-block mt-2">Bạn có <span class="fw-bold text-white">5 thông báo mới</span> chưa đọc.</span>
+                                    </p>
+                                    <a href="#" class="btn btn-light text-primary fw-bold">Xem thông báo</a>
+                                </div>
+                                <div class="col-md-4 d-none d-md-block text-center">
+                                    <img th:src="@{/assets/img/illustrations/rocket.png}" 
+                                         alt="Welcome" 
+                                         class="img-fluid"
+                                         style="max-height: 160px;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="col-12 col-sm-6 col-lg-3 mb-4">
+                    <div class="card stat-card h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div class="avatar bg-label-primary p-2 rounded">
+                                    <i class="bx bx-dollar-circle fs-4 text-primary"></i>
+                                </div>
+                                <span class="badge bg-label-primary rounded-pill">+12.5%</span>
+                            </div>
+                            <h6 class="text-muted mb-1">Tổng doanh thu</h6>
+                            <h4 class="mb-0">128.5M VNĐ</h4>
+                            <small class="text-success">
+                                <i class='bx bx-up-arrow-alt'></i> 12% so với tháng trước
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-sm-6 col-lg-3 mb-4">
+                    <div class="card stat-card h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div class="avatar bg-label-success p-2 rounded">
+                                    <i class="bx bx-cart fs-4 text-success"></i>
+                                </div>
+                                <span class="badge bg-label-success rounded-pill">+28%</span>
+                            </div>
+                            <h6 class="text-muted mb-1">Tổng đơn hàng</h6>
+                            <h4 class="mb-0">1,286</h4>
+                            <small class="text-success">
+                                <i class='bx bx-up-arrow-alt'></i> 5% so với tuần trước
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-sm-6 col-lg-3 mb-4">
+                    <div class="card stat-card h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div class="avatar bg-label-warning p-2 rounded">
+                                    <i class="bx bx-user-plus fs-4 text-warning"></i>
+                                </div>
+                                <span class="badge bg-label-warning rounded-pill">+18%</span>
+                            </div>
+                            <h6 class="text-muted mb-1">Khách hàng</h6>
+                            <h4 class="mb-0">5,248</h4>
+                            <small class="text-success">
+                                <i class='bx bx-up-arrow-alt'></i> 8% so với tháng trước
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-sm-6 col-lg-3 mb-4">
+                    <div class="card stat-card h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div class="avatar bg-label-info p-2 rounded">
+                                    <i class="bx bx-line-chart fs-4 text-info"></i>
+                                </div>
+                                <span class="badge bg-label-info rounded-pill">+8%</span>
+                            </div>
+                            <h6 class="text-muted mb-1">Tỷ lệ chuyển đổi</h6>
+                            <h4 class="mb-0">3.6%</h4>
+                            <small class="text-danger">
+                                <i class='bx bx-down-arrow-alt'></i> 0.8% so với tháng trước
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Revenue Chart -->
+                <div class="col-12 mb-4">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Báo cáo doanh thu</h5>
+                            <div class="dropdown">
+                                <button class="btn p-0" type="button" id="revenueReport" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <i class="bx bx-dots-vertical-rounded"></i>
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-end" aria-labelledby="revenueReport">
+                                    <a class="dropdown-item" href="javascript:void(0);">Xuất báo cáo</a>
+                                    <a class="dropdown-item" href="javascript:void(0);">Xem chi tiết</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div id="revenueChart"></div>
+                            <div class="row mt-4">
+                                <div class="col-6">
+                                    <div class="d-flex align-items-center">
+                                        <div class="badge rounded-pill bg-label-primary p-2 me-2">
+                                            <i class='bx bx-dollar-circle'></i>
+                                        </div>
+                                        <div>
+                                            <p class="mb-1">Tổng doanh thu</p>
+                                            <h6 class="mb-0">25.4M VNĐ</h6>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="d-flex align-items-center">
+                                        <div class="badge rounded-pill bg-label-success p-2 me-2">
+                                            <i class='bx bx-trending-up'></i>
+                                        </div>
+                                        <div>
+                                            <p class="mb-1">Tăng trưởng</p>
+                                            <h6 class="mb-0">+12.5%</h6>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Transactions & Top Products -->
+                <div class="row">
+                    <!-- Recent Transactions -->
+                    <div class="col-md-8 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">Giao dịch gần đây</h5>
+                                <a href="#" class="btn btn-sm btn-outline-primary">Xem tất cả</a>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Mã đơn</th>
+                                                <th>Khách hàng</th>
+                                                <th>Ngày</th>
+                                                <th class="text-end">Tổng tiền</th>
+                                                <th>Trạng thái</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="transaction-item">
+                                                <td>#SK2540</td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="avatar bg-light-primary rounded me-2">
+                                                            <span>NA</span>
+                                                        </div>
+                                                        <span>Nguyễn Văn A</span>
+                                                    </div>
+                                                </td>
+                                                <td>01/10/2023</td>
+                                                <td class="text-end">2,500,000 VNĐ</td>
+                                                <td><span class="badge bg-label-success">Hoàn thành</span></td>
+                                            </tr>
+                                            <tr class="transaction-item">
+                                                <td>#SK2539</td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="avatar bg-light-warning rounded me-2">
+                                                            <span>TB</span>
+                                                        </div>
+                                                        <span>Trần Thị B</span>
+                                                    </div>
+                                                </td>
+                                                <td>01/10/2023</td>
+                                                <td class="text-end">1,850,000 VNĐ</td>
+                                                <td><span class="badge bg-label-warning">Đang xử lý</span></td>
+                                            </tr>
+                                            <tr class="transaction-item">
+                                                <td>#SK2538</td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="avatar bg-light-info rounded me-2">
+                                                            <span>LC</span>
+                                                        </div>
+                                                        <span>Lê Văn C</span>
+                                                    </div>
+                                                </td>
+                                                <td>30/09/2023</td>
+                                                <td class="text-end">3,200,000 VNĐ</td>
+                                                <td><span class="badge bg-label-success">Hoàn thành</span></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Top Products -->
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">Sản phẩm bán chạy</h5>
+                                <a href="#" class="btn btn-sm btn-outline-primary">Xem tất cả</a>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex mb-4">
+                                    <div class="avatar bg-label-primary p-2 rounded me-3">
+                                        <i class="bx bx-laptop fs-4"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-0">Laptop Dell XPS 15</h6>
+                                        <small class="text-muted">Đã bán: 128</small>
+                                    </div>
+                                    <div class="d-flex align-items-center">
+                                        <span class="fw-bold">32.5M VNĐ</span>
+                                    </div>
+                                </div>
+                                <div class="d-flex mb-4">
+                                    <div class="avatar bg-label-success p-2 rounded me-3">
+                                        <i class="bx bx-mobile-alt fs-4"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-0">iPhone 14 Pro Max</h6>
+                                        <small class="text-muted">Đã bán: 98</small>
+                                    </div>
+                                    <div class="d-flex align-items-center">
+                                        <span class="fw-bold">28.5M VNĐ</span>
+                                    </div>
+                                </div>
+                                <div class="d-flex">
+                                    <div class="avatar bg-label-info p-2 rounded me-3">
+                                        <i class="bx bx-headphone fs-4"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-0">Tai nghe Sony</h6>
+                                        <small class="text-muted">Đã bán: 75</small>
+                                    </div>
+                                    <div class="d-flex align-items-center">
+                                        <span class="fw-bold">6.5M VNĐ</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>
