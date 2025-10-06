@@ -1,16 +1,11 @@
-package nhom17.OneShop.entity;
+package nhom17.OneShop.request;
 
-import jakarta.persistence.*;
 import lombok.Data;
 
 import java.math.BigDecimal;
 
 @Data
-@Entity
-@Table(name = "HangThanhVien")
-public class HangThanhVien {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class MembershipTierRequest {
     private Integer maHangThanhVien;
     private String tenHang;
     private Integer diemToiThieu;

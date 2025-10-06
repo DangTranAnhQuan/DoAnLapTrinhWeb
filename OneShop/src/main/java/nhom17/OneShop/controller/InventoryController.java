@@ -2,6 +2,7 @@ package nhom17.OneShop.controller;
 
 import nhom17.OneShop.entity.Inventory;
 import nhom17.OneShop.repository.InventoryRepository;
+import nhom17.OneShop.service.InventoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,12 +20,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class InventoryController {
 
     @Autowired
-    private InventoryRepository inventoryRepository;
+    private InventoryService inventoryService;
 
     @GetMapping
     public String listInventory(@RequestParam(required = false) String keyword,
+                                @RequestParam(required = false) String sort,
                                 @RequestParam(defaultValue = "1") int page,
-                                @RequestParam(defaultValue = "10") int size,
+                                @RequestParam(defaultValue = "5") int size,
                                 Model model) {
         Pageable pageable = PageRequest.of(page - 1, size);
 
@@ -35,9 +37,10 @@ public class InventoryController {
             );
         }
 
-        Page<Inventory> inventoryPage = inventoryRepository.findAll(spec, pageable);
+        Page<Inventory> inventoryPage = inventoryService.findAll(keyword, sort, page, size);
         model.addAttribute("inventoryPage", inventoryPage);
         model.addAttribute("keyword", keyword);
+        model.addAttribute("sort", sort);
         return "admin/warehouse/inventory";
     }
 }

@@ -28,5 +28,5 @@ public class NguoiDung {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MaHangThanhVien")
-    private HangThanhVien hangThanhVien;
+    private MembershipTier hangThanhVien;
 }
