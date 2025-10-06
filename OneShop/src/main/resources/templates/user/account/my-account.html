@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layouts/user}">
+<head>
+    <title>Tài Khoản Của Tôi</title>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <div class="axil-breadcrumb-area">
+        </div>
+    <div class="axil-dashboard-area axil-section-gap">
+        <div class="container">
+            <div class="axil-dashboard-warp">
+                <div class="axil-dashboard-author">
+                    <div class="media">
+                        <div class="thumbnail">
+                            <img th:src="@{/web/assets/images/product/author1.png}" alt="Avatar">
+                        </div>
+                        <div class="media-body">
+                            <h5 class="title mb-0" th:text="'Xin chào, ' + ${#authentication.name}">Xin chào...</h5>
+                            <span class="joining-date">Thành viên OneShop</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xl-3 col-md-4">
+                        <aside class="axil-dashboard-aside">
+                            <nav class="axil-dashboard-nav">
+                                <div class="nav nav-tabs" role="tablist">
+                                    <a class="nav-item nav-link active" data-bs-toggle="tab" href="#nav-dashboard" role="tab" aria-selected="true"><i class="fas fa-th-large"></i>Bảng điều khiển</a>
+                                    <a class="nav-item nav-link" data-bs-toggle="tab" href="#nav-orders" role="tab" aria-selected="false"><i class="fas fa-shopping-basket"></i>Đơn hàng</a>
+                                    <a class="nav-item nav-link" data-bs-toggle="tab" href="#nav-address" role="tab" aria-selected="false"><i class="fas fa-home"></i>Địa chỉ</a>
+                                    <a class="nav-item nav-link" data-bs-toggle="tab" href="#nav-account" role="tab" aria-selected="false"><i class="fas fa-user"></i>Chi tiết tài khoản</a>
+                                    <a class="nav-item nav-link" th:href="@{/logout}"><i class="fal fa-sign-out"></i>Đăng xuất</a>
+                                </div>
+                            </nav>
+                        </aside>
+                    </div>
+                    <div class="col-xl-9 col-md-8">
+                        <div class="tab-content">
+                            <div class="tab-pane fade show active" id="nav-dashboard" role="tabpanel">
+                                <div class="axil-dashboard-overview">
+                                    <div class="welcome-text">Xin chào <b sec:authentication="name">user</b> (không phải <span sec:authentication="name">user</span>? <a th:href="@{/logout}">Đăng xuất</a>)</div>
+                                    <p>Từ bảng điều khiển tài khoản, bạn có thể xem các đơn đặt hàng gần đây, quản lý địa chỉ giao hàng và thanh toán cũng như chỉnh sửa mật khẩu và chi tiết tài khoản của mình.</p>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade" id="nav-orders" role="tabpanel">
+                                </div>
+
+                            <div class="tab-pane fade" id="nav-address" role="tabpanel">
+                                <div class="axil-dashboard-address">
+                                    <p class="notice-text">Các địa chỉ sau sẽ được sử dụng trên trang thanh toán theo mặc định.</p>
+                                    <div class="row row--30">
+                                        <div class="col-lg-6">
+                                            <div class="address-info mb--40">
+                                                <div class="addrss-header d-flex align-items-center justify-content-between">
+                                                    <h4 class="title mb-0">Địa chỉ giao hàng</h4>
+                                                    <a href="#" class="address-edit"><i class="far fa-edit"></i></a>
+                                                </div>
+                                                <ul class="address-details">
+                                                    <li>Tên: <span sec:authentication="name">Username</span></li>
+                                                    <li>Email: <span sec:authentication="name">user@example.com</span></li>
+                                                    <li>SĐT: (Vui lòng cập nhật)</li>
+                                                    <li class="mt--30">(Vui lòng cập nhật địa chỉ)</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade" id="nav-account" role="tabpanel">
+                                <div class="col-lg-9">
+                                    <div class="axil-dashboard-account">
+                                        <form class="account-details-form">
+                                            <div class="row">
+                                                <div class="col-lg-6">
+                                                    <div class="form-group">
+                                                        <label>Họ</label>
+                                                        <input type="text" class="form-control">
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-6">
+                                                    <div class="form-group">
+                                                        <label>Tên</label>
+                                                        <input type="text" class="form-control">
+                                                    </div>
+                                                </div>
+                                                <div class="col-12">
+                                                    <div class="form-group">
+                                                        <label>Tên hiển thị</label>
+                                                        <input type="text" class="form-control" th:value="${#authentication.name}">
+                                                    </div>
+                                                </div>
+                                                <div class="col-12">
+                                                    <h5 class="title">Thay đổi mật khẩu</h5>
+                                                    </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+</body>
+</html>

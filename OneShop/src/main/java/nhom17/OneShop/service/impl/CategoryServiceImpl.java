@@ -13,6 +13,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -94,5 +95,10 @@ public class CategoryServiceImpl implements CategoryService {
             // Sau đó xóa bản ghi trong database
             categoryRepository.deleteById(id);
         }
+    }
+    
+    @Override
+    public List<DanhMuc> findAll() {
+        return categoryRepository.findAll();
     }
 }

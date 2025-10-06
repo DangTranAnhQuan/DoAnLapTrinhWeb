@@ -16,7 +16,7 @@ public class ProductRequest {
     private int hanSuDung;
 
     private String hinhAnh;
-    private boolean kichHoat = true; // Giá trị mặc định khi thêm mới
+    private boolean kichHoat = true; 
     private Integer maDanhMuc;
     private Integer maThuongHieu;
 }

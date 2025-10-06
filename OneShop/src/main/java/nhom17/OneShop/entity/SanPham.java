@@ -19,7 +19,8 @@ public class SanPham {
     private String moTa;
     private BigDecimal giaBan;
     private BigDecimal giaNiemYet;
-    private int hanSuDung;
+//    private int hanSuDung;
+    private Integer hanSuDung;
     private String hinhAnh;
     private boolean kichHoat;
     private LocalDateTime ngayTao;
