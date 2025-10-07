@@ -7,7 +7,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
 @EnableWebSecurity
@@ -16,29 +15,30 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .authorizeHttpRequests(authorize -> authorize
-                .requestMatchers("/", "/shop/**", "/product/**", "/sign-in", "/sign-up", "/contact", "/about-us", "/web/**", "/admin/assets/**").permitAll()
-                .requestMatchers("/admin/**").hasRole("ADMIN")
-                .anyRequest().authenticated()
-            )
-            .formLogin(form -> form
-                .loginPage("/sign-in")
-                .loginProcessingUrl("/login")
-//                .defaultSuccessUrl("/", true)
-                .permitAll()
-            )
-            .logout(logout -> logout
-                .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
-                .logoutSuccessUrl("/sign-in?logout")
-                .permitAll()
-            );
-            
+                .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/", "/shop/**", "/product/**", "/sign-in", "/sign-up",
+                                "/contact", "/about-us", "/web/**", "/admin/assets/**").permitAll()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .anyRequest().authenticated()
+                )
+                .formLogin(form -> form
+                        .loginPage("/sign-in")
+                        .loginProcessingUrl("/login")
+                        .permitAll()
+                )
+                // ✅ Sửa phần logout: bỏ AntPathRequestMatcher
+                .logout(logout -> logout
+                        .logoutUrl("/logout")                // thay cho AntPathRequestMatcher("/logout")
+                        .logoutSuccessUrl("/sign-in?logout") // redirect sau khi logout thành công
+                        .permitAll()
+                );
+
         return http.build();
     }
-    
 
     @Bean
     public PasswordEncoder passwordEncoder() {
+        // ⚠️ Chỉ dùng cho test (không mã hoá mật khẩu)
         return NoOpPasswordEncoder.getInstance();
     }
 }

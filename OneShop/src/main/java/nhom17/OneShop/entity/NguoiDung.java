@@ -41,7 +41,7 @@ public class NguoiDung {
     @Column(name = "NgayCapNhat")
     private LocalDateTime ngayCapNhat;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "MaVaiTro")
     private VaiTro vaiTro;
 

@@ -1,7 +1,7 @@
 package nhom17.OneShop.controller;
 
-import nhom17.OneShop.entity.DanhMuc;
-import nhom17.OneShop.entity.SanPham;
+import nhom17.OneShop.entity.Category;
+import nhom17.OneShop.entity.Product;
 import nhom17.OneShop.service.CategoryService;
 import nhom17.OneShop.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,9 +32,9 @@ public class HomeController {
 
     @GetMapping("/cart")
     public String cartPage(Model model) {
-        List<SanPham> cartItems = new ArrayList<>();
-        SanPham product1 = productService.findById(1); 
-        SanPham product2 = productService.findById(2); 
+        List<Product> cartItems = new ArrayList<>();
+        Product product1 = productService.findById(1);
+        Product product2 = productService.findById(2);
         
         if (product1 != null) cartItems.add(product1);
         if (product2 != null) cartItems.add(product2);
@@ -68,10 +68,10 @@ public class HomeController {
                            @RequestParam(name = "size", defaultValue = "9") int size) {
 
         // Gọi service với các tham số từ request
-        Page<SanPham> productPage = productService.searchUserProducts(categoryId, minPrice, maxPrice, sort, page, size);
+        Page<Product> productPage = productService.searchUserProducts(categoryId, minPrice, maxPrice, sort, page, size);
 
         // Lấy danh sách danh mục
-        List<DanhMuc> categoryList = categoryService.findAll();
+        List<Category> categoryList = categoryService.findAll();
 
         // Đưa dữ liệu vào Model
         model.addAttribute("products", productPage.getContent());
@@ -117,7 +117,7 @@ public class HomeController {
 
     @GetMapping("/product/{id}")
     public String productDetailPage(@PathVariable("id") int productId, Model model) {
-        SanPham product = productService.findById(productId);
+        Product product = productService.findById(productId);
         if (product == null) {
             return "redirect:/shop"; 
         }
@@ -127,9 +127,9 @@ public class HomeController {
 
     @GetMapping("/wishlist")
     public String wishlistPage(Model model) {
-        List<SanPham> wishlistItems = new ArrayList<>();
-        SanPham product1 = productService.findById(3); 
-        SanPham product2 = productService.findById(4); 
+        List<Product> wishlistItems = new ArrayList<>();
+        Product product1 = productService.findById(3);
+        Product product2 = productService.findById(4);
         
         if (product1 != null) wishlistItems.add(product1);
         if (product2 != null) wishlistItems.add(product2);

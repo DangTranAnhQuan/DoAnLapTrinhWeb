@@ -95,7 +95,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
     
     @Override
-    public List<DanhMuc> findAll() {
+    public List<Category> findAll() {
         return categoryRepository.findAll();
     }
 }
