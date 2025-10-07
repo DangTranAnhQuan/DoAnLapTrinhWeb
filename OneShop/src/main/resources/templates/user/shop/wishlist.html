@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/user}">
+<head>
+    <title>Danh Sách Yêu Thích</title>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <div class="axil-wishlist-area axil-section-gap">
+        <div class="container">
+            <div class="product-table-heading">
+                <h4 class="title">Danh sách yêu thích của tôi</h4>
+            </div>
+            <div class="table-responsive">
+                <table class="table axil-product-table axil-wishlist-table">
+                    <thead>
+                        <tr>
+                            <th scope="col" class="product-remove"></th>
+                            <th scope="col" class="product-thumbnail">Sản phẩm</th>
+                            <th scope="col" class="product-title"></th>
+                            <th scope="col" class="product-price">Đơn giá</th>
+                            <th scope="col" class="product-stock-status">Tình trạng</th>
+                            <th scope="col" class="product-add-cart"></th>
+                        </tr>
+                    </thead>
+                    
+                    <tbody th:if="${wishlistItems == null || wishlistItems.isEmpty()}">
+                        <tr>
+                            <td colspan="6" class="text-center py-5">
+                                <h4>Danh sách yêu thích của bạn đang trống.</h4>
+                                <a th:href="@{/shop}" class="axil-btn btn-bg-primary mt-3">Khám phá sản phẩm</a>
+                            </td>
+                        </tr>
+                    </tbody>
+
+                    <tbody th:unless="${wishlistItems == null || wishlistItems.isEmpty()}">
+                        <tr th:each="item : ${wishlistItems}">
+                            <td class="product-remove"><a href="#" class="remove-wishlist"><i class="fal fa-times"></i></a></td>
+                            
+                            <td class="product-thumbnail">
+                                <a th:href="@{'/product/' + ${item.maSanPham}}">
+                                    <img th:src="@{${item.hinhAnh}}" alt="Product Image">
+                                </a>
+                            </td>
+                            
+                            <td class="product-title">
+                                <a th:href="@{'/product/' + ${item.maSanPham}}" th:text="${item.tenSanPham}">Tên sản phẩm</a>
+                            </td>
+                            
+                            <td class="product-price" data-title="Price" th:text="${#numbers.formatCurrency(item.giaBan)}">$124.00</td>
+                            
+                            <td class="product-stock-status" data-title="Status" th:text="${item.kichHoat ? 'Còn hàng' : 'Hết hàng'}">Tình trạng</td>
+                            
+                            <td class="product-add-cart"><a th:href="@{/cart}" class="axil-btn btn-outline">Thêm vào giỏ</a></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

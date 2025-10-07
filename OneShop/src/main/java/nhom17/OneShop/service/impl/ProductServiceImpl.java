@@ -18,7 +18,11 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
+import java.math.BigDecimal;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -118,4 +122,40 @@ public class ProductServiceImpl implements ProductService {
             productRepository.deleteById(id);
         }
     }
+
+    @Override
+    public Page<Product> searchUserProducts(Integer categoryId, BigDecimal minPrice, BigDecimal maxPrice, String sortOption, int page, int size) {
+        int pageNumber = page > 0 ? page - 1 : 0;
+
+        Sort sort;
+        // ... (code switch/case để tạo Sort giữ nguyên như cũ)
+        if (sortOption == null || sortOption.isEmpty()) {
+            sort = Sort.by("ngayTao").descending();
+        } else {
+             switch (sortOption) {
+                case "price_asc": sort = Sort.by("giaBan").ascending(); break;
+                case "price_desc": sort = Sort.by("giaBan").descending(); break;
+                case "oldest": sort = Sort.by("ngayTao").ascending(); break;
+                case "newest": default: sort = Sort.by("ngayTao").descending(); break;
+            }
+        }
+
+        Pageable pageable = PageRequest.of(pageNumber, size, sort);
+
+        // Sử dụng Specification để tạo câu truy vấn động
+        Specification<Product> spec = (root, query, cb) -> cb.isTrue(root.get("kichHoat"));
+
+        if (categoryId != null) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("danhMuc").get("maDanhMuc"), categoryId));
+        }
+        if (minPrice != null) {
+            spec = spec.and((root, query, cb) -> cb.greaterThanOrEqualTo(root.get("giaBan"), minPrice));
+        }
+        if (maxPrice != null) {
+            spec = spec.and((root, query, cb) -> cb.lessThanOrEqualTo(root.get("giaBan"), maxPrice));
+        }
+
+        return productRepository.findAll(spec, pageable);
+    }
+
 }
