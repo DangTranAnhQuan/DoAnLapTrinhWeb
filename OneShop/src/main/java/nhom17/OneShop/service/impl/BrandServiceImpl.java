@@ -1,6 +1,7 @@
 package nhom17.OneShop.service.impl;
 
 import nhom17.OneShop.entity.Brand;
+import nhom17.OneShop.exception.DuplicateRecordException;
 import nhom17.OneShop.repository.BrandRepository;
 import nhom17.OneShop.request.BrandRequest;
 import nhom17.OneShop.service.BrandService;
@@ -49,6 +50,13 @@ public class BrandServiceImpl implements BrandService {
 
     @Override
     public void save(BrandRequest brandRequest) {
+        Optional<Brand> existingBrand = brandRepository.findByTenThuongHieuIgnoreCase(brandRequest.getTenThuongHieu());
+        if (existingBrand.isPresent()) {
+            if (brandRequest.getMaThuongHieu() == null || !existingBrand.get().getMaThuongHieu().equals(brandRequest.getMaThuongHieu())) {
+                throw new DuplicateRecordException("Tên thương hiệu '" + brandRequest.getTenThuongHieu() + "' đã tồn tại.");
+            }
+        }
+
         Brand brand;
         if (brandRequest.getMaThuongHieu() != null) {
             brand = brandRepository.findById(brandRequest.getMaThuongHieu()).orElse(new Brand());

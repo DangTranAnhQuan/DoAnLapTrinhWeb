@@ -30,11 +30,11 @@ public class DonHang {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MaNguoiDung")
-    private NguoiDung nguoiDung;
+    private User nguoiDung;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MaKhuyenMai")
-    private KhuyenMai khuyenMai;
+    private Voucher khuyenMai;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MaDiaChiNhan")

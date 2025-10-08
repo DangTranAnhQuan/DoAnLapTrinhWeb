@@ -1,6 +1,7 @@
 package nhom17.OneShop.service.impl;
 
 import nhom17.OneShop.entity.Category;
+import nhom17.OneShop.exception.DuplicateRecordException;
 import nhom17.OneShop.repository.CategoryRepository;
 import nhom17.OneShop.request.CategoryRequest;
 import nhom17.OneShop.service.CategoryService;
@@ -48,6 +49,14 @@ public class CategoryServiceImpl implements CategoryService {
     }
     @Override
     public void save(CategoryRequest categoryRequest) {
+        Optional<Category> existingCategory = categoryRepository.findByTenDanhMucIgnoreCase(categoryRequest.getTenDanhMuc());
+        if (existingCategory.isPresent()) {
+            // Nếu tìm thấy, kiểm tra xem có phải là chính nó không (trường hợp sửa)
+            if (categoryRequest.getMaDanhMuc() == null || !existingCategory.get().getMaDanhMuc().equals(categoryRequest.getMaDanhMuc())) {
+                throw new DuplicateRecordException("Tên danh mục '" + categoryRequest.getTenDanhMuc() + "' đã tồn tại.");
+            }
+        }
+
         Category category;
 
         if (categoryRequest.getMaDanhMuc() != null) {

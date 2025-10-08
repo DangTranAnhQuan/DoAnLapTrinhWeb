@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{/layouts/admin}">
+<head><title>Quản lý Khuyến mãi</title></head>
+<body>
+<h4 class="fw-bold py-3 mb-4" layout:fragment="page_title">
+    <span class="text-muted fw-light">Quản lý /</span> Khuyến mãi
+</h4>
+<main layout:fragment="content">
+    <div class="card mb-4">
+        <div class="card-body">
+            <form th:action="@{/admin/voucher}" method="get" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label">Tìm theo tên chiến dịch</label>
+                    <div class="input-group">
+                        <input type="text" name="keyword" th:value="${keyword}" class="form-control" placeholder="Nhập tên chiến dịch...">
+                        <button class="btn btn-outline-primary" type="submit"><i class="bx bx-search"></i></button>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Kiểu áp dụng</label>
+                    <select name="kieuApDung" class="form-select" onchange="this.form.submit()">
+                        <option value="">Tất cả</option>
+                        <option value="0" th:selected="${kieuApDung != null and kieuApDung == 0}">Phần trăm</option>
+                        <option value="1" th:selected="${kieuApDung != null and kieuApDung == 1}">Số tiền</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Trạng thái</label>
+                    <select name="status" class="form-select" onchange="this.form.submit()">
+                        <option value="">Tất cả</option>
+                        <option value="1" th:selected="${status != null and status == 1}">Hoạt động</option>
+                        <option value="0" th:selected="${status != null and status == 0}">Ngừng</option>
+                        <option value="2" th:selected="${status != null and status == 2}">Hết hạn</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <a th:href="@{/admin/voucher}" class="btn btn-outline-secondary w-100"><i class="bx bx-reset me-1"></i>Đặt lại</a>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Danh sách khuyến mãi</h5>
+            <a th:href="@{/admin/voucher/add}" class="btn btn-primary"><i class="bx bx-plus me-1"></i>Thêm mới</a>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive text-nowrap">
+                <table class="table table-hover">
+                    <thead>
+                    <tr>
+                        <th>Mã khuyến mãi</th>
+                        <th>Tên chiến dịch</th>
+                        <th>Kiểu áp dụng</th>
+                        <th>Giá trị</th>
+                        <th>Bắt đầu</th>
+                        <th>Kết thúc</th>
+                        <th>Trạng thái</th>
+                        <th class="text-center">Thao tác</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="v : ${voucherPage.content}">
+                        <td th:text="${v.maKhuyenMai}" class="fw-semibold"></td>
+                        <td th:text="${v.tenChienDich}"></td>
+                        <td><span th:if="${v.kieuApDung == 0}" class="badge bg-label-info">Phần trăm</span><span th:if="${v.kieuApDung == 1}" class="badge bg-label-primary">Số tiền</span></td>
+                        <td th:text="${v.kieuApDung == 0} ? ${v.giaTri} + '%' : ${#numbers.formatDecimal(v.giaTri, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></td>
+                        <td th:text="${#temporals.format(v.batDauLuc, 'dd/MM/yyyy HH:mm')}"></td>
+                        <td th:text="${#temporals.format(v.ketThucLuc, 'dd/MM/yyyy HH:mm')}"></td>
+                        <td>
+                            <span th:switch="${v.trangThai}">
+                                <span th:case="1" class="badge bg-label-success">Hoạt động</span>
+                                <span th:case="0" class="badge bg-label-secondary">Ngừng</span>
+                                <span th:case="2" class="badge bg-label-danger">Hết hạn</span>
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            <a th:href="@{/admin/voucher/{id}(id=${v.maKhuyenMai})}" class="btn btn-sm btn-outline-info"><i class="bx bx-show"></i></a>
+                            <a th:href="@{/admin/voucher/edit/{id}(id=${v.maKhuyenMai})}" class="btn btn-sm btn-outline-warning"><i class="bx bx-edit"></i></a>
+                            <a th:href="@{/admin/voucher/delete/{id}(id=${v.maKhuyenMai})}" onclick="return confirm('Bạn có chắc muốn xóa?')" class="btn btn-sm btn-outline-danger"><i class="bx bx-trash"></i></a>
+                        </td>
+                    </tr>
+                    <tr th:if="${voucherPage.empty}">
+                        <td colspan="8" class="text-center py-3">Không có mã khuyến mãi nào.</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>

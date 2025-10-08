@@ -17,5 +17,5 @@ public class NhatKyHeThong {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MaNguoiDungThucHien")
-    private NguoiDung nguoiDungThucHien;
+    private User nguoiDungThucHien;
 }

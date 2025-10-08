@@ -24,5 +24,5 @@ public class LichSuTrangThaiDon {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MaQuanTriVien")
-    private NguoiDung nguoiThucHien;
+    private User nguoiThucHien;
 }

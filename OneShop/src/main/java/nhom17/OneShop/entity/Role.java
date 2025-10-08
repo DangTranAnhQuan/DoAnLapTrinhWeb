@@ -8,7 +8,7 @@ import lombok.Data;
 @Data
 @Entity
 @Table(name = "VaiTro")
-public class VaiTro {
+public class Role {
     @Id
     private Integer maVaiTro;
     private String tenVaiTro;

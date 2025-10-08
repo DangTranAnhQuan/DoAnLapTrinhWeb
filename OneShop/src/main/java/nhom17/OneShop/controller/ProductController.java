@@ -2,6 +2,7 @@ package nhom17.OneShop.controller;
 
 import nhom17.OneShop.entity.Rating;
 import nhom17.OneShop.entity.Product;
+import nhom17.OneShop.exception.DuplicateRecordException;
 import nhom17.OneShop.repository.BrandRepository;
 import nhom17.OneShop.repository.CategoryRepository;
 import nhom17.OneShop.repository.RatingRepository;
@@ -69,56 +70,36 @@ public class ProductController {
         return "admin/products/productDetail";
     }
 
-    @GetMapping("/add")
-    public String showAddForm(Model model,
-                              @RequestParam(required = false) String keyword,
-                              @RequestParam(required = false) Boolean status,
-                              @RequestParam(required = false) Integer categoryId,
-                              @RequestParam(required = false) Integer brandId,
-                              @RequestParam(required = false) String sort,
-                              @RequestParam(defaultValue = "1") int page,
-                              @RequestParam(defaultValue = "5") int size) {
-        model.addAttribute("product", new ProductRequest());
-        model.addAttribute("categories", categoryRepository.findAll());
-        model.addAttribute("brands", brandRepository.findAll());
-        model.addAttribute("keyword", keyword);
-        model.addAttribute("status", status);
-        model.addAttribute("categoryId", categoryId);
-        model.addAttribute("brandId", brandId);
-        model.addAttribute("sort", sort);
-        model.addAttribute("page", page);
-        model.addAttribute("size", size);
-        return "admin/products/addOrEditProduct";
-    }
-
-    @GetMapping("/edit/{id}")
-    public String showEditForm(@PathVariable int id, Model model,
-                               @RequestParam(required = false) String keyword,
-                               @RequestParam(required = false) Boolean status,
-                               @RequestParam(required = false) Integer categoryId,
-                               @RequestParam(required = false) Integer brandId,
-                               @RequestParam(required = false) String sort,
-                               @RequestParam(defaultValue = "1") int page,
-                               @RequestParam(defaultValue = "5") int size) {
-        Product product = productService.findById(id);
-        if (product == null) {
-            return "redirect:/admin/product";
-        }
+    @GetMapping({"/add", "/edit/{id}"})
+    public String showProductForm(@PathVariable(name = "id", required = false) Integer id, Model model,
+                                  @RequestParam(required = false) String keyword,
+                                  @RequestParam(required = false) Boolean status,
+                                  @RequestParam(required = false) Integer categoryId,
+                                  @RequestParam(required = false) Integer brandId,
+                                  @RequestParam(required = false) String sort,
+                                  @RequestParam(defaultValue = "1") int page,
+                                  @RequestParam(defaultValue = "5") int size) {
         ProductRequest productRequest = new ProductRequest();
-        productRequest.setMaSanPham(product.getMaSanPham());
-        productRequest.setTenSanPham(product.getTenSanPham());
-        productRequest.setMoTa(product.getMoTa());
-        productRequest.setGiaBan(product.getGiaBan());
-        productRequest.setGiaNiemYet(product.getGiaNiemYet());
-        productRequest.setHanSuDung(product.getHanSuDung());
-        productRequest.setHinhAnh(product.getHinhAnh());
-        productRequest.setKichHoat(product.isKichHoat());
-        productRequest.setMaDanhMuc(product.getDanhMuc().getMaDanhMuc());
-        productRequest.setMaThuongHieu(product.getThuongHieu().getMaThuongHieu());
+        if (id != null) { // Nếu có ID -> Chế độ Sửa
+            Product product = productService.findById(id);
+            // Chuyển đổi Entity sang DTO
+            productRequest.setMaSanPham(product.getMaSanPham());
+            productRequest.setTenSanPham(product.getTenSanPham());
+            productRequest.setMoTa(product.getMoTa());
+            productRequest.setGiaBan(product.getGiaBan());
+            productRequest.setGiaNiemYet(product.getGiaNiemYet());
+            productRequest.setHanSuDung(product.getHanSuDung());
+            productRequest.setHinhAnh(product.getHinhAnh());
+            productRequest.setKichHoat(product.isKichHoat());
+            productRequest.setMaDanhMuc(product.getDanhMuc().getMaDanhMuc());
+            productRequest.setMaThuongHieu(product.getThuongHieu().getMaThuongHieu());
+        }
 
         model.addAttribute("product", productRequest);
         model.addAttribute("categories", categoryRepository.findAll());
         model.addAttribute("brands", brandRepository.findAll());
+
+        // Giữ lại state của trang danh sách
         model.addAttribute("keyword", keyword);
         model.addAttribute("status", status);
         model.addAttribute("categoryId", categoryId);
@@ -147,6 +128,8 @@ public class ProductController {
             }
             productService.save(productRequest);
             redirectAttributes.addFlashAttribute("successMessage", "Lưu sản phẩm thành công!");
+        } catch (DuplicateRecordException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Lỗi: " + e.getMessage());
         }

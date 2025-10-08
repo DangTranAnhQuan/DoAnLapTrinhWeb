@@ -20,7 +20,7 @@ public class GioHang {
     @Id
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MaNguoiDung")
-    private NguoiDung nguoiDung;
+    private User nguoiDung;
 
     @Id
     @ManyToOne(fetch = FetchType.LAZY)

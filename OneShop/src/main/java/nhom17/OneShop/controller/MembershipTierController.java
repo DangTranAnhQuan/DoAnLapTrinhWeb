@@ -1,6 +1,7 @@
 package nhom17.OneShop.controller;
 
 import nhom17.OneShop.entity.MembershipTier;
+import nhom17.OneShop.exception.DuplicateRecordException;
 import nhom17.OneShop.request.MembershipTierRequest;
 import nhom17.OneShop.service.MembershipTierService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,8 +29,14 @@ public class MembershipTierController {
 
     @PostMapping("/save")
     public String saveTier(@ModelAttribute MembershipTierRequest request, RedirectAttributes redirectAttributes) {
-        membershipTierService.save(request);
-        redirectAttributes.addFlashAttribute("successMessage", "Lưu hạng thành viên thành công!");
+        try {
+            membershipTierService.save(request);
+            redirectAttributes.addFlashAttribute("successMessage", "Lưu hạng thành viên thành công!");
+        } catch (DuplicateRecordException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Đã có lỗi không mong muốn xảy ra!");
+        }
         return "redirect:/admin/membership-tier";
     }
 

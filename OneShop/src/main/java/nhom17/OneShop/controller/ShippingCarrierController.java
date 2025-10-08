@@ -1,6 +1,7 @@
 package nhom17.OneShop.controller;
 
 import nhom17.OneShop.entity.ShippingCarrier;
+import nhom17.OneShop.exception.DuplicateRecordException;
 import nhom17.OneShop.request.ShippingCarrierRequest;
 import nhom17.OneShop.service.ShippingCarrierService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,8 +36,14 @@ public class ShippingCarrierController {
                               @RequestParam(required = false) String keyword,
                               @RequestParam(defaultValue = "1") int page,
                               @RequestParam(defaultValue = "5") int size) {
-        shippingCarrierService.save(request);
-        redirectAttributes.addFlashAttribute("successMessage", "Lưu nhà vận chuyển thành công!");
+        try {
+            shippingCarrierService.save(request);
+            redirectAttributes.addFlashAttribute("successMessage", "Lưu nhà vận chuyển thành công!");
+        } catch (DuplicateRecordException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Đã có lỗi không mong muốn xảy ra!");
+        }
         redirectAttributes.addAttribute("keyword", keyword);
         redirectAttributes.addAttribute("page", page);
         redirectAttributes.addAttribute("size", size);

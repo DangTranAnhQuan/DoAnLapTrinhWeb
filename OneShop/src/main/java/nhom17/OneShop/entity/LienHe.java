@@ -20,9 +20,9 @@ public class LienHe {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MaNguoiDung")
-    private NguoiDung nguoiDung;
+    private User nguoiDung;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MaQuanTriVien")
-    private NguoiDung nhanVienXuLy;
+    private User nhanVienXuLy;
 }

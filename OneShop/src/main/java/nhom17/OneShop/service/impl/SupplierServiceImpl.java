@@ -1,6 +1,7 @@
 package nhom17.OneShop.service.impl;
 
 import nhom17.OneShop.entity.Supplier;
+import nhom17.OneShop.exception.DuplicateRecordException;
 import nhom17.OneShop.repository.SupplierRepository;
 import nhom17.OneShop.request.SupplierRequest;
 import nhom17.OneShop.service.SupplierService;
@@ -11,6 +12,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+
+import java.util.Optional;
 
 @Service
 public class SupplierServiceImpl implements SupplierService {
@@ -34,6 +37,13 @@ public class SupplierServiceImpl implements SupplierService {
 
     @Override
     public void save(SupplierRequest supplierRequest) {
+        Optional<Supplier> existingSupplier = supplierRepository.findByTenNCCIgnoreCase(supplierRequest.getTenNCC());
+        if (existingSupplier.isPresent()) {
+            if (supplierRequest.getMaNCC() == null || !existingSupplier.get().getMaNCC().equals(supplierRequest.getMaNCC())) {
+                throw new DuplicateRecordException("Tên nhà cung cấp '" + supplierRequest.getTenNCC() + "' đã tồn tại.");
+            }
+        }
+
         Supplier supplier = new Supplier();
         // Nếu có ID, đây là trường hợp cập nhật
         if (supplierRequest.getMaNCC() != null) {

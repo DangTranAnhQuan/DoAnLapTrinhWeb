@@ -21,5 +21,5 @@ public class MaXacThuc {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MaNguoiDung", nullable = false)
-    private NguoiDung nguoiDung;
+    private User nguoiDung;
 }

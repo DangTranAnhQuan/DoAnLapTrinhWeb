@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 @Data
 @Entity
 @Table(name = "NguoiDung")
-public class NguoiDung {
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "MaNguoiDung")
@@ -43,7 +43,7 @@ public class NguoiDung {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "MaVaiTro")
-    private VaiTro vaiTro;
+    private Role vaiTro;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MaHangThanhVien")

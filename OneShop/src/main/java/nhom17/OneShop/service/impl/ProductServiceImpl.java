@@ -3,6 +3,7 @@ package nhom17.OneShop.service.impl;
 import nhom17.OneShop.entity.Category;
 import nhom17.OneShop.entity.Product;
 import nhom17.OneShop.entity.Brand;
+import nhom17.OneShop.exception.DuplicateRecordException;
 import nhom17.OneShop.repository.BrandRepository;
 import nhom17.OneShop.repository.CategoryRepository;
 import nhom17.OneShop.repository.ProductRepository;
@@ -75,6 +76,13 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public void save(ProductRequest productRequest) {
+        Optional<Product> existingProduct = productRepository.findByTenSanPhamIgnoreCase(productRequest.getTenSanPham());
+        if (existingProduct.isPresent()) {
+            if (productRequest.getMaSanPham() == null || !existingProduct.get().getMaSanPham().equals(productRequest.getMaSanPham())) {
+                throw new DuplicateRecordException("Tên sản phẩm '" + productRequest.getTenSanPham() + "' đã tồn tại.");
+            }
+        }
+
         Product product;
         if (productRequest.getMaSanPham() != null) {
             product = productRepository.findById(productRequest.getMaSanPham()).orElse(new Product());

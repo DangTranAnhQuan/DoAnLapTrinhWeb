@@ -1,6 +1,7 @@
 package nhom17.OneShop.controller;
 
 import nhom17.OneShop.entity.Supplier;
+import nhom17.OneShop.exception.DuplicateRecordException;
 import nhom17.OneShop.request.SupplierRequest;
 import nhom17.OneShop.service.SupplierService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,8 +35,14 @@ public class SupplierController {
                                @RequestParam(required = false) String keyword,
                                @RequestParam(defaultValue = "1") int page,
                                @RequestParam(defaultValue = "5") int size) {
-        supplierService.save(supplierRequest);
-        redirectAttributes.addFlashAttribute("successMessage", "Lưu nhà cung cấp thành công!");
+        try {
+            supplierService.save(supplierRequest);
+            redirectAttributes.addFlashAttribute("successMessage", "Lưu nhà cung cấp thành công!");
+        } catch (DuplicateRecordException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Đã có lỗi không mong muốn xảy ra!");
+        }
         redirectAttributes.addAttribute("keyword", keyword);
         redirectAttributes.addAttribute("page", page);
         redirectAttributes.addAttribute("size", size);

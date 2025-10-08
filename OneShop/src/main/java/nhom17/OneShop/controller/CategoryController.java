@@ -1,6 +1,7 @@
 package nhom17.OneShop.controller;
 
 import nhom17.OneShop.entity.Category;
+import nhom17.OneShop.exception.DuplicateRecordException;
 import nhom17.OneShop.request.CategoryRequest;
 import nhom17.OneShop.service.CategoryService;
 import nhom17.OneShop.service.StorageService;
@@ -43,11 +44,18 @@ public class CategoryController {
                                @RequestParam(required = false) String keyword,
                                @RequestParam(required = false) Boolean status,
                                RedirectAttributes redirectAttributes){
-        if (!hinhAnhFile.isEmpty()) {
-            String fileName = storageService.storeFile(hinhAnhFile, "categories");
-            categoryRequest.setHinhAnh(fileName);
+        try {
+            if (!hinhAnhFile.isEmpty()) {
+                String fileName = storageService.storeFile(hinhAnhFile, "categories");
+                categoryRequest.setHinhAnh(fileName);
+            }
+            categoryService.save(categoryRequest);
+            redirectAttributes.addFlashAttribute("successMessage", "Lưu danh mục thành công!");
+        } catch (DuplicateRecordException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Đã có lỗi không mong muốn xảy ra!");
         }
-        categoryService.save(categoryRequest);
 
         // Giữ lại tham số phân trang và filter khi redirect
         redirectAttributes.addAttribute("page", page);

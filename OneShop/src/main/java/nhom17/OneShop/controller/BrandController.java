@@ -1,6 +1,7 @@
 package nhom17.OneShop.controller;
 
 import nhom17.OneShop.entity.Brand;
+import nhom17.OneShop.exception.DuplicateRecordException;
 import nhom17.OneShop.request.BrandRequest;
 import nhom17.OneShop.service.BrandService;
 import nhom17.OneShop.service.StorageService;
@@ -44,11 +45,18 @@ public class BrandController {
                             @RequestParam(required = false) String keyword,
                             @RequestParam(required = false) Boolean status,
                             RedirectAttributes redirectAttributes) {
-        if (!hinhAnhFile.isEmpty()) {
-            String fileName = storageService.storeFile(hinhAnhFile, "brands");
-            brandRequest.setHinhAnh(fileName);
+        try {
+            if (!hinhAnhFile.isEmpty()) {
+                String fileName = storageService.storeFile(hinhAnhFile, "brands");
+                brandRequest.setHinhAnh(fileName);
+            }
+            brandService.save(brandRequest);
+            redirectAttributes.addFlashAttribute("successMessage", "Lưu thương hiệu thành công!");
+        } catch (DuplicateRecordException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Đã có lỗi không mong muốn xảy ra!");
         }
-        brandService.save(brandRequest);
 
         // Giữ lại tham số phân trang và filter khi redirect
         redirectAttributes.addAttribute("page", page);

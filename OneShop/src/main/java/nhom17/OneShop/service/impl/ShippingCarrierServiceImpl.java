@@ -1,6 +1,7 @@
 package nhom17.OneShop.service.impl;
 
 import nhom17.OneShop.entity.ShippingCarrier;
+import nhom17.OneShop.exception.DuplicateRecordException;
 import nhom17.OneShop.repository.ShippingCarrierRepository;
 import nhom17.OneShop.request.ShippingCarrierRequest;
 import nhom17.OneShop.service.ShippingCarrierService;
@@ -11,6 +12,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+
+import java.util.Optional;
 
 @Service
 public class ShippingCarrierServiceImpl implements ShippingCarrierService {
@@ -29,6 +32,11 @@ public class ShippingCarrierServiceImpl implements ShippingCarrierService {
 
     @Override
     public void save(ShippingCarrierRequest request) {
+        Optional<ShippingCarrier> existing = shippingCarrierRepository.findByTenNVCIgnoreCase(request.getTenNVC());
+        if (existing.isPresent() && (request.getMaNVC() == null || !existing.get().getMaNVC().equals(request.getMaNVC()))) {
+            throw new DuplicateRecordException("Tên nhà vận chuyển '" + request.getTenNVC() + "' đã tồn tại.");
+        }
+
         ShippingCarrier carrier = new ShippingCarrier();
         if (request.getMaNVC() != null) {
             carrier = shippingCarrierRepository.findById(request.getMaNVC())
