@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 public class VoucherServiceImpl implements VoucherService {
@@ -36,20 +37,21 @@ public class VoucherServiceImpl implements VoucherService {
 
     @Override
     public void save(VoucherRequest request) {
-        if (request.getKetThucLuc() != null && request.getBatDauLuc() != null &&
+        // 1. Kiểm tra ngày hợp lệ
+        if (request.getBatDauLuc() != null && request.getKetThucLuc() != null &&
                 request.getKetThucLuc().isBefore(request.getBatDauLuc())) {
             throw new IllegalArgumentException("Ngày kết thúc phải sau ngày bắt đầu.");
         }
 
         String voucherCode = request.getMaKhuyenMai().toUpperCase();
 
-        Voucher voucher = voucherRepository.findById(voucherCode)
-                .orElse(null);
+        Optional<Voucher> existingVoucherOptional = voucherRepository.findById(voucherCode);
 
-        if (voucher == null) {
-            if (voucherRepository.existsById(voucherCode)) {
-                throw new DuplicateRecordException("Mã khuyến mãi '" + voucherCode + "' đã tồn tại.");
-            }
+        Voucher voucher;
+
+        if (existingVoucherOptional.isPresent()) {
+            voucher = existingVoucherOptional.get();
+        } else {
             voucher = new Voucher();
             voucher.setMaKhuyenMai(voucherCode);
             voucher.setNgayTao(LocalDateTime.now());

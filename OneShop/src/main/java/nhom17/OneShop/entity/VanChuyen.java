@@ -19,7 +19,7 @@ public class VanChuyen {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MaDonHang")
-    private DonHang donHang;
+    private Order donHang;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MaNVC")

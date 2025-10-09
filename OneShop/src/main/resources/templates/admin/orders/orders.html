@@ -1,124 +1,121 @@
 <!DOCTYPE html>
-<html lang="vi" 
-      xmlns:th="http://www.thymeleaf.org"
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{/layouts/admin}">
-
 <head>
-    <title>Quản lý đơn hàng | OneShop</title>
+    <title>Quản lý Đơn hàng</title>
 </head>
-
-<body class="order-management-page">
+<body>
 <h4 class="fw-bold py-3 mb-4" layout:fragment="page_title">
     <span class="text-muted fw-light">Quản lý /</span> Đơn hàng
 </h4>
 <main layout:fragment="content">
-    <div class="container-xxl flex-grow-1 container-p-y">
-        <!-- Bộ lọc đơn hàng -->
-        <div class="card mb-4">
-            <div class="card-body">
-                <form id="filterForm" class="row g-3">
-                    <div class="col-md-3">
-                        <label class="form-label">Mã đơn hàng</label>
-                        <input type="text" class="form-control" id="orderCode" placeholder="Nhập mã đơn hàng">
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label">Khách hàng</label>
-                        <input type="text" class="form-control" id="customerName" placeholder="Tên khách hàng">
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label">Trạng thái</label>
-                        <select class="form-select" id="orderStatus">
-                            <option value="">Tất cả trạng thái</option>
-                            <option value="PENDING">Chờ xử lý</option>
-                            <option value="PROCESSING">Đang xử lý</option>
-                            <option value="SHIPPING">Đang giao hàng</option>
-                            <option value="DELIVERED">Đã giao hàng</option>
-                            <option value="CANCELLED">Đã hủy</option>
-                            <option value="RETURNED">Đổi/Trả hàng</option>
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label">Ngày đặt hàng</label>
-                        <input type="text" class="form-control" id="orderDateRange" placeholder="Chọn khoảng ngày">
-                    </div>
-                    <div class="col-md-12 text-end">
-                        <button type="button" class="btn btn-outline-secondary me-2" id="btnReset">
-                            <i class="bx bx-reset me-1"></i> Đặt lại
-                        </button>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="bx bx-search me-1"></i> Tìm kiếm
-                        </button>
-                    </div>
-                </form>
-            </div>
+    <div class="card mb-4">
+        <div class="card-body">
+            <form th:action="@{/admin/order}" method="get" class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label">Tìm theo Mã Đơn hàng</label>
+                    <input type="text" class="form-control" name="keyword" th:value="${keyword}" placeholder="Nhập mã đơn hàng...">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Trạng thái ĐH</label>
+                    <select class="form-select" name="status" onchange="this.form.submit()">
+                        <option value="">Tất cả</option>
+                        <option th:value="'Đang xử lý'" th:selected="${status == 'Đang xử lý'}">Đang xử lý</option>
+                        <option th:value="'Đã xác nhận'" th:selected="${status == 'Đã xác nhận'}">Đã xác nhận</option>
+                        <option th:value="'Đang giao'" th:selected="${status == 'Đang giao'}">Đang giao</option>
+                        <option th:value="'Đã giao'" th:selected="${status == 'Đã giao'}">Đã giao</option>
+                        <option th:value="'Đã hủy'" th:selected="${status == 'Đã hủy'}">Đã hủy</option>
+                        <option th:value="'Trả hàng-Hoàn tiền'" th:selected="${status == 'Trả hàng-Hoàn tiền'}">Trả hàng-Hoàn tiền</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Phương thức TT</label>
+                    <select class="form-select" name="paymentMethod" onchange="this.form.submit()">
+                        <option value="">Tất cả</option>
+                        <option value="COD" th:selected="${paymentMethod == 'COD'}">COD</option>
+                        <option value="ONLINE" th:selected="${paymentMethod == 'ONLINE'}">Online</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Trạng thái TT</label>
+                    <select class="form-select" name="paymentStatus" onchange="this.form.submit()">
+                        <option value="">Tất cả</option>
+                        <option th:value="'Chưa thanh toán'" th:selected="${paymentStatus == 'Chưa thanh toán'}">Chưa thanh toán</option>
+                        <option th:value="'Đã thanh toán'" th:selected="${paymentStatus == 'Đã thanh toán'}">Đã thanh toán</option>
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex">
+                    <button class="btn btn-primary me-2" type="submit"><i class="bx bx-search"></i> Tìm</button>
+                    <a th:href="@{/admin/order}" class="btn btn-outline-secondary"><i class="bx bx-reset"></i> Đặt lại</a>
+                </div>
+            </form>
         </div>
+    </div>
 
-        <!-- Bảng danh sách đơn hàng -->
-        <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Danh sách đơn hàng</h5>
-                <a th:href="@{/admin/orders/create}" class="btn btn-primary btn-sm">
-                    <i class="bx bx-plus"></i> Tạo đơn hàng
-                </a>
-            </div>
-            <div class="card-datatable table-responsive">
-                <table class="datatables-orders table border-top">
+    <div class="card">
+        <div class="card-header"><h5 class="mb-0">Danh sách đơn hàng</h5></div>
+        <div class="card-body">
+            <div class="table-responsive text-nowrap">
+                <table class="table table-hover">
                     <thead>
                     <tr>
-                        <th>Mã đơn hàng</th>
-                        <th>Khách hàng</th>
-                        <th>Ngày đặt</th>
+                        <th>Mã ĐH</th>
+                        <th>Tên người nhận</th>
+                        <th>Số điện thoại</th>
                         <th>Tổng tiền</th>
-                        <th>Trạng thái</th>
-                        <th>Thanh toán</th>
-                        <th>Thao tác</th>
+                        <th>Trạng thái ĐH</th>
+                        <th>Phương thức TT</th>
+                        <th>Trạng thái TT</th>
+                        <th class="text-center">Thao tác</th>
                     </tr>
                     </thead>
                     <tbody>
-                    <tr th:each="order : ${orders}">
+                    <tr th:if="${!orderPage.empty}" th:each="order : ${orderPage.content}">
+                        <td th:text="'#' + ${order.maDonHang}" class="fw-semibold"></td>
+                        <td th:text="${order.tenNguoiNhan}"></td>
+                        <td th:text="${order.soDienThoaiNhan}"></td>
+                        <td th:text="${#numbers.formatDecimal(order.tongTien, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></td>
                         <td>
-                            <a th:href="@{/admin/orders/{id}(id=${order.id})}" class="fw-medium">
-                                [[${'#' + order.code}]]
+                            <span th:switch="${order.trangThai}">
+                                <span th:case="'Đã giao'" class="badge bg-label-success" th:text="${order.trangThai}"></span>
+                                <span th:case="'Đã hủy'" class="badge bg-label-danger" th:text="${order.trangThai}"></span>
+                                <span th:case="'Trả hàng-Hoàn tiền'" class="badge bg-label-warning" th:text="${order.trangThai}"></span>
+                                <span th:case="*" class="badge bg-label-info" th:text="${order.trangThai}"></span>
+                            </span>
+                        </td>
+                        <td th:text="${order.phuongThucThanhToan}"></td>
+                        <td>
+                            <span th:if="${order.trangThaiThanhToan == 'Đã thanh toán'}" class="badge bg-label-success" th:text="${order.trangThaiThanhToan}"></span>
+                            <span th:if="${order.trangThaiThanhToan == 'Chưa thanh toán'}" class="badge bg-label-warning" th:text="${order.trangThaiThanhToan}"></span>
+                        </td>
+                        <td class="text-center">
+                            <a th:href="@{/admin/order/{id}(id=${order.maDonHang}, page=${orderPage.number + 1}, size=${orderPage.size}, keyword=${keyword}, status=${status}, paymentMethod=${paymentMethod}, paymentStatus=${paymentStatus})}"
+                               class="btn btn-sm btn-outline-info">
+                                <i class="bx bx-show"></i> Xem chi tiết
                             </a>
                         </td>
-                        <td>[[${order.customerName}]]</td>
-                        <td>[[${#temporals.format(order.orderDate, 'dd/MM/yyyy HH:mm')}]]</td>
-                        <td>[[${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')}]]₫</td>
-                        <td>
-                            <span th:classappend="${'order-status ' + order.status.badgeClass}">
-                                [[${order.status.displayName}]]
-                            </span>
-                        </td>
-                        <td>
-                            <span th:classappend="${'payment-status ' + (order.paid ? 'payment-badge-paid' : 'payment-badge-pending')}">
-                                [[${order.paid ? 'Đã thanh toán' : 'Chưa thanh toán'}]]
-                            </span>
-                        </td>
-                        <td>
-                            <div class="dropdown">
-                                <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
-                                    <i class="bx bx-dots-vertical-rounded"></i>
-                                </button>
-                                <div class="dropdown-menu">
-                                    <a th:href="@{/admin/orders/{id}(id=${order.id})}" class="dropdown-item">
-                                        <i class="bx bx-show me-1"></i> Xem chi tiết
-                                    </a>
-                                    <a th:href="@{/admin/orders/{id}/edit(id=${order.id})}" class="dropdown-item">
-                                        <i class="bx bx-edit me-1"></i> Cập nhật
-                                    </a>
-                                    <div class="dropdown-divider"></div>
-                                    <a href="#" class="dropdown-item text-danger" 
-                                       th:onclick="'return confirm(\'Bạn có chắc chắn muốn xóa đơn hàng này?\')'">
-                                        <i class="bx bx-trash me-1"></i> Xóa
-                                    </a>
-                                </div>
-                            </div>
-                        </td>
+                    </tr>
+                    <tr th:if="${orderPage.empty}">
+                        <td colspan="8" class="text-center py-3">Không có đơn hàng nào phù hợp.</td>
                     </tr>
                     </tbody>
                 </table>
             </div>
+
+            <nav th:if="${orderPage.totalPages > 1}" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item" th:classappend="${orderPage.first} ? 'disabled'">
+                        <a class="page-link" th:href="@{/admin/order(page=${orderPage.number}, size=${orderPage.size}, keyword=${keyword}, status=${status}, paymentMethod=${paymentMethod}, paymentStatus=${paymentStatus})}">&laquo;</a>
+                    </li>
+                    <li class="page-item" th:each="i : ${#numbers.sequence(1, orderPage.totalPages)}" th:classappend="${i == orderPage.number + 1} ? 'active'">
+                        <a class="page-link" th:text="${i}" th:href="@{/admin/order(page=${i}, size=${orderPage.size}, keyword=${keyword}, status=${status}, paymentMethod=${paymentMethod}, paymentStatus=${paymentStatus})}"></a>
+                    </li>
+                    <li class="page-item" th:classappend="${orderPage.last} ? 'disabled'">
+                        <a class="page-link" th:href="@{/admin/order(page=${orderPage.number + 2}, size=${orderPage.size}, keyword=${keyword}, status=${status}, paymentMethod=${paymentMethod}, paymentStatus=${paymentStatus})}">&raquo;</a>
+                    </li>
+                </ul>
+            </nav>
         </div>
     </div>
 </main>

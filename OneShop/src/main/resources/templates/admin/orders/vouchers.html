@@ -2,7 +2,9 @@
 <html lang="vi" xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{/layouts/admin}">
-<head><title>Quản lý Khuyến mãi</title></head>
+<head>
+    <title>Quản lý Khuyến mãi</title>
+</head>
 <body>
 <h4 class="fw-bold py-3 mb-4" layout:fragment="page_title">
     <span class="text-muted fw-light">Quản lý /</span> Khuyến mãi
@@ -31,7 +33,6 @@
                     <select name="status" class="form-select" onchange="this.form.submit()">
                         <option value="">Tất cả</option>
                         <option value="1" th:selected="${status != null and status == 1}">Hoạt động</option>
-                        <option value="0" th:selected="${status != null and status == 0}">Ngừng</option>
                         <option value="2" th:selected="${status != null and status == 2}">Hết hạn</option>
                     </select>
                 </div>
@@ -44,9 +45,17 @@
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="mb-0">Danh sách khuyến mãi</h5>
-            <a th:href="@{/admin/voucher/add}" class="btn btn-primary"><i class="bx bx-plus me-1"></i>Thêm mới</a>
+            <a th:href="@{/admin/voucher/add(page=${voucherPage.number + 1}, size=${voucherPage.size}, keyword=${keyword}, status=${status}, kieuApDung=${kieuApDung})}" class="btn btn-primary">
+                <i class='bx bx-plus me-1'></i>Thêm mới
+            </a>
         </div>
         <div class="card-body">
+            <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                <span th:text="${successMessage}"></span><button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <span th:text="${errorMessage}"></span><button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
             <div class="table-responsive text-nowrap">
                 <table class="table table-hover">
                     <thead>
@@ -78,8 +87,8 @@
                         </td>
                         <td class="text-center">
                             <a th:href="@{/admin/voucher/{id}(id=${v.maKhuyenMai})}" class="btn btn-sm btn-outline-info"><i class="bx bx-show"></i></a>
-                            <a th:href="@{/admin/voucher/edit/{id}(id=${v.maKhuyenMai})}" class="btn btn-sm btn-outline-warning"><i class="bx bx-edit"></i></a>
-                            <a th:href="@{/admin/voucher/delete/{id}(id=${v.maKhuyenMai})}" onclick="return confirm('Bạn có chắc muốn xóa?')" class="btn btn-sm btn-outline-danger"><i class="bx bx-trash"></i></a>
+                            <a th:href="@{/admin/voucher/edit/{id}(id=${v.maKhuyenMai}, page=${voucherPage.number+1}, size=${voucherPage.size}, keyword=${keyword}, status=${status}, kieuApDung=${kieuApDung})}" class="btn btn-sm btn-outline-warning"><i class="bx bx-edit"></i></a>
+                            <a th:href="@{/admin/voucher/delete/{id}(id=${v.maKhuyenMai}, page=${voucherPage.number+1}, size=${voucherPage.size}, keyword=${keyword}, status=${status}, kieuApDung=${kieuApDung})}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Bạn có chắc muốn xóa?')"><i class="bx bx-trash"></i></a>
                         </td>
                     </tr>
                     <tr th:if="${voucherPage.empty}">
@@ -88,6 +97,13 @@
                     </tbody>
                 </table>
             </div>
+            <nav th:if="${voucherPage.totalPages > 0}" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item" th:classappend="${voucherPage.first} ? 'disabled'"><a class="page-link" th:href="@{/admin/voucher(page=${voucherPage.number}, size=${voucherPage.size}, keyword=${keyword}, status=${status}, kieuApDung=${kieuApDung})}">&laquo;</a></li>
+                    <li class="page-item" th:each="i : ${#numbers.sequence(1, voucherPage.totalPages)}" th:classappend="${i == voucherPage.number + 1} ? 'active'"><a class="page-link" th:text="${i}" th:href="@{/admin/voucher(page=${i}, size=${voucherPage.size}, keyword=${keyword}, status=${status}, kieuApDung=${kieuApDung})}"></a></li>
+                    <li class="page-item" th:classappend="${voucherPage.last} ? 'disabled'"><a class="page-link" th:href="@{/admin/voucher(page=${voucherPage.number + 2}, size=${voucherPage.size}, keyword=${keyword}, status=${status}, kieuApDung=${kieuApDung})}">&raquo;</a></li>
+                </ul>
+            </nav>
         </div>
     </div>
 </main>

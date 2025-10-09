@@ -34,7 +34,7 @@
     <div class="card">
         <div class="card-header d-flex justify-content-between">
             <h5 class="mb-0">Danh sách người dùng</h5>
-            <a th:href="@{/admin/user/add}" class="btn btn-primary"><i class="bx bx-plus me-1"></i>Thêm mới</a>
+            <a th:href="@{/admin/user/add(page=${userPage.number + 1}, size=${userPage.size}, keyword=${keyword}, roleId=${roleId}, tierId=${tierId}, status=${status})}" class="btn btn-primary"><i class="bx bx-plus me-1"></i>Thêm mới</a>
         </div>
         <div class="card-body">
             <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
@@ -88,16 +88,21 @@
                         </td>
                         <td class="text-center">
                             <a th:href="@{/admin/user/{id}(id=${u.maNguoiDung})}" class="btn btn-sm btn-outline-info"><i class="bx bx-show"></i></a>
-                            <a th:href="@{/admin/user/edit/{id}(id=${u.maNguoiDung})}" class="btn btn-sm btn-outline-warning"><i class="bx bx-edit"></i></a>
-                            <a th:href="@{/admin/user/delete/{id}(id=${u.maNguoiDung})}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Bạn có chắc muốn xóa người dùng này?')"><i class="bx bx-trash"></i></a>
+                            <a th:href="@{/admin/user/edit/{id}(id=${u.maNguoiDung}, page=${userPage.number + 1}, size=${userPage.size}, keyword=${keyword}, roleId=${roleId}, tierId=${tierId}, status=${status})}" class="btn btn-sm btn-outline-warning"><i class="bx bx-edit"></i></a>
+                            <a th:href="@{/admin/user/delete/{id}(id=${u.maNguoiDung}, page=${userPage.number + 1}, size=${userPage.size}, keyword=${keyword}, roleId=${roleId}, tierId=${tierId}, status=${status})}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Bạn có chắc muốn xóa người dùng này?')"><i class="bx bx-trash"></i></a>
                         </td>
                     </tr>
-                    <tr th:if="${userPage.empty}">
-                        <td colspan="7" class="text-center py-3">Không tìm thấy người dùng nào.</td>
-                    </tr>
+                    <tr th:if="${userPage.empty}"><td colspan="7" class="text-center py-3">Không tìm thấy người dùng nào.</td></tr>
                     </tbody>
                 </table>
             </div>
+            <nav th:if="${userPage.totalPages > 0}" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item" th:classappend="${userPage.first} ? 'disabled'"><a class="page-link" th:href="@{/admin/user(page=${userPage.number}, size=${userPage.size}, keyword=${keyword}, roleId=${roleId}, tierId=${tierId}, status=${status})}">&laquo;</a></li>
+                    <li class="page-item" th:each="i : ${#numbers.sequence(1, userPage.totalPages)}" th:classappend="${i == userPage.number + 1} ? 'active'"><a class="page-link" th:text="${i}" th:href="@{/admin/user(page=${i}, size=${userPage.size}, keyword=${keyword}, roleId=${roleId}, tierId=${tierId}, status=${status})}"></a></li>
+                    <li class="page-item" th:classappend="${userPage.last} ? 'disabled'"><a class="page-link" th:href="@{/admin/user(page=${userPage.number + 2}, size=${userPage.size}, keyword=${keyword}, roleId=${roleId}, tierId=${tierId}, status=${status})}">&raquo;</a></li>
+                </ul>
+            </nav>
         </div>
     </div>
 </main>

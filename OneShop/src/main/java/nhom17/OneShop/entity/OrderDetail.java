@@ -9,8 +9,8 @@ import java.math.BigDecimal;
 @Data
 @Entity
 @Table(name = "DonHang_ChiTiet")
-@IdClass(DonHangChiTietId.class)
-public class DonHang_ChiTiet {
+@IdClass(OrderDetailId.class)
+public class OrderDetail {
     private String tenSanPham;
     private BigDecimal donGia;
     private Integer soLuong;
@@ -21,7 +21,7 @@ public class DonHang_ChiTiet {
     @Id
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MaDonHang")
-    private DonHang donHang;
+    private Order donHang;
 
     @Id
     @ManyToOne(fetch = FetchType.LAZY)

@@ -113,6 +113,7 @@ public class ProductController {
     @PostMapping("/save")
     public String saveProduct(@ModelAttribute("product") ProductRequest productRequest,
                               @RequestParam("hinhAnhFile") MultipartFile hinhAnhFile,
+                              Model model,
                               RedirectAttributes redirectAttributes,
                               @RequestParam(required = false) String keyword,
                               @RequestParam(required = false) Boolean status,
@@ -128,19 +129,25 @@ public class ProductController {
             }
             productService.save(productRequest);
             redirectAttributes.addFlashAttribute("successMessage", "Lưu sản phẩm thành công!");
+            redirectAttributes.addAttribute("keyword", keyword);
+            redirectAttributes.addAttribute("status", status);
+            redirectAttributes.addAttribute("categoryId", categoryId);
+            redirectAttributes.addAttribute("brandId", brandId);
+            redirectAttributes.addAttribute("sort", sort);
+            redirectAttributes.addAttribute("page", page);
+            redirectAttributes.addAttribute("size", size);
+            return "redirect:/admin/product";
         } catch (DuplicateRecordException e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            model.addAttribute("errorMessage", e.getMessage());
+            model.addAttribute("categories", categoryRepository.findAll());
+            model.addAttribute("brands", brandRepository.findAll());
+            return "admin/products/addOrEditProduct";
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi: " + e.getMessage());
+            model.addAttribute("errorMessage", "Lỗi: " + e.getMessage());
+            model.addAttribute("categories", categoryRepository.findAll());
+            model.addAttribute("brands", brandRepository.findAll());
+            return "admin/products/addOrEditProduct";
         }
-        redirectAttributes.addAttribute("keyword", keyword);
-        redirectAttributes.addAttribute("status", status);
-        redirectAttributes.addAttribute("categoryId", categoryId);
-        redirectAttributes.addAttribute("brandId", brandId);
-        redirectAttributes.addAttribute("sort", sort);
-        redirectAttributes.addAttribute("page", page);
-        redirectAttributes.addAttribute("size", size);
-        return "redirect:/admin/product";
     }
 
     @GetMapping("/delete/{id}")

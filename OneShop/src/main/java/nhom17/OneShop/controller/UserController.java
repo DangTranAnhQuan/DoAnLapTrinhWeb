@@ -55,7 +55,14 @@ public class UserController {
     }
 
     @GetMapping({"/add", "/edit/{id}"})
-    public String showUserForm(@PathVariable(name = "id", required = false) Integer id, Model model) {
+    public String showUserForm(@PathVariable(name = "id", required = false) Integer id,
+                               Model model,
+                               @RequestParam(defaultValue = "1") int page,
+                               @RequestParam(defaultValue = "5") int size,
+                               @RequestParam(required = false) String keyword,
+                               @RequestParam(required = false) Integer roleId,
+                               @RequestParam(required = false) Integer tierId,
+                               @RequestParam(required = false) Integer status) {
         UserRequest userRequest = new UserRequest();
         if (id != null) { // Chế độ sửa
             User user = userService.findById(id);
@@ -75,32 +82,66 @@ public class UserController {
         model.addAttribute("userRequest", userRequest);
         model.addAttribute("roles", roleRepository.findAll());
         model.addAttribute("tiers", membershipTierRepository.findAll());
+        model.addAttribute("page", page);
+        model.addAttribute("size", size);
+        model.addAttribute("keyword", keyword);
+        model.addAttribute("roleId", roleId);
+        model.addAttribute("tierId", tierId);
+        model.addAttribute("status", status);
         return "admin/user/addOrEditUser";
     }
 
     // ✅ LƯU DỮ LIỆU (THÊM VÀ SỬA)
     @PostMapping("/save")
-    public String saveUser(@ModelAttribute UserRequest userRequest, RedirectAttributes redirectAttributes) {
+    public String saveUser(@ModelAttribute("userRequest") UserRequest userRequest,
+                           Model model,
+                           RedirectAttributes redirectAttributes,
+                           @RequestParam(defaultValue = "1") int page,
+                           @RequestParam(defaultValue = "5") int size,
+                           @RequestParam(required = false) String keyword,
+                           @RequestParam(required = false) Integer roleId,
+                           @RequestParam(required = false) Integer tierId,
+                           @RequestParam(required = false) Integer status) {
         try {
             userService.save(userRequest);
             redirectAttributes.addFlashAttribute("successMessage", "Lưu người dùng thành công!");
+            redirectAttributes.addAttribute("page", page)
+                    .addAttribute("size", size)
+                    .addAttribute("keyword", keyword)
+                    .addAttribute("roleId", roleId)
+                    .addAttribute("tierId", tierId)
+                    .addAttribute("status", status);
+            return "redirect:/admin/user";
         } catch (DuplicateRecordException e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Đã có lỗi không mong muốn xảy ra!");
+            model.addAttribute("errorMessage", e.getMessage());
+            model.addAttribute("roles", roleRepository.findAll());
+            model.addAttribute("tiers", membershipTierRepository.findAll());
+            return "admin/user/addOrEditUser";
         }
-        return "redirect:/admin/user";
     }
 
     // ✅ XÓA NGƯỜI DÙNG
     @GetMapping("/delete/{id}")
-    public String deleteUser(@PathVariable int id, RedirectAttributes redirectAttributes) {
+    public String deleteUser(@PathVariable int id,
+                             RedirectAttributes redirectAttributes,
+                             @RequestParam(defaultValue = "1") int page,
+                             @RequestParam(defaultValue = "5") int size,
+                             @RequestParam(required = false) String keyword,
+                             @RequestParam(required = false) Integer roleId,
+                             @RequestParam(required = false) Integer tierId,
+                             @RequestParam(required = false) Integer status) {
         try {
             userService.delete(id);
             redirectAttributes.addFlashAttribute("successMessage", "Xóa người dùng thành công!");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Không thể xóa người dùng này, có thể do các ràng buộc dữ liệu.");
+            redirectAttributes.addFlashAttribute("errorMessage", "Không thể xóa người dùng này.");
         }
+        redirectAttributes.addAttribute("page", page)
+                .addAttribute("size", size)
+                .addAttribute("keyword", keyword)
+                .addAttribute("roleId", roleId)
+                .addAttribute("tierId", tierId)
+                .addAttribute("status", status);
         return "redirect:/admin/user";
     }
 }

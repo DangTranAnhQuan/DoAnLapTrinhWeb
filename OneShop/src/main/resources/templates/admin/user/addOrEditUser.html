@@ -13,20 +13,31 @@
 <main layout:fragment="content">
     <div class="card">
         <div class="card-body">
+            <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <span th:text="${errorMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
             <form th:action="@{/admin/user/save}" th:object="${userRequest}" method="post">
                 <input type="hidden" th:field="*{maNguoiDung}">
+                <input type="hidden" name="page" th:value="${page}">
+                <input type="hidden" name="size" th:value="${size}">
+                <input type="hidden" name="keyword" th:value="${keyword}">
+                <input type="hidden" name="roleId" th:value="${roleId}">
+                <input type="hidden" name="tierId" th:value="${tierId}">
+                <input type="hidden" name="status" th:value="${status}">
+
                 <div class="row">
                     <div class="mb-3 col-md-6"><label class="form-label">Họ tên</label><input type="text" class="form-control" th:field="*{hoTen}" required></div>
                     <div class="mb-3 col-md-6"><label class="form-label">Email</label><input type="email" class="form-control" th:field="*{email}" required></div>
                     <div class="mb-3 col-md-6"><label class="form-label">Tên đăng nhập</label><input type="text" class="form-control" th:field="*{tenDangNhap}" required></div>
-                    <div class="mb-3 col-md-6"><label class="form-label">Mật khẩu</label><input type="password" class="form-control" th:field="*{matKhau}" th:placeholder="${userRequest.maNguoiDung == null ? 'Bắt buộc' : 'Để trống nếu không đổi'}"></div>
+                    <div class="mb-3 col-md-6"><label class="form-label">Mật khẩu</label><input type="password" class="form-control" th:field="*{matKhau}" th:placeholder="${userRequest.maNguoiDung == null ? 'Bắt buộc' : 'Để trống nếu không đổi'}" th:required="${userRequest.maNguoiDung == null}"></div>
                     <div class="mb-3 col-md-6"><label class="form-label">Số điện thoại</label><input type="text" class="form-control" th:field="*{soDienThoai}"></div>
                     <div class="mb-3 col-md-6"><label class="form-label">Vai trò</label><select class="form-select" th:field="*{maVaiTro}" required><option th:each="r : ${roles}" th:value="${r.maVaiTro}" th:text="${r.tenVaiTro}"></option></select></div>
                     <div class="mb-3 col-md-6"><label class="form-label">Hạng thành viên</label><select class="form-select" th:field="*{maHangThanhVien}"><option value="">-- Không có --</option><option th:each="t : ${tiers}" th:value="${t.maHangThanhVien}" th:text="${t.tenHang}"></option></select></div>
                     <div class="mb-3 col-md-6"><label class="form-label">Trạng thái</label><select class="form-select" th:field="*{trangThai}"><option value="1">Hoạt động</option><option value="0">Khóa</option></select></div>
                 </div>
                 <div class="mt-3">
-                    <a th:href="@{/admin/user}" class="btn btn-outline-secondary">Hủy</a>
+                    <a th:href="@{/admin/user(page=${page}, size=${size}, keyword=${keyword}, roleId=${roleId}, tierId=${tierId}, status=${status})}" class="btn btn-outline-secondary">Hủy</a>
                     <button type="submit" class="btn btn-primary" th:text="${userRequest.maNguoiDung == null ? 'Thêm người dùng' : 'Cập nhật'}"></button>
                 </div>
             </form>
