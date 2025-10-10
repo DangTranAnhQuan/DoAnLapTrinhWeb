@@ -43,4 +43,7 @@ public class Order {
 
     @OneToMany(mappedBy = "donHang", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<OrderDetail> orderDetails;
+
+    @OneToOne(mappedBy = "donHang", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private Shipping shipping;
 }

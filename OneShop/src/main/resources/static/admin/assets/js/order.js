@@ -1,71 +1,38 @@
+// File: order.js
+
 document.addEventListener('DOMContentLoaded', function() {
-    // Khởi tạo date range picker
-    if ($('#orderDateRange').length) {
-        $('#orderDateRange').daterangepicker({
-            locale: {
-                format: 'DD/MM/YYYY',
-                applyLabel: 'Áp dụng',
-                cancelLabel: 'Hủy',
-                fromLabel: 'Từ',
-                toLabel: 'Đến',
-                customRangeLabel: 'Tùy chọn',
-                daysOfWeek: ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'],
-                monthNames: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'],
-                firstDay: 1
-            },
-            opens: 'left',
-            autoUpdateInput: false
-        });
+    
+    // --- LOGIC CHO MODAL SỬA ĐƠN VẬN CHUYỂN ---
+    const editModalShipping = document.getElementById('editModal');
+    if (editModalShipping) {
+        editModalShipping.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const modal = this;
 
-        $('#orderDateRange').on('apply.daterangepicker', function(ev, picker) {
-            $(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY'));
-            // Gọi hàm lọc đơn hàng
-            // filterOrders();
-        });
+            // Lấy dữ liệu từ các thuộc tính data-* của nút
+            const shippingId = button.dataset.id;
+            const orderId = button.dataset.orderId;
+            const trackingCode = button.dataset.trackingCode;
+            const carrierId = button.dataset.carrierId;
+            const status = button.dataset.status;
 
-        $('#orderDateRange').on('cancel.daterangepicker', function(ev, picker) {
-            $(this).val('');
-            // Gọi hàm lọc đơn hàng
-            // filterOrders();
+            // Tìm các trường input/select trong modal
+            const maVanChuyenInput = modal.querySelector('#editMaVanChuyen');
+            const maDonHangInput = modal.querySelector('#editMaDonHang');
+            const maVanDonText = modal.querySelector('#editMaVanDonText');
+            const maNVCSelect = modal.querySelector('#editMaNVC');
+            const trangThaiSelect = modal.querySelector('#editTrangThai');
+
+            // Gán dữ liệu vào các trường trong form
+            if (maVanChuyenInput) maVanChuyenInput.value = shippingId;
+            if (maDonHangInput) maDonHangInput.value = orderId;
+            if (maVanDonText) maVanDonText.textContent = trackingCode;
+            if (maNVCSelect) maNVCSelect.value = carrierId;
+            if (trangThaiSelect) trangThaiSelect.value = status;
         });
     }
 
-    // Khởi tạo bảng đơn vị vận chuyển
-    if ($('.datatables-shipping').length) {
-        // initShippingTable();
-    }
-
-    // Xử lý form thêm/sửa đơn vị vận chuyển
-    if ($('#shippingForm, #editShippingForm').length) {
-        // initShippingForm();
-    }
-
-    // Xử lý nút xóa đơn vị vận chuyển
-    $('.delete-shipping').on('click', function(e) {
-        e.preventDefault();
-        const shippingId = $(this).data('id');
-        // confirmDeleteShipping(shippingId);
-    });
-
-    // Xử lý nút kích hoạt/vô hiệu hóa đơn vị vận chuyển
-    $('.activate-shipping, .deactivate-shipping').on('click', function(e) {
-        e.preventDefault();
-        const shippingId = $(this).data('id');
-        const activate = $(this).hasClass('activate-shipping');
-        // toggleShippingStatus(shippingId, activate);
-    });
-
-    // Xử lý lọc đơn hàng
-    $('#filterStatus, #filterOrderStatus').on('change', function() {
-        // filterOrders();
-    });
-
-    // Xử lý xuất Excel
-    $('#btnExport').on('click', function() {
-        // exportToExcel();
-    });
-
-    // Logic cho nút tạo mã khuyến mãi
+    // --- LOGIC CHO NÚT TẠO MÃ KHUYẾN MÃI ---
     const generateBtn = document.getElementById('generate-voucher-code-btn');
     const codeInput = document.querySelector('input[name="maKhuyenMai"]');
 
@@ -79,4 +46,16 @@ document.addEventListener('DOMContentLoaded', function() {
             codeInput.value = result;
         });
     }
+
+    const createShippingModal = document.getElementById('createShippingModal');
+                if (createShippingModal) {
+                    createShippingModal.addEventListener('show.bs.modal', function (event) {
+                        const button = event.relatedTarget;
+                        const orderId = button.dataset.orderId;
+                        const modal = this;
+
+                        modal.querySelector('#createShipping_maDonHang').value = orderId;
+                        modal.querySelector('#orderIdInModal').textContent = orderId;
+                    });
+                }
 });

@@ -4,7 +4,9 @@ import nhom17.OneShop.entity.Order;
 import nhom17.OneShop.entity.OrderStatusHistory;
 import nhom17.OneShop.entity.User;
 import nhom17.OneShop.repository.OrderStatusHistoryRepository;
+import nhom17.OneShop.repository.ShippingCarrierRepository;
 import nhom17.OneShop.request.OrderUpdateRequest;
+import nhom17.OneShop.request.ShippingRequest;
 import nhom17.OneShop.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -25,6 +27,9 @@ public class OrderController {
     @Autowired
     private OrderStatusHistoryRepository historyRepository;
 
+    @Autowired
+    private ShippingCarrierRepository shippingCarrierRepository;
+
     @GetMapping
     public String listOrders(@RequestParam(required = false) String keyword,
                              @RequestParam(required = false) String status,
@@ -41,6 +46,8 @@ public class OrderController {
         model.addAttribute("status", status);
         model.addAttribute("paymentMethod", paymentMethod);
         model.addAttribute("paymentStatus", paymentStatus);
+        model.addAttribute("carriers", shippingCarrierRepository.findAll());
+        model.addAttribute("shippingRequest", new ShippingRequest());
 
         return "admin/orders/orders";
     }

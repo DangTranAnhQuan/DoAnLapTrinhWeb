@@ -66,7 +66,7 @@
         <div class="modal-dialog">
             <form th:action="@{/admin/membership-tier/save}" th:object="${tierRequest}" method="post" class="modal-content">
                 <input type="hidden" th:field="*{maHangThanhVien}">
-                <div class="modal-header bg-warning"><h5 class="modal-title">Sửa hạng thành viên</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-header bg-warning"><h5 class="modal-title text-white">Chỉnh sửa hạng thành viên</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
                 <div class="modal-body">
                     <div class="mb-3"><label class="form-label">Tên hạng</label><input type="text" th:field="*{tenHang}" class="form-control" required></div>
                     <div class="mb-3"><label class="form-label">Điểm tối thiểu</label><input type="number" th:field="*{diemToiThieu}" class="form-control" required></div>
