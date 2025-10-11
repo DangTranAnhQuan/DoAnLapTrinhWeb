@@ -63,7 +63,9 @@
                         <td th:text="${u.maNguoiDung}"></td>
                         <td>
                             <div class="d-flex align-items-center">
-                                <img th:src="@{/assets/img/avatars/1.png}" th:alt="${u.hoTen}" class="rounded-circle me-2" style="width: 32px; height: 32px; object-fit: cover;">
+                                <img th:src="${u.anhDaiDien != null ? '/uploads/' + u.anhDaiDien : '/admin/assets/img/avatars/default.png'}"
+                                     th:alt="${u.hoTen}" class="rounded-circle me-2"
+                                     style="width: 32px; height: 32px; object-fit: cover;">
                                 <span th:text="${u.hoTen}"></span>
                             </div>
                         </td>
@@ -76,11 +78,7 @@
                             </span>
                         </td>
                         <td>
-                            <span th:if="${u.hangThanhVien != null}" th:switch="${u.hangThanhVien.tenHang}">
-                                <span th:case="'Vàng'" class="badge bg-label-warning" th:text="${u.hangThanhVien.tenHang}"></span>
-                                <span th:case="'Bạc'" class="badge bg-label-info" th:text="${u.hangThanhVien.tenHang}"></span>
-                                <span th:case="*" class="badge bg-label-secondary" th:text="${u.hangThanhVien.tenHang}"></span>
-                            </span>
+                            <span th:if="${u.hangThanhVien != null}" th:text="${u.hangThanhVien.tenHang}"></span>
                         </td>
                         <td>
                             <span th:if="${u.trangThai == 1}" class="badge bg-label-success">Hoạt động</span>
@@ -96,13 +94,6 @@
                     </tbody>
                 </table>
             </div>
-            <nav th:if="${userPage.totalPages > 0}" class="mt-4">
-                <ul class="pagination justify-content-center">
-                    <li class="page-item" th:classappend="${userPage.first} ? 'disabled'"><a class="page-link" th:href="@{/admin/user(page=${userPage.number}, size=${userPage.size}, keyword=${keyword}, roleId=${roleId}, tierId=${tierId}, status=${status})}">&laquo;</a></li>
-                    <li class="page-item" th:each="i : ${#numbers.sequence(1, userPage.totalPages)}" th:classappend="${i == userPage.number + 1} ? 'active'"><a class="page-link" th:text="${i}" th:href="@{/admin/user(page=${i}, size=${userPage.size}, keyword=${keyword}, roleId=${roleId}, tierId=${tierId}, status=${status})}"></a></li>
-                    <li class="page-item" th:classappend="${userPage.last} ? 'disabled'"><a class="page-link" th:href="@{/admin/user(page=${userPage.number + 2}, size=${userPage.size}, keyword=${keyword}, roleId=${roleId}, tierId=${tierId}, status=${status})}">&raquo;</a></li>
-                </ul>
-            </nav>
         </div>
     </div>
 </main>

@@ -17,8 +17,10 @@
                 <span th:text="${errorMessage}"></span>
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-            <form th:action="@{/admin/user/save}" th:object="${userRequest}" method="post">
+            <form th:action="@{/admin/user/save}" th:object="${userRequest}" method="post" enctype="multipart/form-data">
                 <input type="hidden" th:field="*{maNguoiDung}">
+                <input type="hidden" th:field="*{anhDaiDien}">
+
                 <input type="hidden" name="page" th:value="${page}">
                 <input type="hidden" name="size" th:value="${size}">
                 <input type="hidden" name="keyword" th:value="${keyword}">
@@ -27,15 +29,34 @@
                 <input type="hidden" name="status" th:value="${status}">
 
                 <div class="row">
-                    <div class="mb-3 col-md-6"><label class="form-label">Họ tên</label><input type="text" class="form-control" th:field="*{hoTen}" required></div>
-                    <div class="mb-3 col-md-6"><label class="form-label">Email</label><input type="email" class="form-control" th:field="*{email}" required></div>
-                    <div class="mb-3 col-md-6"><label class="form-label">Tên đăng nhập</label><input type="text" class="form-control" th:field="*{tenDangNhap}" required></div>
-                    <div class="mb-3 col-md-6"><label class="form-label">Mật khẩu</label><input type="password" class="form-control" th:field="*{matKhau}" th:placeholder="${userRequest.maNguoiDung == null ? 'Bắt buộc' : 'Để trống nếu không đổi'}" th:required="${userRequest.maNguoiDung == null}"></div>
-                    <div class="mb-3 col-md-6"><label class="form-label">Số điện thoại</label><input type="text" class="form-control" th:field="*{soDienThoai}"></div>
-                    <div class="mb-3 col-md-6"><label class="form-label">Vai trò</label><select class="form-select" th:field="*{maVaiTro}" required><option th:each="r : ${roles}" th:value="${r.maVaiTro}" th:text="${r.tenVaiTro}"></option></select></div>
-                    <div class="mb-3 col-md-6"><label class="form-label">Hạng thành viên</label><select class="form-select" th:field="*{maHangThanhVien}"><option value="">-- Không có --</option><option th:each="t : ${tiers}" th:value="${t.maHangThanhVien}" th:text="${t.tenHang}"></option></select></div>
-                    <div class="mb-3 col-md-6"><label class="form-label">Trạng thái</label><select class="form-select" th:field="*{trangThai}"><option value="1">Hoạt động</option><option value="0">Khóa</option></select></div>
+                    <div class="col-md-8">
+                        <div class="row">
+                            <div class="mb-3 col-md-6"><label class="form-label">Họ tên</label><input type="text" class="form-control" th:field="*{hoTen}" required></div>
+                            <div class="mb-3 col-md-6"><label class="form-label">Email</label><input type="email" class="form-control" th:field="*{email}" required></div>
+                            <div class="mb-3 col-md-6"><label class="form-label">Tên đăng nhập</label><input type="text" class="form-control" th:field="*{tenDangNhap}" required></div>
+                            <div class="mb-3 col-md-6"><label class="form-label">Mật khẩu</label><input type="password" class="form-control" th:field="*{matKhau}" th:placeholder="${userRequest.maNguoiDung == null ? 'Bắt buộc' : 'Để trống nếu không đổi'}" th:required="${userRequest.maNguoiDung == null}"></div>
+                            <div class="mb-3 col-md-6"><label class="form-label">Số điện thoại</label><input type="text" class="form-control" th:field="*{soDienThoai}"></div>
+                            <div class="mb-3 col-md-6"><label class="form-label">Vai trò</label><select class="form-select" th:field="*{maVaiTro}" required><option th:each="r : ${roles}" th:value="${r.maVaiTro}" th:text="${r.tenVaiTro}"></option></select></div>
+                            <div class="mb-3 col-md-6"><label class="form-label">Hạng thành viên</label><select class="form-select" th:field="*{maHangThanhVien}"><option value="">-- Không có --</option><option th:each="t : ${tiers}" th:value="${t.maHangThanhVien}" th:text="${t.tenHang}"></option></select></div>
+                            <div class="mb-3 col-md-6"><label class="form-label">Trạng thái</label><select class="form-select" th:field="*{trangThai}"><option value="1">Hoạt động</option><option value="0">Khóa</option></select></div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label">Ảnh đại diện</label>
+                            <div class="d-flex flex-column align-items-center">
+                                <img id="avatarPreview"
+                                     th:src="${userRequest.anhDaiDien != null ? '/uploads/' + userRequest.anhDaiDien : '/admin/assets/img/avatars/default.png'}"
+                                     alt="Ảnh đại diện"
+                                     class="img-thumbnail rounded mb-3"
+                                     style="width: 150px; height: 150px; object-fit: cover;">
+                                <input type="file" name="anhDaiDienFile" id="anhDaiDienFile" class="form-control" accept="image/*">
+                                <small class="text-muted mt-2">Để trống nếu không muốn thay đổi ảnh.</small>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+
                 <div class="mt-3">
                     <a th:href="@{/admin/user(page=${page}, size=${size}, keyword=${keyword}, roleId=${roleId}, tierId=${tierId}, status=${status})}" class="btn btn-outline-secondary">Hủy</a>
                     <button type="submit" class="btn btn-primary" th:text="${userRequest.maNguoiDung == null ? 'Thêm người dùng' : 'Cập nhật'}"></button>
@@ -44,5 +65,6 @@
         </div>
     </div>
 </main>
+
 </body>
 </html>

@@ -5,12 +5,14 @@ import nhom17.OneShop.exception.DuplicateRecordException;
 import nhom17.OneShop.repository.MembershipTierRepository;
 import nhom17.OneShop.repository.RoleRepository;
 import nhom17.OneShop.request.UserRequest;
+import nhom17.OneShop.service.StorageService;
 import nhom17.OneShop.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
@@ -19,8 +21,12 @@ public class UserController {
 
     @Autowired
     private UserService userService;
-    @Autowired private RoleRepository roleRepository;
-    @Autowired private MembershipTierRepository membershipTierRepository;
+    @Autowired private
+    RoleRepository roleRepository;
+    @Autowired private
+    MembershipTierRepository membershipTierRepository;
+    @Autowired
+    private StorageService storageService;
 
     @GetMapping
     public String listUsers(@RequestParam(required = false) String keyword,
@@ -74,6 +80,7 @@ public class UserController {
             userRequest.setSoDienThoai(user.getSoDienThoai());
             userRequest.setTrangThai(user.getTrangThai());
             userRequest.setMaVaiTro(user.getVaiTro().getMaVaiTro());
+            userRequest.setAnhDaiDien(user.getAnhDaiDien());
             if(user.getHangThanhVien() != null){
                 userRequest.setMaHangThanhVien(user.getHangThanhVien().getMaHangThanhVien());
             }
@@ -94,6 +101,7 @@ public class UserController {
     // ✅ LƯU DỮ LIỆU (THÊM VÀ SỬA)
     @PostMapping("/save")
     public String saveUser(@ModelAttribute("userRequest") UserRequest userRequest,
+                           @RequestParam("anhDaiDienFile") MultipartFile anhDaiDienFile,
                            Model model,
                            RedirectAttributes redirectAttributes,
                            @RequestParam(defaultValue = "1") int page,
@@ -103,6 +111,11 @@ public class UserController {
                            @RequestParam(required = false) Integer tierId,
                            @RequestParam(required = false) Integer status) {
         try {
+            if (!anhDaiDienFile.isEmpty()) {
+                String fileName = storageService.storeFile(anhDaiDienFile, "avatars");
+                userRequest.setAnhDaiDien(fileName);
+            }
+
             userService.save(userRequest);
             redirectAttributes.addFlashAttribute("successMessage", "Lưu người dùng thành công!");
             redirectAttributes.addAttribute("page", page)

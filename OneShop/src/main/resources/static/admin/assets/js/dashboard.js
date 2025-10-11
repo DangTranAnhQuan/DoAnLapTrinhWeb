@@ -1,164 +1,66 @@
-/**
- * Initialize ApexCharts for the dashboard
- */
-function initDashboardCharts() {
-    // Revenue Chart
-    const revenueChartEl = document.getElementById('revenueChart');
-    if (revenueChartEl && typeof ApexCharts !== 'undefined') {
-        const revenueChart = new ApexCharts(revenueChartEl, {
-            chart: {
-                height: 300,
-                type: 'line',
-                zoom: { enabled: false },
-                toolbar: { show: false },
-                fontFamily: 'Public Sans, sans-serif',
-                animations: {
-                    enabled: true,
-                    easing: 'easeinout',
-                    speed: 800,
-                    animateGradually: {
-                        enabled: true,
-                        delay: 150
-                    },
-                    dynamicAnimation: {
-                        enabled: true,
-                        speed: 350
-                    }
-                }
-            },
-            colors: ['#7367F0'],
-            dataLabels: { enabled: false },
-            stroke: {
-                curve: 'smooth',
-                width: 3,
-                lineCap: 'round'
-            },
-            series: [{
-                name: 'Doanh thu',
-                data: [15000000, 18000000, 21000000, 19000000, 23000000, 25000000, 28000000]
-            }],
-            xaxis: {
-                categories: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7'],
-                axisBorder: { show: false },
-                axisTicks: { show: false },
-                tooltip: { enabled: false },
-                labels: {
-                    style: {
-                        fontFamily: 'Public Sans, sans-serif',
-                        colors: '#6c757d'
-                    }
-                }
-            },
-            yaxis: {
-                labels: {
-                    formatter: function(value) {
-                        return (value / 1000000) + 'M';
-                    },
-                    style: {
-                        fontFamily: 'Public Sans, sans-serif',
-                        colors: '#6c757d'
-                    }
-                }
-            },
-            tooltip: {
-                y: {
-                    formatter: function(value) {
-                        return value.toLocaleString('vi-VN') + ' VNĐ';
-                    }
-                },
-                style: {
-                    fontFamily: 'Public Sans, sans-serif'
-                }
-            },
-            grid: {
-                borderColor: '#e5e9f2',
-                strokeDashArray: 4,
-                padding: {
-                    top: 0,
-                    right: 0,
-                    bottom: 0,
-                    left: 0
-                },
-                xaxis: {
-                    lines: {
-                        show: false
-                    }
-                },
-                yaxis: {
-                    lines: {
-                        show: true
-                    }
-                }
-            },
-            fill: {
-                type: 'gradient',
-                gradient: {
-                    shade: 'light',
-                    type: 'vertical',
-                    shadeIntensity: 0.4,
-                    gradientToColors: ['#7367F0'],
-                    inverseColors: false,
-                    opacityFrom: 0.4,
-                    opacityTo: 0.1,
-                    stops: [0, 100]
-                }
-            },
-            markers: {
-                size: 5,
-                colors: ['#7367F0'],
-                strokeColors: '#fff',
-                strokeWidth: 2,
-                hover: {
-                    size: 6
-                }
-            }
-        });
-        
-        // Render the chart
-        revenueChart.render();
-
-        // Update chart on window resize
-        window.addEventListener('resize', function() {
-            revenueChart.updateOptions({
-                chart: {
-                    height: 300
-                }
-            });
-        });
-    }
-}
-
-/**
- * Initialize dashboard components
- */
-function initDashboard() {
-    // Initialize tooltips
-    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
-    });
-
-    // Initialize charts
-    initDashboardCharts();
-
-    // Add animation class to cards on scroll
-    const animateOnScroll = function() {
-        const cards = document.querySelectorAll('.dashboard-card');
-        cards.forEach(card => {
-            const cardTop = card.getBoundingClientRect().top;
-            const windowHeight = window.innerHeight;
-            if (cardTop < windowHeight - 100) {
-                card.classList.add('animate__animated', 'animate__fadeInUp');
-            }
-        });
+document.addEventListener('DOMContentLoaded', function () {
+    // Hàm format tiền tệ chung
+    const currencyFormatter = (val) => {
+        if (val >= 1000000) return (val / 1000000).toFixed(1) + 'tr';
+        if (val >= 1000) return (val / 1000).toFixed(0) + 'k';
+        return val;
     };
 
-    // Initial check
-    animateOnScroll();
-    
-    // Check on scroll
-    window.addEventListener('scroll', animateOnScroll);
-}
+    // ✅ HÀM HELPER AN TOÀN ĐỂ PARSE JSON
+    const safeJsonParse = (jsonString, fallback = []) => {
+        try {
+            // Thay thế dấu nháy đơn bằng dấu nháy kép để hợp lệ hóa JSON
+            return JSON.parse(jsonString.replace(/'/g, '"'));
+        } catch (e) {
+            console.error("Failed to parse JSON string:", jsonString, e);
+            return fallback;
+        }
+    };
 
-// Initialize dashboard when DOM is fully loaded
-document.addEventListener('DOMContentLoaded', initDashboard);
+    // 1. Vẽ Biểu đồ Doanh thu theo ngày
+    const revenueAndProfitChartEl = document.querySelector('#revenueAndProfitChart');
+    if (revenueAndProfitChartEl && typeof ApexCharts !== 'undefined') {
+        const revenueData = safeJsonParse(revenueAndProfitChartEl.dataset.revenueData);
+        const dayLabels = safeJsonParse(revenueAndProfitChartEl.dataset.dayLabels);
+
+        if (revenueData.length > 0 && dayLabels.length > 0) {
+            // ... (phần options của biểu đồ giữ nguyên)
+            const options = {
+                chart: { height: 350, type: 'area', parentHeightOffset: 0, toolbar: { show: false } },
+                series: [{ name: 'Doanh thu', data: revenueData }],
+                xaxis: { categories: dayLabels, labels: { style: { colors: '#697a8d', fontSize: '13px' } } },
+                yaxis: { labels: { style: { colors: '#697a8d', fontSize: '13px' }, formatter: currencyFormatter } },
+                dataLabels: { enabled: false },
+                stroke: { width: 3, curve: 'smooth' },
+                tooltip: { y: { formatter: (val) => new Intl.NumberFormat('vi-VN').format(val) + " ₫" } },
+                fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.7, opacityTo: 0.3, stops: [0, 90, 100] } },
+                grid: { borderColor: '#e0e0e0', strokeDashArray: 5 }
+            };
+            new ApexCharts(revenueAndProfitChartEl, options).render();
+        } else {
+            revenueAndProfitChartEl.innerHTML = '<div class="d-flex justify-content-center align-items-center h-100 text-muted">Không có dữ liệu để vẽ biểu đồ.</div>';
+        }
+    }
+
+    // 2. Vẽ Biểu đồ tròn Doanh thu theo Danh mục
+    const categoryChartEl = document.querySelector('#revenueByCategoryChart');
+    if (categoryChartEl && typeof ApexCharts !== 'undefined') {
+        const categoryLabels = safeJsonParse(categoryChartEl.dataset.categoryLabels);
+        const categoryData = safeJsonParse(categoryChartEl.dataset.categoryData);
+
+        if (categoryData.length > 0 && categoryLabels.length > 0) {
+            // ... (phần options của biểu đồ giữ nguyên)
+             const options = {
+                chart: { height: 350, type: 'donut' },
+                series: categoryData,
+                labels: categoryLabels,
+                legend: { position: 'bottom' },
+                tooltip: { y: { formatter: (val) => new Intl.NumberFormat('vi-VN').format(val) + " ₫" } },
+                plotOptions: { pie: { donut: { labels: { show: true, total: { show: true, label: 'Tổng', formatter: (w) => currencyFormatter(w.globals.seriesTotals.reduce((a, b) => a + b, 0)) } } } } }
+            };
+            new ApexCharts(categoryChartEl, options).render();
+        } else {
+            categoryChartEl.innerHTML = '<div class="d-flex justify-content-center align-items-center h-100 text-muted">Không có dữ liệu doanh thu theo danh mục.</div>';
+        }
+    }
+});
