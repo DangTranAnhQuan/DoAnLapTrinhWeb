@@ -1,63 +1,113 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layouts/user}">
-<head>
-    <title>Trang Chủ</title>
-</head>
+
 <body>
-
-<div layout:fragment="content">
-
-    <div class="axil-main-slider-area main-slider-style-7 bg_image--8">
+<main layout:fragment="content">
+    <div class="axil-main-slider-area main-slider-style-1">
         <div class="container">
             <div class="row align-items-center">
-                <div class="col-sm-8">
+                <div class="col-lg-5 col-sm-6">
                     <div class="main-slider-content">
-                        <span class="subtitle"><i class="fas fa-fire"></i>Ưu đãi hấp dẫn</span>
-                        <h1 class="title">Bộ sưu tập thiết kế độc quyền</h1>
-                        <p>Dòng sản phẩm thường ngày với thiết kế ngắn gọn từ 100% da lộn.</p>
-                        <div class="shop-btn">
-                            <a th:href="@{/shop}" class="axil-btn btn-bg-secondary right-icon">Xem sản phẩm <i class="fal fa-long-arrow-right"></i></a>
+                        <div class="slider-content-activation-one">
+                            <div th:each="product : ${sliderProducts}" class="single-slide slick-slide" data-sal="slide-up" data-sal-delay="400" data-sal-duration="800">
+                                <span class="subtitle"><i class="fas fa-fire"></i> Ưu đãi hấp dẫn trong tuần</span>
+                                <h1 class="title" th:text="${product.tenSanPham}">Tên sản phẩm</h1>
+                                <div class="slide-action">
+                                    <div class="shop-btn">
+                                        <a th:href="@{/shop}" class="axil-btn btn-bg-white"><i class="fal fa-shopping-cart"></i>Mua ngay</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-7 col-sm-6">
+                    <div class="main-slider-large-thumb">
+                        <div class="slider-thumb-activation-one axil-slick-dots">
+                            <div th:each="product : ${sliderProducts}" class="single-slide slick-slide" data-sal="slide-up" data-sal-delay="600" data-sal-duration="1500">
+                                <img th:src="@{'/uploads/' + ${product.hinhAnh}}" alt="Product">
+                                <div class="product-price">
+                                    <span class="text">Chỉ từ</span>
+                                    <span class="price-amount" th:text="${#numbers.formatDecimal(product.giaBan, 0, 'COMMA', 0, 'POINT')} + ' ₫'">$49.00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <ul class="shape-group">
+            <li class="shape-1"><img th:src="@{/web/assets/images/others/shape-1.png}" alt="Shape"></li>
+            <li class="shape-2"><img th:src="@{/web/assets/images/others/shape-2.png}" alt="Shape"></li>
+        </ul>
+    </div>
+
+    <div class="axil-categorie-area bg-color-white axil-section-gapcommon">
+        <div class="container">
+            <div class="section-title-wrapper">
+                <span class="title-highlighter highlighter-secondary"> <i class="far fa-tags"></i> Danh mục</span>
+                <h2 class="title">Duyệt theo danh mục</h2>
+            </div>
+
+            <div class="categrie-product-activation slick-layout-wrapper--15 axil-slick-arrow arrow-top-slide">
+
+                <div th:each="category : ${categories}" class="slick-single-layout">
+                    <div class="categrie-product" data-sal="zoom-out" data-sal-delay="200" data-sal-duration="500">
+                        <a th:href="@{/shop(categoryId=${category.maDanhMuc})}">
+                            <img class="img-fluid" th:src="@{'/uploads/' + ${category.hinhAnh}}" alt="product categorie">
+                            <h6 class="cat-title" th:text="${category.tenDanhMuc}">Tên danh mục</h6>
+                        </a>
+                    </div>
+                </div>
+
+            </div> </div>
+    </div>
+
+    <div class="axil-product-area bg-color-white axil-section-gap">
+        <div class="container">
+            <div class="section-title-wrapper">
+                <span class="title-highlighter highlighter-primary"> <i class="far fa-shopping-basket"></i> Sản phẩm của chúng tôi</span>
+                <h2 class="title">Khám phá sản phẩm</h2>
+            </div>
+            <div class="explore-product-activation slick-layout-wrapper slick-layout-wrapper--15 axil-slick-arrow arrow-top-slide">
+                <div th:each="productGroup : ${groupedProducts}" class="slick-single-layout">
+                    <div class="row row--15">
+                        <div th:each="product : ${productGroup}" class="col-xl-3 col-lg-4 col-sm-6 col-12 mb--30">
+                            <div class="axil-product product-style-one">
+                                <div class="thumbnail">
+                                    <a th:href="@{/product/{id}(id=${product.maSanPham})}">
+                                        <img data-sal="zoom-out" class="main-img" th:src="@{'/uploads/' + ${product.hinhAnh}}" alt="Product Images">
+                                    </a>
+                                    <div class="product-hover-action">
+                                        <ul class="cart-action">
+                                            <li class="quickview">
+                                                <a href="#" class="quick-view-btn" data-bs-toggle="modal" data-bs-target="#quick-view-modal" th:data-product-id="${product.maSanPham}">
+                                                    <i class="far fa-eye"></i>
+                                                </a>
+                                            </li>
+                                            <li class="select-option">
+                                                <a href="#" class="add-to-cart-btn-ajax" th:data-product-id="${product.maSanPham}">
+                                                    Thêm vào giỏ
+                                                </a>
+                                            </li>
+                                            <li class="wishlist">
+                                                <a href="#" class="toggle-wishlist-btn" th:data-product-id="${product.maSanPham}">
+                                                    <i class="far fa-heart"></i>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="axil-poster axil-section-gap pb--0">
-        <div class="container">
-            <div class="row g-lg-5 g-4">
-                <div class="col-lg-6">
-                    <div class="single-poster">
-                        <a th:href="@{/shop}">
-                            <img th:src="@{/web/assets/images/product/poster/poster-08.png}" alt="eTrade promotion poster">
-                            <div class="poster-content">
-                                <div class="inner">
-                                    <h3 class="title">Chất lượng <br> Cao cấp.</h3>
-                                    <span class="sub-title">Bộ sưu tập <i class="fal fa-long-arrow-right"></i></span>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-                <div class="col-lg-6">
-                    <div class="single-poster">
-                        <a th:href="@{/shop}">
-                            <img th:src="@{/web/assets/images/product/poster/poster-09.png}" alt="eTrade promotion poster">
-                            <div class="poster-content content-left">
-                                <div class="inner">
-                                    <span class="sub-title">Giảm 50% mùa đông</span>
-                                    <h3 class="title">Nhận kim cương <br> độc quyền</h3>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    </div>
-
+</main>
 </body>
 </html>

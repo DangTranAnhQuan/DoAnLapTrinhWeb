@@ -20,6 +20,8 @@
             axilInit.axilBackToTop();
             axilInit.shopFilterWidget();
             axilInit.mobileMenuActivation();
+            axilInit.shopSortActivation();
+            axilInit.cartQuantityInitialize();
             axilInit.menuLinkActive();
             axilInit.headerIconToggle();
             axilInit.priceRangeSlider();
@@ -143,6 +145,32 @@
             });
         },
 
+        shopSortActivation: function() {
+                    $('.single-select').on('change', function() {
+                        var sortValue = $(this).val();
+                        if (sortValue) {
+                            var currentUrl = new URL(window.location.href);
+                            currentUrl.searchParams.set('sort', sortValue);
+                            currentUrl.searchParams.set('page', '1');
+                            window.location.href = currentUrl.toString();
+                        }
+                    });
+                },
+
+        cartQuantityInitialize: function() {
+            $('.quantity-input').on('change', function() {
+                $(this).closest('.quantity-form').submit();
+            });
+            $(document).on('click', '.pro-qty .qtybtn', function() {
+                var form = $(this).closest('.quantity-form');
+                setTimeout(function() {
+                    if (form.length) {
+                        form.submit();
+                    }
+                }, 100);
+            });
+        },
+
         mobileMenuActivation: function(e) {
             
             $('.menu-item-has-children > a').on('click', function(e) {
@@ -201,20 +229,37 @@
             })
         },
 
-        priceRangeSlider: function(e) {
-            $('#slider-range').slider({
-                range: true,
-                min: 0,
-                max: 5000,
-                values: [0, 3000],
-                slide: function(event, ui) {
-                    $('#amount').val('$' + ui.values[0] + '  $' + ui.values[1]);
-                }
-            });
-            $('#amount').val('$' + $('#slider-range').slider('values', 0) +
-                '  $' + $('#slider-range').slider('values', 1));
+         priceRangeSlider: function(e) {
+                    if ($('#slider-range').length) {
+                        var slider = $("#slider-range");
 
-        },
+                        // Đọc các giá trị đã được truyền từ backend vào thẻ HTML
+                        var minVal = parseInt(slider.data('min-value'), 10);
+                        var maxVal = parseInt(slider.data('max-value'), 10);
+                        var defaultMin = parseInt(slider.data('default-min'), 10);
+                        var defaultMax = parseInt(slider.data('default-max'), 10);
+
+                        slider.slider({
+                            range: true,
+                            min: defaultMin,
+                            max: defaultMax,
+                            step: 50000, // Bước nhảy 50,000đ
+                            values: [minVal, maxVal], // Thiết lập vị trí ban đầu của thanh trượt
+                            slide: function (event, ui) {
+                                // Hiển thị theo định dạng VND khi kéo
+                                $("#amount").val(ui.values[0].toLocaleString('vi-VN') + "₫ - " + ui.values[1].toLocaleString('vi-VN') + "₫");
+                            },
+                            stop: function(event, ui) {
+                                // Cập nhật giá trị vào input ẩn khi người dùng thả chuột
+                                $('#min-price').val(ui.values[0]);
+                                $('#max-price').val(ui.values[1]);
+                            }
+                        });
+
+                        // Hiển thị giá trị ban đầu theo định dạng VND
+                        $("#amount").val(slider.slider("values", 0).toLocaleString('vi-VN') + "₫ - " + slider.slider("values", 1).toLocaleString('vi-VN') + "₫");
+                    }
+                },
 
         quantityRanger: function() {
             $('.pro-qty').prepend('<span class="dec qtybtn">-</span>');
@@ -406,7 +451,7 @@
                 dots: false,
                 prevArrow: '<button class="slide-arrow prev-arrow"><i class="fal fa-long-arrow-left"></i></button>',
                 nextArrow: '<button class="slide-arrow next-arrow"><i class="fal fa-long-arrow-right"></i></button>',
-                
+
             });
 
             $('.popular-product-activation').slick({

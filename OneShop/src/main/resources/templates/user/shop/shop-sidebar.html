@@ -1,215 +1,167 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layouts/user}">
+
 <head>
-  <title>Cửa hàng - OneShop</title>
-  <meta charset="utf-8" />
+    <title>Cửa hàng</title>
 </head>
+
 <body>
-<div layout:fragment="content">
-  <!-- Breadcrumb -->
-  <div class="axil-breadcrumb-area">
-    <div class="container">
-      <div class="row align-items-center">
-        <div class="col-lg-6 col-md-8">
-          <div class="inner">
-            <ul class="axil-breadcrumb">
-              <li class="axil-breadcrumb-item"><a th:href="@{/}">Trang chủ</a></li>
-              <li class="separator"></li>
-              <li class="axil-breadcrumb-item active" aria-current="page">Cửa hàng</li>
-            </ul>
-            <h1 class="title">Khám phá sản phẩm</h1>
-          </div>
-        </div>
-        <div class="col-lg-6 col-md-4">
-          <div class="inner">
-            <div class="bradcrumb-thumb">
-              <img th:src="@{/web/assets/images/product/product-45.png}" alt="Breadcrumb" />
+<main layout:fragment="content">
+    <div class="axil-breadcrumb-area">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6 col-md-8">
+                    <div class="inner">
+                        <ul class="axil-breadcrumb">
+                            <li class="axil-breadcrumb-item"><a th:href="@{/}">Trang chủ</a></li>
+                            <li class="separator"></li>
+                            <li class="axil-breadcrumb-item active" aria-current="page">Cửa hàng</li>
+                        </ul>
+                        <h1 class="title">Khám phá tất cả sản phẩm</h1>
+                    </div>
+                </div>
             </div>
-          </div>
         </div>
-      </div>
     </div>
-  </div>
 
-  <!-- Shop + Sidebar -->
-  <div class="axil-shop-area axil-section-gap bg-color-white">
-    <div class="container">
-      <div class="row">
-        <!-- Sidebar -->
-        <div class="col-lg-3">
-          <div class="axil-shop-sidebar">
-            <div class="d-lg-none"><button class="sidebar-close filter-close-btn"><i class="fas fa-times"></i></button></div>
+    <div class="axil-shop-area axil-section-gap bg-color-white">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-3">
+                    <div class="axil-shop-sidebar">
+                        <form id="filter-form" th:action="@{/shop}" method="get">
+                            <input type="hidden" name="sort" th:value="${sort}">
 
-            <form id="filter-form" th:action="@{/shop}" method="get">
-              <!-- giữ tham số sort & paging -->
-              <input type="hidden" name="sort" th:value="${sort}" />
-              <input type="hidden" name="page" th:value="${pageNumber}" />
-              <input type="hidden" name="size" th:value="${pageSize}" />
+                            <div class="toggle-list product-categories active">
+                                <h6 class="title">DANH MỤC</h6>
+                                <div class="shop-submenu">
+                                    <ul>
+                                        <li th:classappend="${selectedCategoryId == null ? 'current-cat' : ''}"><a th:href="@{/shop(sort=${sort})}">Tất cả danh mục</a></li>
+                                        <li th:each="category : ${categories}" th:classappend="${category.maDanhMuc == selectedCategoryId ? 'current-cat' : ''}">
+                                            <a th:href="@{/shop(categoryId=${category.maDanhMuc}, sort=${sort})}" th:text="${category.tenDanhMuc}"></a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
 
-              <!-- Categories -->
-              <div class="toggle-list product-categories active">
-                <h6 class="title">DANH MỤC</h6>
-                <div class="shop-submenu">
-                  <ul>
-                    <li>
-                      <a th:href="@{/shop(sort=${sort},minPrice=${minPrice},maxPrice=${maxPrice})}"
-                         th:classappend="${selectedCategoryId}==null ? 'active'">Tất cả</a>
-                    </li>
-                    <li th:each="c : ${categories}">
-                      <a th:href="@{/shop(categoryId=${c.maDanhMuc},sort=${sort},minPrice=${minPrice},maxPrice=${maxPrice})}"
-                         th:text="${c.tenDanhMuc}"
-                         th:classappend="${selectedCategoryId}==${c.maDanhMuc} ? 'active'"></a>
-                    </li>
-                  </ul>
-                </div>
-              </div>
+                            <div class="toggle-list product-categories active">
+                                <h6 class="title">NHÀ SẢN XUẤT</h6>
+                                <div class="shop-submenu">
+                                    <ul>
+                                        <li th:each="brand : ${brands}">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="brandIds" th:value="${brand.maThuongHieu}" th:id="'brand-' + ${brand.maThuongHieu}"
+                                                       th:checked="${selectedBrandIds != null and selectedBrandIds.contains(brand.maThuongHieu)}">
+                                                <label class="form-check-label" th:for="'brand-' + ${brand.maThuongHieu}" th:text="${brand.tenThuongHieu}"></label>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
 
-              <!-- Price -->
-              <div class="toggle-list product-price-range active">
-                <h6 class="title">GIÁ</h6>
-                <div class="shop-submenu">
-                  <div id="slider-range"></div>
-                  <div class="flex-center mt--20">
-                    <div class="input-group">
-                      <span class="input-group-text">đ</span>
-                      <input type="text" id="amount-min-display" class="amount-input" readonly>
+                            <div class="toggle-list product-price-range active">
+                                <h6 class="title">LỌC THEO GIÁ</h6>
+                                <div class="shop-submenu">
+                                    <input type="hidden" name="minPrice" id="min-price">
+                                    <input type="hidden" name="maxPrice" id="max-price">
+                                    <div class="price-filter-area">
+                                        <div id="slider-range" class="mb-3"
+                                             th:data-default-min="0"
+                                             th:data-default-max="5000000"
+                                             th:data-min-value="${minPrice != null ? minPrice : 0}"
+                                             th:data-max-value="${maxPrice != null ? maxPrice : 5000000}">
+                                        </div>
+                                        <div class="flex-center">
+                                            <span class="input-range">Giá: </span>
+                                            <input type="text" id="amount" class="amount-range" readonly>
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="axil-btn btn-bg-primary mt-4 w-100">Áp dụng</button>
+                                </div>
+                            </div>
+
+                            <a th:href="@{/shop}" class="axil-btn btn-bg-secondary mt-2 w-100 text-center">Xóa bộ lọc</a>
+                        </form>
                     </div>
-                    <span class="mid-separate"> - </span>
-                    <div class="input-group">
-                      <span class="input-group-text">đ</span>
-                      <input type="text" id="amount-max-display" class="amount-input" readonly>
+                </div>
+
+                <div class="col-lg-9">
+                    <div class="axil-shop-top mb--40">
+                        <div class="category-select align-items-center justify-content-lg-end justify-content-between">
+                            <span class="filter-results" th:text="'Hiển thị ' + ${products.size()} + ' trên ' + ${totalElements} + ' kết quả'"></span>
+                            <select id="sort-select" class="single-select">
+                                <option value="newest" th:selected="${sort == 'newest' or sort == null}">Sắp xếp theo mới nhất</option>
+                                <option value="price_asc" th:selected="${sort == 'price_asc'}">Giá: thấp đến cao</option>
+                                <option value="price_desc" th:selected="${sort == 'price_desc'}">Giá: cao đến thấp</option>
+                            </select>
+                        </div>
                     </div>
-                  </div>
-                  <input type="hidden" id="minPrice" name="minPrice" th:value="${minPrice}" />
-                  <input type="hidden" id="maxPrice" name="maxPrice" th:value="${maxPrice}" />
-                </div>
-              </div>
 
-              <!-- Reset -->
-              <a class="axil-btn btn-bg-primary w-100" th:href="@{/shop}">Làm mới</a>
-            </form>
-          </div>
-        </div>
+                    <div class="row row--15">
+                        <div th:if="${products.isEmpty()}" class="col-12 text-center">
+                            <h4>Không tìm thấy sản phẩm nào phù hợp.</h4>
+                        </div>
+                        <div th:each="product : ${products}" class="col-xl-4 col-sm-6">
+                            <div class="axil-product product-style-one mb--30">
+                                <div class="thumbnail">
+                                    <a th:href="@{/product/{id}(id=${product.maSanPham})}">
+                                        <img th:src="@{'/uploads/' + ${product.hinhAnh}}" alt="Product Images">
+                                    </a>
+                                    <div class="product-hover-action">
+                                        <ul class="cart-action">
+                                            <li class="quickview">
+                                                <a href="#" class="quick-view-btn" data-bs-toggle="modal" data-bs-target="#quick-view-modal" th:data-product-id="${product.maSanPham}">
+                                                    <i class="far fa-eye"></i>
+                                                </a>
+                                            </li>
+                                            <li class="select-option">
+                                                <a href="#" class="add-to-cart-btn-ajax" th:data-product-id="${product.maSanPham}">
+                                                    Thêm vào giỏ
+                                                </a>
+                                            </li>
+                                            <li class="wishlist">
+                                                <a href="#" class="toggle-wishlist-btn" th:data-product-id="${product.maSanPham}">
+                                                    <i class="far fa-heart"></i>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="product-content">
+                                    <div class="inner">
+                                        <h5 class="title"><a th:href="@{/product/{id}(id=${product.maSanPham})}" th:text="${product.tenSanPham}"></a></h5>
+                                        <div class="product-price-variant">
+                                            <span class="price current-price" th:text="${#numbers.formatDecimal(product.giaBan, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></span>
+                                            <span class="price old-price" th:text="${#numbers.formatDecimal(product.giaNiemYet, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-        <!-- Products -->
-        <div class="col-lg-9">
-          <div class="row">
-            <div class="col-lg-12">
-              <div class="axil-shop-top mb--40">
-                <div class="category-select align-items-center justify-content-lg-end justify-content-between">
-                  <span class="filter-results" th:with="from=${pageNumber*pageSize + (totalElements>0?1:0)}, to=${(pageNumber*pageSize + pageSize) < totalElements ? (pageNumber*pageSize + pageSize) : totalElements}"
-                        th:text="${totalElements} != null ? 'Hiển thị ' + ${from} + '-' + ${to} + ' / ' + ${totalElements} + ' kết quả' : 'Kết quả'">Kết quả</span>
-
-                  <select class="single-select" id="sortSelect" name="sort" onchange="onChangeSort(this.value)">
-                    <option th:value="'latest'" th:selected="${sort}=='latest'">Mới nhất</option>
-                    <option th:value="'oldest'" th:selected="${sort}=='oldest'">Cũ nhất</option>
-                    <option th:value="'price_asc'" th:selected="${sort}=='price_asc'">Giá tăng dần</option>
-                    <option th:value="'price_desc'" th:selected="${sort}=='price_desc'">Giá giảm dần</option>
-                  </select>
+                    <div th:if="${totalPages > 1}" class="text-center pt--20">
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination pagination-lg justify-content-center">
+                                <li class="page-item" th:classappend="${pageNumber == 1 ? 'disabled' : ''}">
+                                    <a class="page-link" th:href="@{/shop(page=${pageNumber - 1}, size=${pageSize}, sort=${sort}, categoryId=${selectedCategoryId}, brandIds=${selectedBrandIds}, minPrice=${minPrice}, maxPrice=${maxPrice})}">Trước</a>
+                                </li>
+                                <li th:each="i : ${#numbers.sequence(1, totalPages)}" class="page-item" th:classappend="${i == pageNumber ? 'active' : ''}">
+                                    <a class="page-link" th:href="@{/shop(page=${i}, size=${pageSize}, sort=${sort}, categoryId=${selectedCategoryId}, brandIds=${selectedBrandIds}, minPrice=${minPrice}, maxPrice=${maxPrice})}" th:text="${i}"></a>
+                                </li>
+                                <li class="page-item" th:classappend="${pageNumber == totalPages ? 'disabled' : ''}">
+                                    <a class="page-link" th:href="@{/shop(page=${pageNumber + 1}, size=${pageSize}, sort=${sort}, categoryId=${selectedCategoryId}, brandIds=${selectedBrandIds}, minPrice=${minPrice}, maxPrice=${maxPrice})}">Sau</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
                 </div>
-                <div class="d-lg-none">
-                  <button class="product-filter-mobile filter-toggle"><i class="fas fa-filter"></i> LỌC</button>
-                </div>
-              </div>
             </div>
-          </div>
-
-          <div class="row row--15">
-            <!-- Product card -->
-            <div class="col-xl-4 col-sm-6" th:each="p : ${products}">
-              <div class="axil-product product-style-one mb--30">
-                <div class="thumbnail">
-                  <a th:href="@{'/product/' + ${p.maSanPham}}">
-                    <img th:src="${#strings.isEmpty(p.hinhAnh)} ? '/web/assets/images/product/electric/product-01.png' : ${p.hinhAnh}" alt="Product" />
-                  </a>
-                  <div class="product-hover-action">
-                    <ul class="cart-action">
-                      <li class="wishlist"><a th:href="@{'/wishlist/add/' + ${p.maSanPham}}"><i class="far fa-heart"></i></a></li>
-                      <li class="select-option"><a th:href="@{'/cart/add/' + ${p.maSanPham}}">Thêm vào giỏ</a></li>
-                      <li class="quickview"><a href="#" data-bs-toggle="modal" data-bs-target="#quick-view-modal"><i class="far fa-eye"></i></a></li>
-                    </ul>
-                  </div>
-                </div>
-                <div class="product-content">
-                  <div class="inner">
-                    <h5 class="title"><a th:href="@{'/product/' + ${p.maSanPham}}" th:text="${p.tenSanPham}">Tên sản phẩm</a></h5>
-                    <div class="product-price-variant">
-                      <span class="price current-price" th:text="${#numbers.formatDecimal(p.giaBan, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</span>
-                      <span class="price old-price" th:if="${p.giaGoc!=null}" th:text="${#numbers.formatDecimal(p.giaGoc, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <!-- /Product card -->
-          </div>
-
-          <!-- Pagination -->
-          <nav th:if="${totalPages>1}" aria-label="Pagination" class="mt--10">
-            <ul class="pagination justify-content-center">
-              <li class="page-item" th:classappend="${pageNumber==0} ? 'disabled'">
-                <a class="page-link" th:href="@{/shop(page=${pageNumber-1},size=${pageSize},sort=${sort},categoryId=${selectedCategoryId},minPrice=${minPrice},maxPrice=${maxPrice})}">&laquo;</a>
-              </li>
-              <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages-1)}" th:classappend="${i==pageNumber} ? 'active'">
-                <a class="page-link" th:text="${i+1}"
-                   th:href="@{/shop(page=${i},size=${pageSize},sort=${sort},categoryId=${selectedCategoryId},minPrice=${minPrice},maxPrice=${maxPrice})}"></a>
-              </li>
-              <li class="page-item" th:classappend="${pageNumber==totalPages-1} ? 'disabled'">
-                <a class="page-link" th:href="@{/shop(page=${pageNumber+1},size=${pageSize},sort=${sort},categoryId=${selectedCategoryId},minPrice=${minPrice},maxPrice=${maxPrice})}">&raquo;</a>
-              </li>
-            </ul>
-          </nav>
         </div>
-      </div>
     </div>
-  </div>
-
-  <!-- Page scripts (inline, after main.js from layout) -->
-  <th:block layout:fragment="scripts">
-    <script th:inline="javascript">
-      /*<![CDATA[*/
-      function onChangeSort(value) {
-        const url = new URL(window.location.href);
-        url.searchParams.set('sort', value);
-        // reset page về 0 khi đổi sort
-        url.searchParams.set('page', '0');
-        window.location.href = url.toString();
-      }
-
-      $(function () {
-        // jQuery UI slider init (có sẵn từ layouts/user)
-        var initialMin = /*[[${minPrice != null ? minPrice : 0}]]*/ 0;
-        var initialMax = /*[[${maxPrice != null ? maxPrice : 50000000}]]*/ 50000000;
-
-        if ($('#slider-range').length && $.ui && $.ui.slider) {
-          $("#slider-range").slider({
-            range: true,
-            min: 0,
-            max: 50000000,
-            step: 50000,
-            values: [initialMin, initialMax],
-            slide: function (event, ui) {
-              $("#amount-min-display").val(ui.values[0].toLocaleString('vi-VN'));
-              $("#amount-max-display").val(ui.values[1].toLocaleString('vi-VN'));
-            },
-            stop: function (event, ui) {
-              $("#minPrice").val(ui.values[0]);
-              $("#maxPrice").val(ui.values[1]);
-              // đổi trang về 0 khi lọc giá
-              $("input[name='page']").val('0');
-              $("#filter-form")[0].submit();
-            }
-          });
-
-          $("#amount-min-display").val($("#slider-range").slider("values", 0).toLocaleString('vi-VN'));
-          $("#amount-max-display").val($("#slider-range").slider("values", 1).toLocaleString('vi-VN'));
-        }
-      });
-      /*]]>*/
-    </script>
-  </th:block>
-</div>
+</main>
 </body>
 </html>

@@ -1,6 +1,7 @@
 package nhom17.OneShop.entity;
 
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -26,14 +27,17 @@ public class Product {
     private LocalDateTime ngayTao;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnore
     @JoinColumn(name = "MaDanhMuc")
     private Category danhMuc;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MaThuongHieu")
+    @JsonIgnore
     private Brand thuongHieu;
 
     @OneToMany(mappedBy = "sanPham", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<Rating> danhSachRating;
 
     @PrePersist

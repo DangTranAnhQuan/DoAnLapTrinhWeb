@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/user}">
+<head>
+    <title>Sửa địa chỉ</title>
+</head>
+<body>
+<main layout:fragment="content">
+    <div class="axil-checkout-area axil-section-gap">
+        <div class="container">
+            <h4 class="title mb-4">Chỉnh sửa địa chỉ giao hàng</h4>
+            <form th:action="@{/checkout/save-address}" th:object="${address}" method="post" class="axil-checkout-billing">
+                <input type="hidden" th:field="*{maDiaChi}" />
+                <input type="hidden" th:field="*{nguoiDung}" />
+
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Tên người nhận <span>*</span></label>
+                            <input type="text" class="form-control" th:field="*{tenNguoiNhan}" required>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Số điện thoại <span>*</span></label>
+                            <input type="tel" class="form-control" th:field="*{soDienThoai}" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Tỉnh/Thành phố <span>*</span></label>
+                    <input type="text" class="form-control" th:field="*{tinhThanh}" required>
+                </div>
+                <div class="form-group">
+                    <label>Quận/Huyện <span>*</span></label>
+                    <input type="text" class="form-control" th:field="*{quanHuyen}" required>
+                </div>
+                <div class="form-group">
+                    <label>Phường/Xã <span>*</span></label>
+                    <input type="text" class="form-control" th:field="*{phuongXa}" required>
+                </div>
+                <div class="form-group">
+                    <label>Số nhà, tên đường <span>*</span></label>
+                    <input type="text" class="form-control" th:field="*{soNhaDuong}" required>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="axil-btn btn-bg-primary">Lưu thay đổi</button>
+                    <a th:href="@{/checkout}" class="axil-btn btn-outline ms-2">Hủy</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+</body>
+</html>

@@ -1,7 +1,6 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org">
 <body>
-
 <div th:fragment="user-footer">
     <div class="service-area">
         <div class="container">
@@ -12,8 +11,8 @@
                             <img th:src="@{/web/assets/images/icons/service1.png}" alt="Service">
                         </div>
                         <div class="content">
-                            <h6 class="title">Fast &amp; Secure Delivery</h6>
-                            <p>Tell about your service.</p>
+                            <h6 class="title">Giao Hàng Nhanh & An Toàn</h6>
+                            <p>Miễn phí cho đơn hàng trên 500k.</p>
                         </div>
                     </div>
                 </div>
@@ -23,8 +22,8 @@
                             <img th:src="@{/web/assets/images/icons/service2.png}" alt="Service">
                         </div>
                         <div class="content">
-                            <h6 class="title">Money Back Guarantee</h6>
-                            <p>Within 10 days.</p>
+                            <h6 class="title">Đảm Bảo Hoàn Tiền</h6>
+                            <p>Trong vòng 7 ngày.</p>
                         </div>
                     </div>
                 </div>
@@ -34,8 +33,8 @@
                             <img th:src="@{/web/assets/images/icons/service3.png}" alt="Service">
                         </div>
                         <div class="content">
-                            <h6 class="title">24 Hour Return Policy</h6>
-                            <p>No question ask.</p>
+                            <h6 class="title">Chính Sách Đổi Trả 24h</h6>
+                            <p>Không cần lý do.</p>
                         </div>
                     </div>
                 </div>
@@ -45,8 +44,8 @@
                             <img th:src="@{/web/assets/images/icons/service4.png}" alt="Service">
                         </div>
                         <div class="content">
-                            <h6 class="title">Pro Quality Support</h6>
-                            <p>24/7 Live support.</p>
+                            <h6 class="title">Hỗ Trợ Chuyên Nghiệp</h6>
+                            <p>Hỗ trợ trực tuyến 24/7.</p>
                         </div>
                     </div>
                 </div>
@@ -57,49 +56,70 @@
         <div class="footer-top separator-top">
             <div class="container">
                 <div class="row">
-                    <div class="col-lg-4 col-sm-6">
+                    <div class="col-lg-3 col-sm-6">
                         <div class="axil-footer-widget">
-                            <h5 class="widget-title">Support</h5>
+                            <h5 class="widget-title">Hỗ trợ</h5>
                             <div class="inner">
-                                <p>685 Market Street, <br>
-                                Las Vegas, LA 95820, <br>
-                                United States.
+                                <p>685 Đường Market, <br>
+                                    Las Vegas, LA 95820, <br>
+                                    Hoa Kỳ.
                                 </p>
                                 <ul class="support-list-item">
-                                    <li><a href="mailto:example@domain.com"><i class="fal fa-envelope-open"></i> example@domain.com</a></li>
-                                    <li><a href="tel:(+01)850-315-5862"><i class="fal fa-phone-alt"></i> (+01) 850-315-5862</a></li>
+                                    <li><a href="mailto:example@domain.com"><i class="fal fa-envelope-open"></i> support@oneshop.com</a></li>
+                                    <li><a href="tel:(+01)850-315-5862"><i class="fal fa-phone-alt"></i> 1900 1234</a></li>
                                 </ul>
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-4 col-sm-6">
+                    <div class="col-lg-3 col-sm-6">
                         <div class="axil-footer-widget">
-                            <h5 class="widget-title">Account</h5>
+                            <h5 class="widget-title">Tài khoản</h5>
                             <div class="inner">
                                 <ul>
-                                    <li><a th:href="@{/my-account}">My Account</a></li>
-                                    <li><a th:href="@{/sign-in}">Login / Register</a></li>
-                                    <li><a th:href="@{/cart}">Cart</a></li>
-                                    <li><a th:href="@{/wishlist}">Wishlist</a></li>
-                                    <li><a th:href="@{/shop}">Shop</a></li>
+                                    <li><a th:href="@{/my-account}">Tài khoản của tôi</a></li>
+                                    <li><a th:href="@{/sign-in}">Đăng nhập / Đăng ký</a></li>
+                                    <li><a th:href="@{/cart}">Giỏ hàng</a></li>
+                                    <li><a th:href="@{/wishlist}">Yêu thích</a></li>
+                                    <li><a th:href="@{/shop}">Cửa hàng</a></li>
                                 </ul>
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-4 col-sm-6">
+                    <div class="col-lg-3 col-sm-6">
                         <div class="axil-footer-widget">
-                            <h5 class="widget-title">Quick Link</h5>
+                            <h5 class="widget-title">Liên kết nhanh</h5>
                             <div class="inner">
                                 <ul>
-                                    <li><a th:href="@{/privacy-policy}">Privacy Policy</a></li>
-                                    <li><a href="#">Terms Of Use</a></li>
-                                    <li><a href="#">FAQ</a></li>
-                                    <li><a th:href="@{/contact}">Contact</a></li>
+                                    <li><a th:href="@{/privacy-policy}">Chính sách bảo mật</a></li>
+                                    <li><a href="#">Điều khoản sử dụng</a></li>
+                                    <li><a href="#">Câu hỏi thường gặp</a></li>
+                                    <li><a th:href="@{/contact}">Liên hệ</a></li>
                                 </ul>
                             </div>
                         </div>
                     </div>
+                    <div class="col-lg-3 col-sm-6">
+                        <div class="axil-footer-widget">
+                            <h5 class="widget-title">Tải ứng dụng</h5>
+                            <div class="inner">
+                                <span>Tải App ngay, nhận ưu đãi!</span>
+                                <div class="download-btn-group">
+                                    <div class="qr-code">
+                                        <img th:src="@{/web/assets/images/others/qr.png}" alt="QR Code">
+                                    </div>
+                                    <div class="app-link">
+                                        <a href="#">
+                                            <img th:src="@{/web/assets/images/others/app-store.png}" alt="App Store">
+                                        </a>
+                                        <a href="#">
+                                            <img th:src="@{/web/assets/images/others/play-store.png}" alt="Play Store">
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
+                </div>
             </div>
         </div>
         <div class="copyright-area copyright-default separator-top">
@@ -115,13 +135,13 @@
                     <div class="col-xl-4 col-lg-12">
                         <div class="copyright-left d-flex flex-wrap justify-content-center">
                             <ul class="quick-link">
-                                <li>© 2025. All rights reserved by OneShop.</li>
+                                <li>© 2025. Bản quyền thuộc về OneShop.</li>
                             </ul>
                         </div>
                     </div>
                     <div class="col-xl-4 col-lg-12">
                         <div class="copyright-right d-flex flex-wrap justify-content-xl-end justify-content-center align-items-center">
-                            <span class="card-text">Accept For</span>
+                            <span class="card-text">Chấp nhận thanh toán</span>
                             <ul class="payment-icons-bottom quick-link">
                                 <li><img th:src="@{/web/assets/images/icons/cart/cart-1.png}" alt="paypal cart"></li>
                                 <li><img th:src="@{/web/assets/images/icons/cart/cart-2.png}" alt="paypal cart"></li>
@@ -132,8 +152,7 @@
                 </div>
             </div>
         </div>
-        </footer>
-    </div>
-
+    </footer>
+</div>
 </body>
 </html>

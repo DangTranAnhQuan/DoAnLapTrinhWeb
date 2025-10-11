@@ -3,7 +3,6 @@ package nhom17.OneShop.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.Formula;
-
 import java.math.BigDecimal;
 
 @Data
