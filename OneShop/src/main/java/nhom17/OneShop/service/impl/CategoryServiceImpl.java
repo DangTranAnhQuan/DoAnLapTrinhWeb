@@ -1,15 +1,17 @@
 package nhom17.OneShop.service.impl;
 
-import nhom17.OneShop.entity.DanhMuc;
+import nhom17.OneShop.entity.Category;
 import nhom17.OneShop.repository.CategoryRepository;
 import nhom17.OneShop.request.CategoryRequest;
 import nhom17.OneShop.service.CategoryService;
 import nhom17.OneShop.service.StorageService;
+import nhom17.OneShop.specification.CategorySpecification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -25,69 +27,64 @@ public class CategoryServiceImpl implements CategoryService {
     private StorageService storageService;
 
     @Override
-    public Page<DanhMuc> searchAndFilter(String keyword, Boolean status, int page, int size) {
+    public Page<Category> searchAndFilter(String keyword, Boolean status, int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size, Sort.by("maDanhMuc").ascending());
 
-        boolean hasKeyword = StringUtils.hasText(keyword);
+        Specification<Category> spec = (root, query, cb) -> cb.conjunction();
 
-        if (hasKeyword && status != null) {
-            // Trường hợp 1: Có cả keyword và status
-            return categoryRepository.findAllByTenDanhMucContainingAndKichHoat(keyword, status, pageable);
-        } else if (hasKeyword) {
-            // Trường hợp 2: Chỉ có keyword
-            return categoryRepository.findAllByTenDanhMucContaining(keyword, pageable);
-        } else if (status != null) {
-            // Trường hợp 3: Chỉ có status
-            return categoryRepository.findAllByKichHoat(status, pageable);
-        } else {
-            // Trường hợp 4: Không có cả hai, lấy tất cả
-            return categoryRepository.findAll(pageable);
+        if (StringUtils.hasText(keyword)) {
+            spec = spec.and(CategorySpecification.hasKeyword(keyword));
         }
+        if (status != null) {
+            spec = spec.and(CategorySpecification.hasStatus(status));
+        }
+
+        return categoryRepository.findAll(spec, pageable);
     }
 
     @Override
-    public DanhMuc findById(int id) {
+    public Category findById(int id) {
         return categoryRepository.findById(id).orElse(null);
     }
     @Override
     public void save(CategoryRequest categoryRequest) {
-        DanhMuc danhMuc;
+        Category category;
 
         if (categoryRequest.getMaDanhMuc() != null) {
-            danhMuc = categoryRepository.findById(categoryRequest.getMaDanhMuc())
-                    .orElse(new DanhMuc());
+            category = categoryRepository.findById(categoryRequest.getMaDanhMuc())
+                    .orElse(new Category());
         } else {
-            danhMuc = new DanhMuc();
+            category = new Category();
         }
 
         // Xử lý ảnh
         if (StringUtils.hasText(categoryRequest.getHinhAnh())) {
             // Có ảnh mới upload
-            String oldImage = danhMuc.getHinhAnh();
-            danhMuc.setHinhAnh(categoryRequest.getHinhAnh());
-            if (StringUtils.hasText(oldImage) && !oldImage.equals(danhMuc.getHinhAnh())) {
+            String oldImage = category.getHinhAnh();
+            category.setHinhAnh(categoryRequest.getHinhAnh());
+            if (StringUtils.hasText(oldImage) && !oldImage.equals(category.getHinhAnh())) {
                 storageService.deleteFile(oldImage);
             }
-        } else if (danhMuc.getMaDanhMuc() != null) {
+        } else if (category.getMaDanhMuc() != null) {
             // Sửa mà không upload ảnh -> giữ nguyên ảnh cũ
-            DanhMuc existing = categoryRepository.findById(danhMuc.getMaDanhMuc()).orElse(null);
+            Category existing = categoryRepository.findById(category.getMaDanhMuc()).orElse(null);
             if (existing != null) {
-                danhMuc.setHinhAnh(existing.getHinhAnh());
+                category.setHinhAnh(existing.getHinhAnh());
             }
         }
 
         // Cập nhật các thông tin khác
-        danhMuc.setTenDanhMuc(categoryRequest.getTenDanhMuc());
-        danhMuc.setKichHoat(categoryRequest.isKichHoat());
+        category.setTenDanhMuc(categoryRequest.getTenDanhMuc());
+        category.setKichHoat(categoryRequest.isKichHoat());
 
-        categoryRepository.save(danhMuc);
+        categoryRepository.save(category);
     }
 
     @Override
     public void delete(int id) {
-        Optional<DanhMuc> categoryOpt = categoryRepository.findById(id);
+        Optional<Category> categoryOpt = categoryRepository.findById(id);
         if (categoryOpt.isPresent()) {
-            DanhMuc category = categoryOpt.get();
+            Category category = categoryOpt.get();
             // Nếu danh mục có ảnh, thì xóa file ảnh trước
             if (StringUtils.hasText(category.getHinhAnh())) {
                 storageService.deleteFile(category.getHinhAnh());
@@ -98,7 +95,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
     
     @Override
-    public List<DanhMuc> findAll() {
+    public List<Category> findAll() {
         return categoryRepository.findAll();
     }
 }

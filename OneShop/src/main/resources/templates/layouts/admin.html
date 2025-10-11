@@ -13,24 +13,31 @@
     <title>OneShop Admin</title>
     <meta name="description" content=""/>
 
+    <!-- Favicon -->
     <link rel="icon" type="image/x-icon" th:href="@{/admin/assets/img/favicon/favicon.ico}"/>
 
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com"/>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
     <link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet"/>
 
+    <!-- Icons -->
     <link rel="stylesheet" th:href="@{/admin/assets/vendor/fonts/boxicons.css}"/>
 
+    <!-- Core CSS -->
     <link rel="stylesheet" th:href="@{/admin/assets/vendor/css/core.css}" class="template-customizer-core-css"/>
     <link rel="stylesheet" th:href="@{/admin/assets/vendor/css/theme-default.css}" class="template-customizer-theme-css"/>
     <link rel="stylesheet" th:href="@{/admin/assets/css/demo.css}"/>
 
+    <!-- Vendor CSS -->
     <link rel="stylesheet" th:href="@{/admin/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css}"/>
     <link rel="stylesheet" th:href="@{/admin/assets/vendor/libs/apex-charts/apex-charts.css}"/>
 
+    <!-- Helpers -->
     <script th:src="@{/admin/assets/vendor/js/helpers.js}"></script>
     <script th:src="@{/admin/assets/js/config.js}"></script>
 
+    <!-- Custom CSS -->
     <link rel="stylesheet" th:href="@{/admin/assets/css/order.css}">
     <link rel="stylesheet" th:href="@{/admin/assets/css/dashboard.css}" />
     <link rel="stylesheet" th:href="@{/admin/assets/css/products.css}">
@@ -40,18 +47,19 @@
 <body>
 <div class="layout-wrapper layout-content-navbar">
     <div class="layout-container">
-        <aside th:replace="~{fragments/admin/sidebar :: sidebar}"></aside>
+        <aside th:replace="~{/fragments/admin/sidebar :: sidebar}"></aside>
 
         <div class="layout-page">
-            <header th:replace="~{fragments/admin/header :: header}"></header>
+            <header th:replace="~{/fragments/admin/header :: header}"></header>
 
-            <main class="content-wrapper">
-                <div class="container-xxl flex-grow-1 container-p-y">
-                     <section layout:fragment="content"></section>
+            <main class="col-md-9 col-lg-12 px-md-4">
+                <div class="pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2" layout:fragment="page_title"></h1>
                 </div>
+                <section layout:fragment="content"></section>
             </main>
 
-            <footer th:replace="~{fragments/admin/footer :: footer}"></footer>
+            <footer th:replace="~{/fragments/admin/footer :: footer}"></footer>
             <div class="content-backdrop fade"></div>
         </div>
     </div>
@@ -60,20 +68,19 @@
 <div class="layout-overlay layout-menu-toggle"></div>
 
 <script th:src="@{/admin/assets/vendor/libs/jquery/jquery.js}"></script>
+<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
 <script th:src="@{/admin/assets/vendor/libs/popper/popper.js}"></script>
 <script th:src="@{/admin/assets/vendor/js/bootstrap.js}"></script>
 <script th:src="@{/admin/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js}"></script>
 <script th:src="@{/admin/assets/vendor/js/menu.js}"></script>
-
 <script th:src="@{/admin/assets/vendor/libs/apex-charts/apexcharts.js}"></script>
-<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
-
 <script th:src="@{/admin/assets/js/main.js}"></script>
 <script th:src="@{/admin/assets/js/dashboards-analytics.js}"></script>
-
 <script th:src="@{/admin/assets/js/active-menu.js}"></script>
 <script th:src="@{/admin/assets/js/order.js}"></script>
 <script th:src="@{/admin/assets/js/products.js}"></script>
+<script th:src="@{/admin/assets/js/warehouse.js}"></script>
+<script th:src="@{/admin/assets/js/system.js}"></script>
 
 <script async defer src="https://buttons.github.io/buttons.js"></script>
 </body>

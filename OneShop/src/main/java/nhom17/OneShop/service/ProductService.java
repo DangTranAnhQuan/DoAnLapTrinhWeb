@@ -1,17 +1,18 @@
 package nhom17.OneShop.service;
 
-import nhom17.OneShop.entity.SanPham;
+import nhom17.OneShop.entity.Product;
 import nhom17.OneShop.request.ProductRequest;
 import org.springframework.data.domain.Page;
 import java.math.BigDecimal;
+import java.util.List; // QUAN TRỌNG: Thêm import này
 
 public interface ProductService {
-    Page<SanPham> searchProducts(String keyword, Boolean status, String sort, int page, int size);
+    // Phương thức cho trang Admin
+    Page<Product> searchProducts(String keyword, Boolean status, Integer categoryId, Integer brandId, String sort, int page, int size);
+    Page<Product> searchUserProducts(Integer categoryId, BigDecimal minPrice, BigDecimal maxPrice, String sort, List<Integer> brandIds, int page, int size);
 
-    Page<SanPham> searchUserProducts(Integer categoryId, BigDecimal minPrice, BigDecimal maxPrice, String sort, int page, int size);
+    Product findById(int id);
 
-    SanPham findById(int id);
-    
     void save(ProductRequest productRequest);
 
     void delete(int id);

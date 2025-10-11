@@ -23,5 +23,5 @@ public class VanChuyen {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MaNVC")
-    private NhaVanChuyen nhaVanChuyen;
+    private ShippingCarrier nhaVanChuyen;
 }

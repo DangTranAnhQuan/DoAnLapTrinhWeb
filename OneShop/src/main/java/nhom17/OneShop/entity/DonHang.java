@@ -2,6 +2,7 @@ package nhom17.OneShop.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import java.util.List;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -39,4 +40,7 @@ public class DonHang {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MaDiaChiNhan")
     private DiaChi diaChi;
+
+    @OneToMany(mappedBy = "donHang", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<DonHang_ChiTiet> donHangChiTiets;
 }

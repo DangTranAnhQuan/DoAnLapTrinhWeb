@@ -1,0 +1,137 @@
+/* --- CSS ĐỒNG BỘ KÍCH THƯỚC ẢNH SẢN PHẨM --- */
+
+/* 1. Thiết lập khung chứa ảnh có tỷ lệ cố định */
+.axil-product .thumbnail {
+    /* Thiết lập tỷ lệ khung ảnh là 1:1 (vuông).
+       Bạn có thể đổi thành "4 / 3" cho ảnh chữ nhật đứng.
+    */
+    aspect-ratio: 1 / 1;
+    overflow: hidden; /* Ẩn các phần ảnh bị thừa ra khỏi khung */
+    background-color: #f7f7f7; /* Thêm màu nền nhạt cho các ảnh đang tải */
+}
+
+/* 2. Ra lệnh cho ảnh tự lấp đầy khung chứa */
+.axil-product .thumbnail img.main-img {
+    width: 100%;       /* Ảnh rộng bằng 100% chiều rộng của khung */
+    height: 100%;      /* Ảnh cao bằng 100% chiều cao của khung */
+    object-fit: cover; /* Tự co dãn và cắt ảnh */
+}
+
+/* --- STYLE CHO NÚT "THÊM VÀO GIỎ" Ở TRANG CHỦ --- */
+.product-hover-action .cart-action .select-option button {
+    color: #ff497c; /* Màu hồng nhạt */
+    font-weight: 500;
+}
+
+.product-hover-action .cart-action .select-option button:hover {
+    color: #3577f0; /* Màu xanh khi hover */
+}
+
+/* --- STYLE CHO NÚT "YÊU THÍCH" KHI ĐƯỢC BẤM --- */
+.toggle-wishlist-btn.wishlist-added i.far.fa-heart {
+    font-weight: 900; /* Biến icon thành dạng solid (đầy) */
+    color: #ff497c;   /* Tô màu hồng nhạt */
+}
+
+/* * --- BỔ SUNG/SỬA ĐỔI CHO ĐỊA CHỈ GIAO HÀNG (ĐÃ SỬA LỖI BỐ CỤC) ---
+ * Sử dụng cấu trúc HTML mới: radio - address-wrapper(label + btn Sửa)
+ */
+
+/* Khung chứa toàn bộ option địa chỉ */
+.custom-address-option {
+    display: flex; /* Bật Flexbox để căn radio và wrapper */
+    align-items: flex-start; /* Căn các mục theo lề trên */
+    padding: 15px;
+    border: 1px solid #e3e6e9;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    background-color: #f9f9f9;
+    transition: all .3s ease-in-out;
+}
+
+/* Thêm hiệu ứng khi hover */
+.custom-address-option:hover {
+    border-color: #3577f0;
+    background-color: #fff;
+}
+
+/* Style cho nút radio */
+.custom-address-option .address-radio {
+    width: 20px;
+    height: 20px;
+    margin-top: 5px;
+    margin-right: 15px;
+    flex-shrink: 0;
+}
+
+/* Khung chứa toàn bộ một lựa chọn địa chỉ */
+.custom-address-option {
+    display: flex; /* Bật Flexbox để căn chỉnh radio và nội dung */
+    align-items: flex-start; /* Căn các mục theo lề trên */
+    padding: 15px;
+    border: 1px solid #e3e6e9;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    background-color: #f9f9f9;
+    transition: all .3s ease-in-out;
+}
+
+.custom-address-option:hover {
+    border-color: #3577f0;
+    background-color: #fff;
+}
+
+/* Nút radio */
+.custom-address-option .address-radio {
+    width: 20px;
+    height: 20px;
+    margin-top: 5px; /* Căn chỉnh với dòng text đầu tiên */
+    margin-right: 15px; /* Tạo khoảng cách với nội dung */
+    flex-shrink: 0; /* Quan trọng: Ngăn radio bị co lại */
+}
+
+/* KHUNG BAO BỌC NỘI DUNG VÀ NÚT SỬA: ĐÂY LÀ PHẦN QUAN TRỌNG NHẤT */
+.custom-address-option .address-wrapper {
+    display: flex;
+    flex-grow: 1; /* Rất quan trọng: Chiếm hết không gian còn lại */
+    align-items: flex-start; /* Căn nội dung và nút Sửa theo lề trên */
+    min-width: 0; /* BẮT BUỘC: Cho phép flexbox co nhỏ hơn nội dung của nó */
+    gap: 10px; /* Tạo khoảng cách giữa nội dung và nút Sửa, thay cho margin */
+}
+
+/* Khung chứa nội dung text (thẻ label) */
+.custom-address-option .address-content {
+    flex-grow: 1; /* Cho phép label chiếm hết không gian còn lại */
+    min-width: 0; /* BẮT BUỘC: Cho phép nội dung bên trong (địa chỉ) xuống dòng */
+    cursor: pointer;
+}
+
+/* Nút Sửa: Đảm bảo nó không bị co lại và luôn ở bên phải */
+.custom-address-option .address-edit-btn {
+    flex-shrink: 0; /* QUAN TRỌNG: Ngăn nút "Sửa" bị co lại */
+    white-space: nowrap; /* Đảm bảo chữ "Sửa" không bị xuống dòng */
+    font-weight: bold;
+    text-decoration: none;
+    color: #3577f0;
+    padding: 2px 5px;
+}
+
+.custom-address-option .address-edit-btn:hover {
+    color: #ff497c;
+}
+
+/* Dòng chứa Tên - SĐT */
+.custom-address-option .address-header {
+    margin-bottom: 5px;
+}
+
+/* Style cho dòng địa chỉ chi tiết */
+.custom-address-option .address-details {
+    display: block;
+    color: #777;
+    font-size: 14px;
+    /* Rất quan trọng: Các thuộc tính để ngắt dòng cho nội dung quá dài */
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}

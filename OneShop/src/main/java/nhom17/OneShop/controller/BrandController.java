@@ -1,6 +1,6 @@
 package nhom17.OneShop.controller;
 
-import nhom17.OneShop.entity.ThuongHieu;
+import nhom17.OneShop.entity.Brand;
 import nhom17.OneShop.request.BrandRequest;
 import nhom17.OneShop.service.BrandService;
 import nhom17.OneShop.service.StorageService;
@@ -28,7 +28,7 @@ public class BrandController {
                              @RequestParam(defaultValue = "1") int page,
                              @RequestParam(defaultValue = "5") int size,
                              Model model) {
-        Page<ThuongHieu> brandPage = brandService.searchAndFilter(keyword, status, page, size);
+        Page<Brand> brandPage = brandService.searchAndFilter(keyword, status, page, size);
         model.addAttribute("brandPage", brandPage);
         model.addAttribute("keyword", keyword);
         model.addAttribute("status", status);

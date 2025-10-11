@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layouts/user}"
+      xmlns:layout="http://www.w3.org/1999/xhtml">
+<head><title>Chi tiết đơn hàng</title></head>
+<body>
+<main layout:fragment="content">
+    <div class="axil-dashboard-area axil-section-gap">
+        <div class="container">
+            <a th:href="@{/my-orders}" class="axil-btn btn-outline btn-sm mb-4"><i class="fal fa-long-arrow-left"></i> Quay lại danh sách</a>
+            <div class="axil-dashboard-warp">
+                <div class="axil-dashboard-account">
+                    <h4 class="title" th:text="'Chi tiết đơn hàng #' + ${order.maDonHang}"></h4>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>Ngày đặt:</strong> <span th:text="${#temporals.format(order.ngayDat, 'dd-MM-yyyy HH:mm')}"></span><br>
+                            <strong>Trạng thái:</strong> <span th:text="${order.trangThai}"></span><br>
+                            <strong>Tổng tiền:</strong> <span class="text-danger fw-bold" th:text="${#numbers.formatDecimal(order.tongTien, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Người nhận:</strong> <span th:text="${order.tenNguoiNhan}"></span><br>
+                            <strong>Số điện thoại:</strong> <span th:text="${order.soDienThoaiNhan}"></span><br>
+                            <strong>Địa chỉ:</strong> <span th:text="${order.diaChiNhan}"></span>
+                        </div>
+                    </div>
+                    <hr>
+                    <h5 class="mt-4">Các sản phẩm đã mua</h5>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th>Sản phẩm</th>
+                                <th>Đơn giá</th>
+                                <th>Số lượng</th>
+                                <th>Thành tiền</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="detail : ${order.donHangChiTiets}">
+                                <td th:text="${detail.tenSanPham}"></td>
+                                <td th:text="${#numbers.formatDecimal(detail.donGia, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></td>
+                                <td th:text="${detail.soLuong}"></td>
+                                <td th:text="${#numbers.formatDecimal(detail.thanhTien, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>

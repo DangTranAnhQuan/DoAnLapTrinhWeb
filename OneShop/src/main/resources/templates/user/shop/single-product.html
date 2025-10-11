@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layouts/user}">
+
+<head>
+    <title th:text="${product.tenSanPham}"></title>
+    <style>
+        .rating-form .rating-stars { display: inline-block; direction: rtl; }
+        .rating-form .rating-stars input[type="radio"] { display: none; }
+        .rating-form .rating-stars label { font-size: 28px; color: #d1d1d1; cursor: pointer; padding: 0 2px; }
+        .rating-form .rating-stars label:hover,
+        .rating-form .rating-stars label:hover ~ label,
+        .rating-form .rating-stars input[type="radio"]:checked ~ label { color: #ffdc00; }
+    </style>
+</head>
+
+<body>
+<main layout:fragment="content">
+    <div class="axil-single-product-area bg-color-white">
+        <div class="single-product-thumb axil-section-gapcommon single-product-modern">
+            <div class="container">
+                <div class="row row--20">
+                    <div class="col-lg-6 mb--40">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="product-large-thumbnail-4 single-product-thumbnail axil-product">
+                                    <div class="thumbnail">
+                                        <img th:src="@{'/uploads/' + ${product.hinhAnh}}" th:alt="${product.tenSanPham}">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-12">
+                                <div class="small-thumb-wrapper product-small-thumb-4 slick-layout-wrapper--10 axil-slick-arrow arrow-both-side">
+                                    <div class="small-thumb-img">
+                                        <img th:src="@{'/uploads/' + ${product.hinhAnh}}" alt="samll-thumb">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 mb--40">
+                        <div class="single-product-content">
+                            <div class="inner">
+                                <h2 class="product-title" th:text="${product.tenSanPham}"></h2>
+                                <div class="price-amount-wrapper d-flex align-items-center">
+                                    <span class="price current-price" th:text="${#numbers.formatDecimal(product.giaBan, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></span>
+                                    <span class="price old-price" th:text="${#numbers.formatDecimal(product.giaNiemYet, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></span>
+                                </div>
+                                <div class="product-rating">
+                                    <div class="star-rating">
+                                        <span th:text="${#numbers.formatDecimal(averageRating, 1, 1)}"></span> <i class="fas fa-star"></i>
+                                    </div>
+                                    <div class="review-number" th:text="'(' + ${totalReviews} + ' đánh giá)'"></div>
+                                </div>
+                                <div class="description" th:utext="${product.moTa}"></div>
+
+                                <form th:action="@{/cart/add}" method="post">
+                                    <input type="hidden" name="productId" th:value="${product.maSanPham}">
+                                    <div class="product-variation quantity-variant-wrapper">
+                                        <h6 class="title">Số lượng</h6>
+                                        <div class="pro-qty">
+                                            <input type="number" name="quantity" value="1" min="1">
+                                        </div>
+                                    </div>
+                                    <div class="product-action-wrapper">
+                                        <ul class="product-action d-flex-center mb--0">
+                                            <li class="add-to-cart">
+                                                <button type="submit" class="axil-btn btn-bg-primary">
+                                                    <i class="far fa-shopping-cart"></i> Thêm vào giỏ
+                                                </button>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="woocommerce-tabs wc-tabs-wrapper bg-lighter wc-tab-style-two">
+            <div class="container">
+                <ul class="nav tabs" role="tablist">
+                    <li class="nav-item" role="presentation"><a class="active" data-bs-toggle="tab" href="#description">Mô tả sản phẩm</a></li>
+                    <li class="nav-item" role="presentation"><a data-bs-toggle="tab" href="#reviews">Đánh giá</a></li>
+                </ul>
+                <div class="tab-content">
+                    <div class="tab-pane fade show active" id="description" role="tabpanel">
+                        <div class="product-desc-wrapper" th:utext="${product.moTa}"></div>
+                    </div>
+                    <div class="tab-pane fade" id="reviews" role="tabpanel">
+                        <div class="reviews-wrapper">
+                            <div class="row">
+                                <div class="col-lg-6 mb--40">
+                                    <div class="axil-comment-area pro-desc-commnet-area">
+                                        <h5 class="title" th:text="${totalReviews} + ' đánh giá cho sản phẩm này'"></h5>
+                                        <ul class="comment-list">
+                                            <li th:if="${reviews.isEmpty()}"><p>Chưa có đánh giá nào cho sản phẩm này.</p></li>
+                                            <li th:each="review : ${reviews}" class="comment">
+                                                <div class="comment-body">
+                                                    <div class="single-comment">
+                                                        <div class="comment-inner">
+                                                            <h6 class="commenter" th:text="${review.nguoiDung != null ? review.nguoiDung.hoTen : 'Người dùng ẩn danh'}"></h6>
+                                                            <div class="comment-text">
+                                                                <p th:text="${review.binhLuan}"></p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 mb--40">
+                                    <div class="comment-respond pro-des-commend-respond mt--0">
+                                        <h5 class="title mb--30">Thêm đánh giá</h5>
+                                        <div sec:authorize="isAuthenticated()">
+                                            <form th:action="@{/submit-review}" method="post" class="rating-form">
+                                                <input type="hidden" name="productId" th:value="${product.maSanPham}">
+                                                <p class="your-rating mb-2">Đánh giá của bạn <span class="require">*</span></p>
+                                                <div class="rating-stars mb-4">
+                                                    <input type="radio" id="star5" name="rating" value="5" required/><label for="star5" title="5 sao">★</label>
+                                                    <input type="radio" id="star4" name="rating" value="4" required/><label for="star4" title="4 sao">★</label>
+                                                    <input type="radio" id="star3" name="rating" value="3" required/><label for="star3" title="3 sao">★</label>
+                                                    <input type="radio" id="star2" name="rating" value="2" required/><label for="star2" title="2 sao">★</label>
+                                                    <input type="radio" id="star1" name="rating" value="1" required/><label for="star1" title="1 sao">★</label>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>Bình luận của bạn</label>
+                                                    <textarea name="comment" placeholder="Viết bình luận ở đây..." required></textarea>
+                                                </div>
+                                                <div class="form-submit"><button type="submit" class="axil-btn btn-bg-primary w-auto">Gửi đánh giá</button></div>
+                                            </form>
+                                        </div>
+                                        <div sec:authorize="!isAuthenticated()">
+                                            <div class="alert alert-warning">Vui lòng <a th:href="@{/sign-in}">đăng nhập</a> để để lại đánh giá.</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div th:if="${recentlyViewedProducts != null and !recentlyViewedProducts.isEmpty()}" class="axil-new-arrivals-product-area fullwidth-container flash-sale-area section-gap-80-35">
+            <div class="container ml--xxl-0">
+                <div class="section-title-border slider-section-title">
+                    <h2 class="title">Sản phẩm đã xem gần đây 💥</h2>
+                </div>
+                <div class="recently-viwed-activation slick-layout-wrapper--15 axil-slick-angle angle-top-slide">
+                    <div th:each="recentProduct : ${recentlyViewedProducts}" class="slick-single-layout">
+                        <div class="axil-product product-style-eight">
+                            <div class="thumbnail">
+                                <a th:href="@{/product/{id}(id=${recentProduct.maSanPham})}">
+                                    <img th:src="@{'/uploads/' + ${recentProduct.hinhAnh}}" alt="Product Images">
+                                </a>
+                            </div>
+                            <div class="product-content">
+                                <div class="inner">
+                                    <h5 class="title"><a th:href="@{/product/{id}(id=${recentProduct.maSanPham})}" th:text="${recentProduct.tenSanPham}"></a></h5>
+                                    <div class="product-price-variant">
+                                        <span class="price current-price" th:text="${#numbers.formatDecimal(recentProduct.giaBan, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>

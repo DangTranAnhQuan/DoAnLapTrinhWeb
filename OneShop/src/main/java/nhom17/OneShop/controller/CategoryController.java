@@ -1,6 +1,6 @@
 package nhom17.OneShop.controller;
 
-import nhom17.OneShop.entity.DanhMuc;
+import nhom17.OneShop.entity.Category;
 import nhom17.OneShop.request.CategoryRequest;
 import nhom17.OneShop.service.CategoryService;
 import nhom17.OneShop.service.StorageService;
@@ -27,7 +27,7 @@ public class CategoryController {
                                  @RequestParam(defaultValue = "1") int page,
                                  @RequestParam(defaultValue = "5") int size,
                                  Model model) {
-        Page<DanhMuc> categoryPage = categoryService.searchAndFilter(keyword, status, page, size);
+        Page<Category> categoryPage = categoryService.searchAndFilter(keyword, status, page, size);
         model.addAttribute("categoryPage", categoryPage);
         model.addAttribute("keyword", keyword);
         model.addAttribute("status", status);
