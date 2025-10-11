@@ -1,103 +1,228 @@
+<!--<!DOCTYPE html>-->
+<!--<html lang="vi"-->
+<!--      xmlns:th="http://www.thymeleaf.org"-->
+<!--      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"-->
+<!--      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"-->
+<!--      layout:decorate="~{layouts/user}">-->
+<!--<head>-->
+<!--    <title>Lịch sử đơn hàng</title>-->
+<!--</head>-->
+<!--<body>-->
+
+<!--<div layout:fragment="content">-->
+<!--    <div class="axil-breadcrumb-area">-->
+<!--        <div class="container">-->
+<!--            <div class="row align-items-center">-->
+<!--                <div class="col-lg-6 col-md-8">-->
+<!--                    <div class="inner">-->
+<!--                        <ul class="axil-breadcrumb">-->
+<!--                            <li class="axil-breadcrumb-item"><a th:href="@{/}">Trang chủ</a></li>-->
+<!--                            <li class="separator"></li>-->
+<!--                            <li class="axil-breadcrumb-item active" aria-current="page">Tài khoản của tôi</li>-->
+<!--                        </ul>-->
+<!--                        <h1 class="title">Lịch sử đơn hàng</h1>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--    <div class="axil-dashboard-area axil-section-gap">-->
+<!--        <div class="container">-->
+<!--            <div class="axil-dashboard-warp">-->
+<!--                <div class="axil-dashboard-author">-->
+<!--                    <div class="media">-->
+<!--                        <div class="thumbnail">-->
+<!--                            <img th:src="@{/web/assets/images/product/author1.png}" alt="Avatar">-->
+<!--                        </div>-->
+<!--                        <div class="media-body">-->
+<!--                            <h5 class="title mb-0" th:text="'Xin chào, ' + ${#authentication.principal.username}"></h5>-->
+<!--                            <span class="joining-date">Thành viên OneShop</span>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--                <div class="row">-->
+<!--                    <div class="col-xl-3 col-md-4">-->
+<!--                        <aside class="axil-dashboard-aside">-->
+<!--                            <nav class="axil-dashboard-nav">-->
+<!--                                <div class="nav nav-tabs" role="tablist">-->
+<!--                                    <a class="nav-item nav-link" th:href="@{/my-account}"><i class="fas fa-th-large"></i>Bảng điều khiển</a>-->
+<!--                                    <a class="nav-item nav-link active"><i class="fas fa-shopping-basket"></i>Đơn hàng</a>-->
+<!--                                    <a class="nav-item nav-link" th:href="@{/my-account}"><i class="fas fa-home"></i>Địa chỉ</a>-->
+<!--                                    <a class="nav-item nav-link" th:href="@{/my-account}"><i class="fas fa-user"></i>Chi tiết tài khoản</a>-->
+<!--                                    <form th:action="@{/logout}" method="post" class="nav-item nav-link" style="all: unset;">-->
+<!--                                        <button type="submit" style="all: unset; cursor: pointer; display: block; width: 100%; text-align: left; padding: 15px 25px;">-->
+<!--                                            <i class="fal fa-sign-out"></i>Đăng xuất-->
+<!--                                        </button>-->
+<!--                                    </form>-->
+<!--                                </div>-->
+<!--                            </nav>-->
+<!--                        </aside>-->
+<!--                    </div>-->
+<!--                    <div class="col-xl-9 col-md-8">-->
+<!--                        <div class="tab-content">-->
+<!--                            <div class="tab-pane fade show active" id="nav-orders" role="tabpanel">-->
+<!--                                <div class="axil-dashboard-order">-->
+<!--                                    <div th:if="${orders.isEmpty()}" class="text-center">-->
+<!--                                        <p>Bạn chưa có đơn hàng nào.</p>-->
+<!--                                    </div>-->
+<!--                                    <div th:unless="${orders.isEmpty()}" class="table-responsive">-->
+<!--                                        <table class="table">-->
+<!--                                            <thead>-->
+<!--                                            <tr>-->
+<!--                                                <th scope="col">Mã đơn</th>-->
+<!--                                                <th scope="col">Ngày đặt</th>-->
+<!--                                                <th scope="col">Trạng thái</th>-->
+<!--                                                <th scope="col">Tổng tiền</th>-->
+<!--                                                <th scope="col">Hành động</th>-->
+<!--                                            </tr>-->
+<!--                                            </thead>-->
+<!--                                            <tbody>-->
+<!--                                            <tr th:each="order : ${orders}">-->
+<!--                                                <th scope="row" th:text="'#' + ${order.maDonHang}"></th>-->
+<!--                                                <td th:text="${#temporals.format(order.ngayDat, 'dd-MM-yyyy')}"></td>-->
+<!--                                                <td th:text="${order.trangThai}"></td>-->
+<!--                                                <td th:text="${#numbers.formatDecimal(order.tongTien, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></td>-->
+<!--                                                <td>-->
+<!--                                                    <a th:href="@{/order-details/{id}(id=${order.maDonHang})}" class="axil-btn view-btn">Xem</a>-->
+<!--                                                </td>-->
+<!--                                            </tr>-->
+<!--                                            </tbody>-->
+<!--                                        </table>-->
+<!--                                    </div>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</div>-->
+
+<!--</body>-->
+<!--</html>-->
 <!DOCTYPE html>
 <html lang="vi"
       xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       layout:decorate="~{layouts/user}">
 <head>
     <title>Lịch sử đơn hàng</title>
 </head>
 <body>
-
 <div layout:fragment="content">
-    <div class="axil-breadcrumb-area">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-lg-6 col-md-8">
-                    <div class="inner">
-                        <ul class="axil-breadcrumb">
-                            <li class="axil-breadcrumb-item"><a th:href="@{/}">Trang chủ</a></li>
-                            <li class="separator"></li>
-                            <li class="axil-breadcrumb-item active" aria-current="page">Tài khoản của tôi</li>
-                        </ul>
-                        <h1 class="title">Lịch sử đơn hàng</h1>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
     <div class="axil-dashboard-area axil-section-gap">
         <div class="container">
             <div class="axil-dashboard-warp">
+
+                <!-- Header user -->
                 <div class="axil-dashboard-author">
                     <div class="media">
                         <div class="thumbnail">
                             <img th:src="@{/web/assets/images/product/author1.png}" alt="Avatar">
                         </div>
                         <div class="media-body">
-                            <h5 class="title mb-0" th:text="'Xin chào, ' + ${#authentication.principal.username}"></h5>
+                            <h5 class="title mb-0" th:text="'Xin chào, ' + ${user.hoTen}"></h5>
                             <span class="joining-date">Thành viên OneShop</span>
                         </div>
                     </div>
                 </div>
+
                 <div class="row">
+                    <!-- Sidebar giống y như My Account -->
                     <div class="col-xl-3 col-md-4">
                         <aside class="axil-dashboard-aside">
                             <nav class="axil-dashboard-nav">
                                 <div class="nav nav-tabs" role="tablist">
-                                    <a class="nav-item nav-link" th:href="@{/my-account}"><i class="fas fa-th-large"></i>Bảng điều khiển</a>
-                                    <a class="nav-item nav-link active"><i class="fas fa-shopping-basket"></i>Đơn hàng</a>
-                                    <a class="nav-item nav-link" th:href="@{/my-account}"><i class="fas fa-home"></i>Địa chỉ</a>
-                                    <a class="nav-item nav-link" th:href="@{/my-account}"><i class="fas fa-user"></i>Chi tiết tài khoản</a>
+                                    <a class="nav-item nav-link" th:href="@{/my-account}">
+                                        <i class="fas fa-user"></i>Chi tiết tài khoản
+                                    </a>
+                                    <a class="nav-item nav-link active">
+                                        <i class="fas fa-shopping-basket"></i>Đơn hàng
+                                    </a>
+                                    <a class="nav-item nav-link" th:href="@{/my-account(tab=${'addresses'})}">
+                                        <i class="fas fa-home"></i>Địa chỉ
+                                    </a>
                                     <form th:action="@{/logout}" method="post" class="nav-item nav-link" style="all: unset;">
-                                        <button type="submit" style="all: unset; cursor: pointer; display: block; width: 100%; text-align: left; padding: 15px 25px;">
-                                            <i class="fal fa-sign-out"></i>Đăng xuất
+                                        <button type="submit" style="all: unset; cursor:pointer; display:block; width:100%; text-align:left; padding:15px 25px;">
+                                           Đăng xuất
                                         </button>
                                     </form>
                                 </div>
                             </nav>
                         </aside>
                     </div>
+
+                    <!-- Content -->
                     <div class="col-xl-9 col-md-8">
-                        <div class="tab-content">
-                            <div class="tab-pane fade show active" id="nav-orders" role="tabpanel">
-                                <div class="axil-dashboard-order">
-                                    <div th:if="${orders.isEmpty()}" class="text-center">
-                                        <p>Bạn chưa có đơn hàng nào.</p>
-                                    </div>
-                                    <div th:unless="${orders.isEmpty()}" class="table-responsive">
-                                        <table class="table">
-                                            <thead>
-                                            <tr>
-                                                <th scope="col">Mã đơn</th>
-                                                <th scope="col">Ngày đặt</th>
-                                                <th scope="col">Trạng thái</th>
-                                                <th scope="col">Tổng tiền</th>
-                                                <th scope="col">Hành động</th>
-                                            </tr>
-                                            </thead>
-                                            <tbody>
-                                            <tr th:each="order : ${orders}">
-                                                <th scope="row" th:text="'#' + ${order.maDonHang}"></th>
-                                                <td th:text="${#temporals.format(order.ngayDat, 'dd-MM-yyyy')}"></td>
-                                                <td th:text="${order.trangThai}"></td>
-                                                <td th:text="${#numbers.formatDecimal(order.tongTien, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></td>
-                                                <td>
-                                                    <a th:href="@{/order-details/{id}(id=${order.maDonHang})}" class="axil-btn view-btn">Xem</a>
-                                                </td>
-                                            </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
+                        <div class="axil-dashboard-account">
+
+                            <h4 class="mb-4">Lịch sử đơn hàng</h4>
+
+                            <!-- Alerts (nếu có flash) -->
+                            <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert" data-auto-hide="true" th:text="${success}">
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                             </div>
+                            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert" data-auto-hide="true" th:text="${error}">
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+
+                            <!-- Empty state -->
+                            <div th:if="${#lists.isEmpty(orders)}" class="text-center text-muted">
+                                Bạn chưa có đơn hàng nào.
+                            </div>
+
+                            <!-- Table orders -->
+                            <div th:if="${!#lists.isEmpty(orders)}" class="table-responsive">
+                                <table class="table align-middle">
+                                    <thead>
+                                    <tr>
+                                        <th>Mã đơn</th>
+                                        <th>Ngày đặt</th>
+                                        <th>Trạng thái</th>
+                                        <th class="text-end">Tổng tiền</th>
+                                        <th></th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr th:each="o : ${orders}">
+                                        <td th:text="'#' + ${o.maDonHang}"></td>
+                                        <td th:text="${#temporals.format(o.ngayDat,'dd/MM/yyyy')}"></td>
+                                        <td>
+                                            <span class="badge bg-secondary" th:text="${o.trangThai}"></span>
+                                        </td>
+                                        <td class="text-end" th:text="${#numbers.formatDecimal(o.tongTien,0,'COMMA',0,'POINT')} + ' ₫'"></td>
+                                        <td class="text-end">
+                                            <a th:href="@{/order-details/{id}(id=${o.maDonHang})}" class="btn btn-sm btn-outline-primary">Xem</a>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
                         </div>
                     </div>
                 </div>
+
+                <!-- Auto-hide alerts -->
+                <script th:inline="javascript">
+                    /*<![CDATA[*/
+                    document.addEventListener('DOMContentLoaded', function () {
+                      document.querySelectorAll('.alert[data-auto-hide="true"]').forEach(function (el) {
+                        setTimeout(function () {
+                          try {
+                            if (window.bootstrap && bootstrap.Alert) { bootstrap.Alert.getOrCreateInstance(el).close(); }
+                            else { el.classList.remove('show'); }
+                          } catch (e) {}
+                        }, 4000);
+                      });
+                    });
+                    /*]]>*/
+                </script>
+
             </div>
         </div>
     </div>
 </div>
-
 </body>
 </html>

@@ -1,3 +1,118 @@
+<!--<!DOCTYPE html>-->
+<!--<html lang="vi"-->
+<!--      xmlns:th="http://www.thymeleaf.org"-->
+<!--      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"-->
+<!--      layout:decorate="~{layouts/user}">-->
+
+<!--<head>-->
+<!--    <title>Thanh toán</title>-->
+<!--</head>-->
+
+<!--<body>-->
+<!--<main layout:fragment="content">-->
+<!--    <div class="axil-checkout-area axil-section-gap">-->
+<!--        <div class="container">-->
+<!--            <form th:action="@{/place-order}" method="post">-->
+<!--                <div class="row">-->
+<!--                    <div class="col-lg-6">-->
+<!--                        <div class="axil-checkout-billing">-->
+<!--                            <h4 class="title mb&#45;&#45;40">Chi tiết giao hàng</h4>-->
+
+<!--                            <div class="mb-4">-->
+<!--                                <a th:href="@{/cart}" class="axil-btn btn-outline btn-sm"><i class="fal fa-long-arrow-left"></i> Quay lại giỏ hàng</a>-->
+<!--                            </div>-->
+
+<!--                            <div th:if="${error}" th:text="${error}" class="alert alert-danger"></div>-->
+
+<!--                            <div th:if="${addresses.isEmpty()}">-->
+<!--                                <p>Bạn chưa có địa chỉ nào được lưu.</p>-->
+<!--                                <a th:href="@{/my-account}" class="axil-btn btn-outline">Thêm địa chỉ mới</a>-->
+<!--                            </div>-->
+
+<!--                            <div th:each="address, iter : ${addresses}" class="custom-address-option">-->
+<!--                                <div class="address-main-content">-->
+<!--                                    <input type="radio" name="shipping_address" th:id="'address' + ${iter.index}" th:value="${address.maDiaChi}" th:checked="${iter.index == 0}" class="address-radio">-->
+<!--                                    <label th:for="'address' + ${iter.index}" class="address-content">-->
+<!--                                        <div class="address-header">-->
+<!--                                            <strong th:text="${address.tenNguoiNhan} + ' | ' + ${address.soDienThoai}"></strong>-->
+<!--                                        </div>-->
+<!--                                        <span class="address-details" th:text="${address.soNhaDuong} + ', ' + ${address.phuongXa} + ', ' + ${address.quanHuyen} + ', ' + ${address.tinhThanh}"></span>-->
+<!--                                    </label>-->
+<!--                                </div>-->
+
+<!--                                <a th:href="@{/checkout/edit-address/{id}(id=${address.maDiaChi})}" class="btn-sm address-edit-btn">Sửa</a>-->
+<!--                            </div>-->
+
+<!--                            <div class="form-group">-->
+<!--                                <label>Ghi chú đơn hàng (tùy chọn)</label>-->
+<!--                                <textarea name="notes" rows="2" placeholder="Ghi chú về đơn hàng của bạn..."></textarea>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                    <div class="col-lg-6">-->
+<!--                        <div class="axil-order-summery order-checkout-summery">-->
+<!--                            <h5 class="title mb&#45;&#45;20">Đơn hàng của bạn</h5>-->
+<!--                            <div class="summery-table-wrap">-->
+<!--                                <table class="table summery-table">-->
+<!--                                    <thead>-->
+<!--                                    <tr>-->
+<!--                                        <th>Sản phẩm</th>-->
+<!--                                        <th>Tạm tính</th>-->
+<!--                                    </tr>-->
+<!--                                    </thead>-->
+<!--                                    <tbody>-->
+<!--                                    <tr th:each="item : ${cartItems}" class="order-product">-->
+<!--                                        <td th:text="${item.sanPham.tenSanPham} + ' x ' + ${item.soLuong}"></td>-->
+<!--                                        <td th:text="${#numbers.formatDecimal(item.thanhTien, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></td>-->
+<!--                                    </tr>-->
+<!--                                    <tr class="order-subtotal">-->
+<!--                                        <td>Tạm tính</td>-->
+<!--                                        <td th:text="${#numbers.formatDecimal(subtotal, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></td>-->
+<!--                                    </tr>-->
+<!--                                    <tr class="order-shipping">-->
+<!--                                        <td>Phí vận chuyển</td>-->
+<!--                                        <td th:text="${#numbers.formatDecimal(shippingFee, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></td>-->
+<!--                                    </tr>-->
+<!--                                    <tr class="order-shipping text-success" th:if="${membershipDiscount != null and membershipDiscount.compareTo(T(java.math.BigDecimal).ZERO) > 0}">-->
+<!--                                        <td>Giảm giá hạng <strong th:text="${membershipTier != null ? membershipTier.tenHang : ''}"></strong></td>-->
+<!--                                        <td th:text="'-' + ${#numbers.formatDecimal(membershipDiscount, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></td>-->
+<!--                                    </tr>-->
+<!--                                    <tr class="order-shipping text-success" th:if="${couponDiscount != null and couponDiscount.compareTo(T(java.math.BigDecimal).ZERO) > 0}">-->
+<!--                                        <td>Mã giảm giá</td>-->
+<!--                                        <td th:text="'-' + ${#numbers.formatDecimal(couponDiscount, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></td>-->
+<!--                                    </tr>-->
+<!--                                    <tr class="order-total">-->
+<!--                                        <td>Tổng cộng</td>-->
+<!--                                        <td class="order-total-amount" th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></td>-->
+<!--                                    </tr>-->
+<!--                                    </tbody>-->
+<!--                                </table>-->
+<!--                            </div>-->
+<!--                            <div class="order-payment-method">-->
+<!--                                <div class="single-payment">-->
+<!--                                    <div class="input-group">-->
+<!--                                        <input type="radio" id="radio4" name="payment_method" value="COD" checked>-->
+<!--                                        <label for="radio4">Thanh toán khi nhận hàng (COD)</label>-->
+<!--                                    </div>-->
+<!--                                    <p>Thanh toán bằng tiền mặt khi nhận hàng.</p>-->
+<!--                                </div>-->
+<!--                                <div class="single-payment">-->
+<!--                                    <div class="input-group">-->
+<!--                                        <input type="radio" id="radio5" name="payment_method" value="ONLINE" disabled>-->
+<!--                                        <label for="radio5">Thanh toán online (Chưa hỗ trợ)</label>-->
+<!--                                    </div>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                            <button type="submit" class="axil-btn btn-bg-primary checkout-btn">Đặt hàng</button>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </form>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</main>-->
+<!--</body>-->
+<!--</html>-->
 <!DOCTYPE html>
 <html lang="vi"
       xmlns:th="http://www.thymeleaf.org"
@@ -12,35 +127,46 @@
 <main layout:fragment="content">
     <div class="axil-checkout-area axil-section-gap">
         <div class="container">
+
             <form th:action="@{/place-order}" method="post">
                 <div class="row">
+                    <!-- CỘT TRÁI: ĐỊA CHỈ + GHI CHÚ -->
                     <div class="col-lg-6">
                         <div class="axil-checkout-billing">
                             <h4 class="title mb--40">Chi tiết giao hàng</h4>
 
                             <div class="mb-4">
-                                <a th:href="@{/cart}" class="axil-btn btn-outline btn-sm"><i class="fal fa-long-arrow-left"></i> Quay lại giỏ hàng</a>
+                                <a th:href="@{/cart}" class="axil-btn btn-outline btn-sm">
+                                    <i class="fal fa-long-arrow-left"></i> Quay lại giỏ hàng
+                                </a>
                             </div>
 
                             <div th:if="${error}" th:text="${error}" class="alert alert-danger"></div>
 
                             <div th:if="${addresses.isEmpty()}">
                                 <p>Bạn chưa có địa chỉ nào được lưu.</p>
-                                <a th:href="@{/my-account}" class="axil-btn btn-outline">Thêm địa chỉ mới</a>
+                                <a th:href="@{/my-account(tab=${'addresses'})}" class="axil-btn btn-outline">Thêm địa chỉ mới</a>
                             </div>
 
                             <div th:each="address, iter : ${addresses}" class="custom-address-option">
                                 <div class="address-main-content">
-                                    <input type="radio" name="shipping_address" th:id="'address' + ${iter.index}" th:value="${address.maDiaChi}" th:checked="${iter.index == 0}" class="address-radio">
+                                    <input type="radio"
+                                           name="shipping_address"
+                                           th:id="'address' + ${iter.index}"
+                                           th:value="${address.maDiaChi}"
+                                           th:checked="${iter.index == 0}"
+                                           class="address-radio">
                                     <label th:for="'address' + ${iter.index}" class="address-content">
                                         <div class="address-header">
                                             <strong th:text="${address.tenNguoiNhan} + ' | ' + ${address.soDienThoai}"></strong>
                                         </div>
-                                        <span class="address-details" th:text="${address.soNhaDuong} + ', ' + ${address.phuongXa} + ', ' + ${address.quanHuyen} + ', ' + ${address.tinhThanh}"></span>
+                                        <span class="address-details"
+                                              th:text="${address.soNhaDuong} + ', ' + ${address.phuongXa} + ', ' + ${address.quanHuyen} + ', ' + ${address.tinhThanh}"></span>
                                     </label>
                                 </div>
 
-                                <a th:href="@{/checkout/edit-address/{id}(id=${address.maDiaChi})}" class="btn-sm address-edit-btn">Sửa</a>
+                                <a th:href="@{/checkout/edit-address/{id}(id=${address.maDiaChi})}"
+                                   class="btn-sm address-edit-btn">Sửa</a>
                             </div>
 
                             <div class="form-group">
@@ -49,6 +175,8 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- CỘT PHẢI: TỔNG TIỀN + PHƯƠNG THỨC THANH TOÁN -->
                     <div class="col-lg-6">
                         <div class="axil-order-summery order-checkout-summery">
                             <h5 class="title mb--20">Đơn hàng của bạn</h5>
@@ -73,41 +201,56 @@
                                         <td>Phí vận chuyển</td>
                                         <td th:text="${#numbers.formatDecimal(shippingFee, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></td>
                                     </tr>
-                                    <tr class="order-shipping text-success" th:if="${membershipDiscount != null and membershipDiscount.compareTo(T(java.math.BigDecimal).ZERO) > 0}">
+                                    <tr class="order-shipping text-success"
+                                        th:if="${membershipDiscount != null and membershipDiscount.compareTo(T(java.math.BigDecimal).ZERO) > 0}">
                                         <td>Giảm giá hạng <strong th:text="${membershipTier != null ? membershipTier.tenHang : ''}"></strong></td>
                                         <td th:text="'-' + ${#numbers.formatDecimal(membershipDiscount, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></td>
                                     </tr>
-                                    <tr class="order-shipping text-success" th:if="${couponDiscount != null and couponDiscount.compareTo(T(java.math.BigDecimal).ZERO) > 0}">
+                                    <tr class="order-shipping text-success"
+                                        th:if="${couponDiscount != null and couponDiscount.compareTo(T(java.math.BigDecimal).ZERO) > 0}">
                                         <td>Mã giảm giá</td>
                                         <td th:text="'-' + ${#numbers.formatDecimal(couponDiscount, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></td>
                                     </tr>
                                     <tr class="order-total">
                                         <td>Tổng cộng</td>
-                                        <td class="order-total-amount" th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></td>
+                                        <td class="order-total-amount"
+                                            th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></td>
                                     </tr>
                                     </tbody>
                                 </table>
                             </div>
+
+                            <!-- PHƯƠNG THỨC THANH TOÁN -->
                             <div class="order-payment-method">
                                 <div class="single-payment">
                                     <div class="input-group">
-                                        <input type="radio" id="radio4" name="payment_method" value="COD" checked>
-                                        <label for="radio4">Thanh toán khi nhận hàng (COD)</label>
+                                        <input type="radio" id="pmCOD" name="payment_method" value="COD" checked>
+                                        <label for="pmCOD">Thanh toán khi nhận hàng (COD)</label>
                                     </div>
                                     <p>Thanh toán bằng tiền mặt khi nhận hàng.</p>
                                 </div>
                                 <div class="single-payment">
                                     <div class="input-group">
-                                        <input type="radio" id="radio5" name="payment_method" value="ONLINE" disabled>
-                                        <label for="radio5">Thanh toán online (Chưa hỗ trợ)</label>
+                                        <input type="radio" id="pmMOMO" name="payment_method" value="MOMO">
+                                        <label for="pmMOMO">Ví MoMo</label>
+                                    </div>
+                                </div>
+                                <div class="single-payment">
+                                    <div class="input-group">
+                                        <input type="radio" id="pmVNPAY" name="payment_method" value="VNPAY">
+                                        <label for="pmVNPAY">VNPAY</label>
                                     </div>
                                 </div>
                             </div>
-                            <button type="submit" class="axil-btn btn-bg-primary checkout-btn">Đặt hàng</button>
+
+                            <button type="submit" class="axil-btn btn-bg-primary checkout-btn">
+                                Tiếp tục thanh toán
+                            </button>
                         </div>
                     </div>
                 </div>
             </form>
+
         </div>
     </div>
 </main>

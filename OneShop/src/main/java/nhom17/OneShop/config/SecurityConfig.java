@@ -21,6 +21,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(
                                 "/", "/shop/**", "/product/**", "/sign-in", "/sign-up", "/forgot-password",
+                                "/forgot-password/send-otp",
+                                "/forgot-password/verify",
+                                "/forgot-password/reset",
                                 "/contact", "/about-us",
                                 "/web/**", "/uploads/**",
                                 "/admin/assets/**",
