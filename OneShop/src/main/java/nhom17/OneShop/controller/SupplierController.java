@@ -38,10 +38,8 @@ public class SupplierController {
         try {
             supplierService.save(supplierRequest);
             redirectAttributes.addFlashAttribute("successMessage", "Lưu nhà cung cấp thành công!");
-        } catch (DuplicateRecordException e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Đã có lỗi không mong muốn xảy ra!");
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
         redirectAttributes.addAttribute("keyword", keyword);
         redirectAttributes.addAttribute("page", page);
@@ -55,8 +53,12 @@ public class SupplierController {
                                  @RequestParam(required = false) String keyword,
                                  @RequestParam(defaultValue = "1") int page,
                                  @RequestParam(defaultValue = "5") int size) {
-        supplierService.delete(id);
-        redirectAttributes.addFlashAttribute("successMessage", "Xóa nhà cung cấp thành công!");
+        try {
+            supplierService.delete(id);
+            redirectAttributes.addFlashAttribute("successMessage", "Xóa nhà cung cấp thành công!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
         redirectAttributes.addAttribute("keyword", keyword);
         redirectAttributes.addAttribute("page", page);
         redirectAttributes.addAttribute("size", size);

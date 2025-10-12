@@ -27,7 +27,7 @@ public class Import {
     private BigDecimal tongTien;
 
     @OneToMany(mappedBy = "phieuNhap", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<ImportDetail> importDetailList;
+    private List<ImportDetail> chiTietPhieuNhapList;
 
     @PrePersist
     protected void onCreate() {

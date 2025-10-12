@@ -8,4 +8,6 @@ import java.util.Optional;
 
 public interface CategoryRepository extends JpaRepository<Category, Integer>, JpaSpecificationExecutor<Category> {
     Optional<Category> findByTenDanhMucIgnoreCase(String tenDanhMuc);
+    boolean existsByTenDanhMucIgnoreCase(String tenDanhMuc);
+    boolean existsByTenDanhMucIgnoreCaseAndMaDanhMucNot(String tenDanhMuc, Integer categoryId);
 }

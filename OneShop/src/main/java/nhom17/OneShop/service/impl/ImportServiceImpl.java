@@ -1,6 +1,7 @@
 package nhom17.OneShop.service.impl;
 
 import nhom17.OneShop.entity.*;
+import nhom17.OneShop.exception.NotFoundException;
 import nhom17.OneShop.repository.*;
 import nhom17.OneShop.request.ImportDetailRequest;
 import nhom17.OneShop.request.ImportRequest;
@@ -64,78 +65,82 @@ public class ImportServiceImpl implements ImportService {
     @Override
     @Transactional
     public void save(ImportRequest importRequest) {
+        // Bước 1: Chuẩn bị đối tượng cha (Phiếu nhập) và nhà cung cấp
         Supplier supplier = supplierRepository.findById(importRequest.getMaNCC())
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy nhà cung cấp"));
-
-        Import phieuNhap;
-        List<ImportDetail> newChiTietList = new ArrayList<>();
-
-        // Xử lý Sửa
-        if (importRequest.getMaPhieuNhap() != null) {
-            phieuNhap = importRepository.findById(importRequest.getMaPhieuNhap())
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy phiếu nhập"));
-
-            // Hoàn trả lại số lượng tồn kho từ các chi tiết cũ
-            for (ImportDetail oldDetail : phieuNhap.getImportDetailList()) {
-                Inventory inventory = inventoryRepository.findById(oldDetail.getSanPham().getMaSanPham()).orElse(null);
-                if (inventory != null) {
-                    inventory.setSoLuongTon(inventory.getSoLuongTon() - oldDetail.getSoLuong());
-                    inventoryRepository.save(inventory);
-                }
-            }
-
-            // ✅ Xóa các chi tiết cũ khỏi collection trong bộ nhớ
-            // orphanRemoval=true sẽ tự động xóa chúng khỏi CSDL khi lưu phiếu nhập
-            phieuNhap.getImportDetailList().clear();
-
-        } else { // Xử lý Thêm mới
-            phieuNhap = new Import();
-        }
-
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy nhà cung cấp với ID: " + importRequest.getMaNCC()));
+        Import phieuNhap = prepareImportEntity(importRequest);
         phieuNhap.setNhaCungCap(supplier);
 
-        // Tạo danh sách chi tiết mới
-        for (ImportDetailRequest detailRequest : importRequest.getChiTietPhieuNhapList()) {
+        // Bước 2: (Chỉ khi sửa) Hoàn trả tồn kho từ các chi tiết cũ và xóa chúng
+        if (phieuNhap.getMaPhieuNhap() != null) {
+            handleInventoryForUpdate(phieuNhap);
+        }
+
+        // Bước 3: Xử lý các chi tiết mới từ request (tạo chi tiết, cập nhật tồn kho)
+        List<ImportDetail> newChiTietList = processNewImportDetails(importRequest.getChiTietPhieuNhapList(), phieuNhap);
+
+        // Bước 4: Cập nhật danh sách chi tiết của phiếu nhập và lưu
+        phieuNhap.getChiTietPhieuNhapList().addAll(newChiTietList);
+        importRepository.save(phieuNhap);
+    }
+
+    private Import prepareImportEntity(ImportRequest importRequest) {
+        if (importRequest.getMaPhieuNhap() != null) {
+            return findById(importRequest.getMaPhieuNhap());
+        }
+        Import newImport = new Import();
+        newImport.setChiTietPhieuNhapList(new ArrayList<>()); // Khởi tạo list để tránh NullPointerException
+        return newImport;
+    }
+
+    private void handleInventoryForUpdate(Import phieuNhap) {
+        // Hoàn trả lại số lượng tồn kho từ các chi tiết cũ
+        for (ImportDetail oldDetail : phieuNhap.getChiTietPhieuNhapList()) {
+            updateInventory(oldDetail.getSanPham(), -oldDetail.getSoLuong());
+        }
+        phieuNhap.getChiTietPhieuNhapList().clear();
+    }
+
+    private List<ImportDetail> processNewImportDetails(List<ImportDetailRequest> detailRequests, Import phieuNhap) {
+        List<ImportDetail> newDetails = new ArrayList<>();
+        for (ImportDetailRequest detailRequest : detailRequests) {
             Product sanPham = productRepository.findById(detailRequest.getMaSanPham())
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm"));
+                    .orElseThrow(() -> new NotFoundException("Không tìm thấy sản phẩm với ID: " + detailRequest.getMaSanPham()));
 
             ImportDetail chiTiet = new ImportDetail();
-            chiTiet.setPhieuNhap(phieuNhap); // Quan trọng: Liên kết với đối tượng cha
+            chiTiet.setPhieuNhap(phieuNhap);
             chiTiet.setSanPham(sanPham);
             chiTiet.setSoLuong(detailRequest.getSoLuong());
             chiTiet.setGiaNhap(detailRequest.getGiaNhap());
-            newChiTietList.add(chiTiet);
+            newDetails.add(chiTiet);
 
-            // Cập nhật số lượng tồn kho
-            Inventory inventory = inventoryRepository.findById(sanPham.getMaSanPham()).orElse(new Inventory());
-            if (inventory.getSanPham() == null) {
-                inventory.setSanPham(sanPham);
-                inventory.setMaSanPham(sanPham.getMaSanPham());
-            }
-            int currentStock = inventory.getSoLuongTon() != null ? inventory.getSoLuongTon() : 0;
-            inventory.setSoLuongTon(currentStock + detailRequest.getSoLuong());
-            inventory.setNgayNhapGanNhat(LocalDateTime.now());
-            inventoryRepository.save(inventory);
+            updateInventory(sanPham, detailRequest.getSoLuong());
         }
+        return newDetails;
+    }
 
-        // ✅ Thêm danh sách chi tiết mới vào collection
-        phieuNhap.getImportDetailList().addAll(newChiTietList);
+    private void updateInventory(Product product, int quantityChange) {
+        Inventory inventory = inventoryRepository.findById(product.getMaSanPham()).orElse(new Inventory());
+        if (inventory.getSanPham() == null) {
+            inventory.setSanPham(product);
+            inventory.setMaSanPham(product.getMaSanPham());
+        }
+        int currentStock = inventory.getSoLuongTon() != null ? inventory.getSoLuongTon() : 0;
+        inventory.setSoLuongTon(currentStock + quantityChange);
 
-        // ✅ Lưu đối tượng cha, cascade sẽ tự động lưu các đối tượng con
-        importRepository.save(phieuNhap);
+        if (quantityChange > 0) {
+            inventory.setNgayNhapGanNhat(LocalDateTime.now());
+        }
+        inventoryRepository.save(inventory);
     }
 
     @Override
     @Transactional
     public void delete(int id) {
-        Import phieuNhap = importRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy phiếu nhập"));
-        for (ImportDetail detail : phieuNhap.getImportDetailList()) {
-            Inventory inventory = inventoryRepository.findById(detail.getSanPham().getMaSanPham()).orElse(null);
-            if (inventory != null) {
-                inventory.setSoLuongTon(inventory.getSoLuongTon() - detail.getSoLuong());
-                inventoryRepository.save(inventory);
-            }
+        Import phieuNhap = findById(id);
+        // Hoàn trả tồn kho trước khi xóa
+        for (ImportDetail detail : phieuNhap.getChiTietPhieuNhapList()) {
+            updateInventory(detail.getSanPham(), -detail.getSoLuong()); // Trừ đi số lượng đã nhập
         }
         importRepository.delete(phieuNhap);
     }

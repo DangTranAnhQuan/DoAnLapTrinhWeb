@@ -32,10 +32,8 @@ public class MembershipTierController {
         try {
             membershipTierService.save(request);
             redirectAttributes.addFlashAttribute("successMessage", "Lưu hạng thành viên thành công!");
-        } catch (DuplicateRecordException e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Đã có lỗi không mong muốn xảy ra!");
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
         return "redirect:/admin/membership-tier";
     }
@@ -46,7 +44,7 @@ public class MembershipTierController {
             membershipTierService.delete(id);
             redirectAttributes.addFlashAttribute("successMessage", "Xóa hạng thành viên thành công!");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Không thể xóa hạng này vì đang có người dùng sử dụng.");
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
         return "redirect:/admin/membership-tier";
     }

@@ -1,8 +1,10 @@
 package nhom17.OneShop.service.impl;
 
 import nhom17.OneShop.entity.Category;
+import nhom17.OneShop.exception.DataIntegrityViolationException;
 import nhom17.OneShop.exception.DuplicateRecordException;
 import nhom17.OneShop.repository.CategoryRepository;
+import nhom17.OneShop.repository.ProductRepository;
 import nhom17.OneShop.request.CategoryRequest;
 import nhom17.OneShop.service.CategoryService;
 import nhom17.OneShop.service.StorageService;
@@ -14,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
@@ -26,6 +29,9 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Autowired
     private StorageService storageService;
+
+    @Autowired private
+    ProductRepository productRepository;
 
     @Override
     public Page<Category> searchAndFilter(String keyword, Boolean status, int page, int size) {
@@ -48,59 +54,57 @@ public class CategoryServiceImpl implements CategoryService {
         return categoryRepository.findById(id).orElse(null);
     }
     @Override
+    @Transactional
     public void save(CategoryRequest categoryRequest) {
-        Optional<Category> existingCategory = categoryRepository.findByTenDanhMucIgnoreCase(categoryRequest.getTenDanhMuc());
-        if (existingCategory.isPresent()) {
-            // Nếu tìm thấy, kiểm tra xem có phải là chính nó không (trường hợp sửa)
-            if (categoryRequest.getMaDanhMuc() == null || !existingCategory.get().getMaDanhMuc().equals(categoryRequest.getMaDanhMuc())) {
-                throw new DuplicateRecordException("Tên danh mục '" + categoryRequest.getTenDanhMuc() + "' đã tồn tại.");
-            }
-        }
-
-        Category category;
-
-        if (categoryRequest.getMaDanhMuc() != null) {
-            category = categoryRepository.findById(categoryRequest.getMaDanhMuc())
-                    .orElse(new Category());
-        } else {
-            category = new Category();
-        }
-
-        // Xử lý ảnh
-        if (StringUtils.hasText(categoryRequest.getHinhAnh())) {
-            // Có ảnh mới upload
-            String oldImage = category.getHinhAnh();
-            category.setHinhAnh(categoryRequest.getHinhAnh());
-            if (StringUtils.hasText(oldImage) && !oldImage.equals(category.getHinhAnh())) {
-                storageService.deleteFile(oldImage);
-            }
-        } else if (category.getMaDanhMuc() != null) {
-            // Sửa mà không upload ảnh -> giữ nguyên ảnh cũ
-            Category existing = categoryRepository.findById(category.getMaDanhMuc()).orElse(null);
-            if (existing != null) {
-                category.setHinhAnh(existing.getHinhAnh());
-            }
-        }
-
-        // Cập nhật các thông tin khác
-        category.setTenDanhMuc(categoryRequest.getTenDanhMuc());
-        category.setKichHoat(categoryRequest.isKichHoat());
-
+        validateUniqueCategoryName(categoryRequest);
+        Category category = prepareCategoryEntity(categoryRequest);
+        String oldImage = category.getHinhAnh();
+        mapRequestToEntity(categoryRequest, category);
         categoryRepository.save(category);
+
+        if (StringUtils.hasText(categoryRequest.getHinhAnh()) && StringUtils.hasText(oldImage) && !oldImage.equals(categoryRequest.getHinhAnh())) {
+            storageService.deleteFile(oldImage);
+        }
+    }
+
+    private void validateUniqueCategoryName(CategoryRequest request) {
+        if (request.getMaDanhMuc() == null) {
+            if (categoryRepository.existsByTenDanhMucIgnoreCase(request.getTenDanhMuc())) {
+                throw new DuplicateRecordException("Tên danh mục '" + request.getTenDanhMuc() + "' đã tồn tại.");
+            }
+        } else {
+            if (categoryRepository.existsByTenDanhMucIgnoreCaseAndMaDanhMucNot(request.getTenDanhMuc(), request.getMaDanhMuc())) {
+                throw new DuplicateRecordException("Tên danh mục '" + request.getTenDanhMuc() + "' đã được sử dụng.");
+            }
+        }
+    }
+
+    private Category prepareCategoryEntity(CategoryRequest request) {
+        if (request.getMaDanhMuc() != null) {
+            return findById(request.getMaDanhMuc());
+        }
+        return new Category();
+    }
+
+    private void mapRequestToEntity(CategoryRequest request, Category category) {
+        category.setTenDanhMuc(request.getTenDanhMuc());
+        category.setKichHoat(request.isKichHoat());
+        if (StringUtils.hasText(request.getHinhAnh())) {
+            category.setHinhAnh(request.getHinhAnh());
+        }
     }
 
     @Override
+    @Transactional
     public void delete(int id) {
-        Optional<Category> categoryOpt = categoryRepository.findById(id);
-        if (categoryOpt.isPresent()) {
-            Category category = categoryOpt.get();
-            // Nếu danh mục có ảnh, thì xóa file ảnh trước
-            if (StringUtils.hasText(category.getHinhAnh())) {
-                storageService.deleteFile(category.getHinhAnh());
-            }
-            // Sau đó xóa bản ghi trong database
-            categoryRepository.deleteById(id);
+        Category categoryToDelete = findById(id);
+        if (productRepository.existsByDanhMuc_MaDanhMuc(id)) {
+            throw new DataIntegrityViolationException("Không thể xóa danh mục '" + categoryToDelete.getTenDanhMuc() + "' vì vẫn còn sản phẩm thuộc danh mục này.");
         }
+        if (StringUtils.hasText(categoryToDelete.getHinhAnh())) {
+            storageService.deleteFile(categoryToDelete.getHinhAnh());
+        }
+        categoryRepository.delete(categoryToDelete);
     }
     
     @Override

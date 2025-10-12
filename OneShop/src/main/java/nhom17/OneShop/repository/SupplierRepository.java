@@ -10,4 +10,6 @@ import java.util.Optional;
 public interface SupplierRepository extends JpaRepository<Supplier, Integer> {
     Page<Supplier> findByTenNCCContainingIgnoreCase(String keyword, Pageable pageable);
     Optional<Supplier> findByTenNCCIgnoreCase(String tenNCC);
+    boolean existsByTenNCCIgnoreCase(String tenNCC);
+    boolean existsByTenNCCIgnoreCaseAndMaNCCNot(String tenNCC, Integer supplierId);
 }

@@ -51,10 +51,8 @@ public class CategoryController {
             }
             categoryService.save(categoryRequest);
             redirectAttributes.addFlashAttribute("successMessage", "Lưu danh mục thành công!");
-        } catch (DuplicateRecordException e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Đã có lỗi không mong muốn xảy ra!");
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
 
         // Giữ lại tham số phân trang và filter khi redirect
@@ -72,9 +70,12 @@ public class CategoryController {
                                  @RequestParam(required = false) String keyword,
                                  @RequestParam(required = false) Boolean status,
                                  RedirectAttributes redirectAttributes){
-        categoryService.delete(id);
-
-        // Giữ lại tham số phân trang và filter khi redirect
+        try {
+            categoryService.delete(id);
+            redirectAttributes.addFlashAttribute("successMessage", "Xóa danh mục thành công!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
         redirectAttributes.addAttribute("page", page);
         redirectAttributes.addAttribute("size", size);
         if (keyword != null) redirectAttributes.addAttribute("keyword", keyword);

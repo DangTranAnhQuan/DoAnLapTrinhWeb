@@ -58,37 +58,32 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public void update(Long orderId, OrderUpdateRequest request, User adminUser) {
-        // 1. Tìm đơn hàng trong CSDL
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng với ID: " + orderId));
-
+        Order order = findById(orderId); // Sử dụng findById đã được "đánh thức"
         String oldStatus = order.getTrangThai();
         String newStatus = request.getTrangThai();
 
-        // 2. Kiểm tra xem trạng thái có thực sự thay đổi không
+        // Ghi lại lịch sử nếu trạng thái thay đổi
         if (!Objects.equals(oldStatus, newStatus)) {
-            // 3. Nếu có, tạo một bản ghi lịch sử mới
-            OrderStatusHistory history = new OrderStatusHistory();
-            history.setDonHang(order);
-
-            history.setTuTrangThai(oldStatus);
-            history.setDenTrangThai(newStatus);
-            history.setThoiDiemThayDoi(LocalDateTime.now());
-            history.setNguoiThucHien(adminUser); // Gán admin đã thực hiện
-            // Tùy chọn: Thêm ghi chú
-            // history.setGhiChu("Admin đã cập nhật trạng thái.");
-
-            historyRepository.save(history);
+            logStatusChange(order, oldStatus, newStatus, adminUser);
         }
 
-        // 4. Cập nhật các thông tin trên đơn hàng
+        // Cập nhật thông tin đơn hàng
         order.setTrangThai(newStatus);
         order.setPhuongThucThanhToan(request.getPhuongThucThanhToan());
         order.setTrangThaiThanhToan(request.getTrangThaiThanhToan());
         order.setNgayCapNhat(LocalDateTime.now());
 
-        // 5. Lưu lại đơn hàng đã cập nhật
         orderRepository.save(order);
+    }
+
+    private void logStatusChange(Order order, String oldStatus, String newStatus, User adminUser) {
+        OrderStatusHistory history = new OrderStatusHistory();
+        history.setDonHang(order);
+        history.setTuTrangThai(oldStatus);
+        history.setDenTrangThai(newStatus);
+        history.setThoiDiemThayDoi(LocalDateTime.now());
+        history.setNguoiThucHien(adminUser);
+        historyRepository.save(history);
     }
 
     @Override

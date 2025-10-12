@@ -131,7 +131,7 @@ public class OrderController {
             redirectAttributes.addFlashAttribute("successMessage", "Cập nhật đơn hàng thành công!");
 
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
 
         // Luôn đính kèm các tham số state vào URL khi redirect

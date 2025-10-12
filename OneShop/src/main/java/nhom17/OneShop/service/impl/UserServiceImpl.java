@@ -6,6 +6,7 @@ import nhom17.OneShop.entity.User;
 import nhom17.OneShop.exception.DuplicateRecordException;
 import nhom17.OneShop.exception.NotFoundException;
 import nhom17.OneShop.repository.MembershipTierRepository;
+import nhom17.OneShop.repository.OrderRepository;
 import nhom17.OneShop.repository.RoleRepository;
 import nhom17.OneShop.repository.UserRepository;
 import nhom17.OneShop.request.UserRequest;
@@ -37,6 +38,8 @@ public class UserServiceImpl implements UserService {
     MembershipTierRepository membershipTierRepository;
     @Autowired
     private StorageService storageService;
+    @Autowired
+    private OrderRepository orderRepository;
 
     @Override
     public Page<User> findAll(String keyword, Integer roleId, Integer tierId, Integer status, int page, int size) {
@@ -61,68 +64,92 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User findById(int id) {
-        return userRepository.findById(id).orElse(null);
+        return userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy người dùng với ID: " + id));
     }
 
     @Override
+    @Transactional
     public void save(UserRequest userRequest) {
-        // Phần kiểm tra email và username giữ nguyên
-        Optional<User> existingEmail = userRepository.findByEmail(userRequest.getEmail());
-        if (existingEmail.isPresent() && (userRequest.getMaNguoiDung() == null || !existingEmail.get().getMaNguoiDung().equals(userRequest.getMaNguoiDung()))) {
-            throw new DuplicateRecordException("Email '" + userRequest.getEmail() + "' đã được sử dụng.");
+        validateUniqueFields(userRequest);
+        User user = prepareUserEntity(userRequest);
+        String oldAvatar = user.getAnhDaiDien(); // Lấy ảnh cũ trước khi map ảnh mới
+        mapRequestToEntity(userRequest, user);
+        userRepository.save(user);
+
+        // Xóa ảnh cũ nếu có ảnh mới được upload
+        if (StringUtils.hasText(userRequest.getAnhDaiDien()) && StringUtils.hasText(oldAvatar) && !oldAvatar.equals(userRequest.getAnhDaiDien())) {
+            storageService.deleteFile(oldAvatar);
         }
-        Optional<User> existingUsername = userRepository.findByTenDangNhapIgnoreCase(userRequest.getTenDangNhap());
-        if (existingUsername.isPresent() && (userRequest.getMaNguoiDung() == null || !existingUsername.get().getMaNguoiDung().equals(userRequest.getMaNguoiDung()))) {
-            throw new DuplicateRecordException("Tên đăng nhập '" + userRequest.getTenDangNhap() + "' đã tồn tại.");
-        }
+    }
 
-        User user;
-        String oldAvatar = null;
-
-        if (userRequest.getMaNguoiDung() != null) { // Sửa
-            user = userRepository.findById(userRequest.getMaNguoiDung())
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
-            oldAvatar = user.getAnhDaiDien(); // Lấy tên ảnh cũ
-        } else { // Thêm mới
-            user = new User();
-        }
-
-        user.setHoTen(userRequest.getHoTen());
-        user.setEmail(userRequest.getEmail());
-        user.setTenDangNhap(userRequest.getTenDangNhap());
-        user.setSoDienThoai(userRequest.getSoDienThoai());
-        user.setTrangThai(userRequest.getTrangThai());
-
-        // Xử lý ảnh đại diện
-        if (StringUtils.hasText(userRequest.getAnhDaiDien())) {
-            user.setAnhDaiDien(userRequest.getAnhDaiDien());
-            // Nếu có ảnh cũ và nó khác ảnh mới, thì xóa file ảnh cũ đi
-            if (StringUtils.hasText(oldAvatar) && !oldAvatar.equals(userRequest.getAnhDaiDien())) {
-                storageService.deleteFile(oldAvatar);
+    private void validateUniqueFields(UserRequest request) {
+        if (request.getMaNguoiDung() == null) { // Tạo mới
+            if (userRepository.existsByEmailIgnoreCase(request.getEmail())) {
+                throw new DuplicateRecordException("Email '" + request.getEmail() + "' đã được sử dụng.");
+            }
+            if (userRepository.existsByTenDangNhapIgnoreCase(request.getTenDangNhap())) {
+                throw new DuplicateRecordException("Tên đăng nhập '" + request.getTenDangNhap() + "' đã tồn tại.");
+            }
+        } else { // Cập nhật
+            if (userRepository.existsByEmailIgnoreCaseAndMaNguoiDungNot(request.getEmail(), request.getMaNguoiDung())) {
+                throw new DuplicateRecordException("Email '" + request.getEmail() + "' đã được người dùng khác sử dụng.");
+            }
+            if (userRepository.existsByTenDangNhapIgnoreCaseAndMaNguoiDungNot(request.getTenDangNhap(), request.getMaNguoiDung())) {
+                throw new DuplicateRecordException("Tên đăng nhập '" + request.getTenDangNhap() + "' đã được người dùng khác sử dụng.");
             }
         }
+    }
 
-        // Phần xử lý mật khẩu, vai trò, hạng thành viên giữ nguyên
-        if (StringUtils.hasText(userRequest.getMatKhau())) {
-            user.setMatKhau(userRequest.getMatKhau());
+    private User prepareUserEntity(UserRequest userRequest) {
+        if (userRequest.getMaNguoiDung() != null) {
+            return findById(userRequest.getMaNguoiDung());
         }
-        Role role = roleRepository.findById(userRequest.getMaVaiTro())
-                .orElseThrow(() -> new RuntimeException("Vai trò không hợp lệ"));
+        return new User();
+    }
+
+    private void mapRequestToEntity(UserRequest request, User user) {
+        user.setHoTen(request.getHoTen());
+        user.setEmail(request.getEmail());
+        user.setTenDangNhap(request.getTenDangNhap());
+        user.setSoDienThoai(request.getSoDienThoai());
+        user.setTrangThai(request.getTrangThai());
+        if (StringUtils.hasText(request.getAnhDaiDien())) {
+            user.setAnhDaiDien(request.getAnhDaiDien());
+        }
+        if (StringUtils.hasText(request.getMatKhau())) {
+            user.setMatKhau(request.getMatKhau());
+        }
+        Role role = roleRepository.findById(request.getMaVaiTro())
+                .orElseThrow(() -> new NotFoundException("Vai trò không hợp lệ với ID: " + request.getMaVaiTro()));
         user.setVaiTro(role);
-        if (userRequest.getMaHangThanhVien() != null) {
-            MembershipTier tier = membershipTierRepository.findById(userRequest.getMaHangThanhVien())
-                    .orElseThrow(() -> new RuntimeException("Hạng thành viên không hợp lệ"));
+        if (request.getMaHangThanhVien() != null) {
+            MembershipTier tier = membershipTierRepository.findById(request.getMaHangThanhVien())
+                    .orElseThrow(() -> new NotFoundException("Hạng thành viên không hợp lệ với ID: " + request.getMaHangThanhVien()));
             user.setHangThanhVien(tier);
         } else {
             user.setHangThanhVien(null);
         }
-
-        userRepository.save(user);
     }
 
+    /**
+     * ✅ THAY ĐỔI BÊN TRONG:
+     * - Bổ sung logic kiểm tra ràng buộc và xóa ảnh.
+     */
     @Override
+    @Transactional(noRollbackFor = DataIntegrityViolationException.class)
     public void delete(int id) {
-        // Cân nhắc: Bạn có thể thêm logic xóa file ảnh đại diện ở đây
-        userRepository.deleteById(id);
+        User userToDelete = findById(id);
+
+        if (orderRepository.existsByNguoiDung_MaNguoiDung(id)) {
+            userToDelete.setTrangThai(0);
+            userRepository.save(userToDelete);
+            throw new DataIntegrityViolationException("Không thể xóa người dùng '" + userToDelete.getHoTen() + "' vì đã có lịch sử đặt hàng. Tài khoản đã được chuyển sang trạng thái 'Khóa'.");
+        }
+
+        if (StringUtils.hasText(userToDelete.getAnhDaiDien())) {
+            storageService.deleteFile(userToDelete.getAnhDaiDien());
+        }
+        userRepository.delete(userToDelete);
     }
 }

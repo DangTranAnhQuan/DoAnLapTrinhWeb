@@ -21,15 +21,15 @@ public class VoucherController {
     @GetMapping
     public String listVouchers(@RequestParam(required = false) String keyword,
                                @RequestParam(required = false) Integer status,
-                               @RequestParam(required = false) Integer kieuApDung,
+                               @RequestParam(required = false) Integer filterKieuApDung,
                                @RequestParam(defaultValue = "1") int page,
                                @RequestParam(defaultValue = "5") int size,
                                Model model) {
-        Page<Voucher> voucherPage = voucherService.findAll(keyword, status, kieuApDung, page, size);
+        Page<Voucher> voucherPage = voucherService.findAll(keyword, status, filterKieuApDung, page, size);
         model.addAttribute("voucherPage", voucherPage);
         model.addAttribute("keyword", keyword);
         model.addAttribute("status", status);
-        model.addAttribute("kieuApDung", kieuApDung);
+        model.addAttribute("filterKieuApDung", filterKieuApDung);
         return "admin/orders/vouchers";
     }
 
@@ -46,7 +46,7 @@ public class VoucherController {
                                   @RequestParam(defaultValue = "5") int size,
                                   @RequestParam(required = false) String keyword,
                                   @RequestParam(required = false) Integer status,
-                                  @RequestParam(required = false) Integer kieuApDung) {
+                                  @RequestParam(required = false) Integer filterKieuApDung) {
         VoucherRequest request = new VoucherRequest();
         if (id != null) {
             Voucher voucher = voucherService.findById(id);
@@ -67,7 +67,7 @@ public class VoucherController {
         model.addAttribute("size", size);
         model.addAttribute("keyword", keyword);
         model.addAttribute("status", status);
-        model.addAttribute("kieuApDung", kieuApDung);
+        model.addAttribute("filterKieuApDung", filterKieuApDung);
         return "admin/orders/addOrEditVoucher";
     }
 
@@ -79,7 +79,8 @@ public class VoucherController {
                               @RequestParam(defaultValue = "5") int size,
                               @RequestParam(required = false) String keyword,
                               @RequestParam(required = false) Integer status,
-                              @RequestParam(required = false) Integer kieuApDung) {
+                              @RequestParam(required = false) Integer filterKieuApDung) {
+        System.out.println("➡️ Giá trị kiểu áp dụng: " + request.getKieuApDung());
         try {
             voucherService.save(request);
             redirectAttributes.addFlashAttribute("successMessage", "Lưu khuyến mãi thành công!");
@@ -87,11 +88,11 @@ public class VoucherController {
                     .addAttribute("size", size)
                     .addAttribute("keyword", keyword)
                     .addAttribute("status", status)
-                    .addAttribute("kieuApDung", kieuApDung);
+                    .addAttribute("filterKieuApDung", filterKieuApDung);
             return "redirect:/admin/voucher";
-        } catch (DuplicateRecordException | IllegalArgumentException e) {
+        } catch (Exception e) {
             model.addAttribute("errorMessage", e.getMessage());
-            return "admin/order/voucherForm";
+            return "admin/orders/addOrEditVoucher";
         }
     }
 
@@ -101,18 +102,18 @@ public class VoucherController {
                                 @RequestParam(defaultValue = "5") int size,
                                 @RequestParam(required = false) String keyword,
                                 @RequestParam(required = false) Integer status,
-                                @RequestParam(required = false) Integer kieuApDung) {
+                                @RequestParam(required = false) Integer filterKieuApDung) {
         try {
             voucherService.delete(id);
             redirectAttributes.addFlashAttribute("successMessage", "Xóa khuyến mãi thành công!");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Không thể xóa khuyến mãi này.");
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
         redirectAttributes.addAttribute("page", page)
                 .addAttribute("size", size)
                 .addAttribute("keyword", keyword)
                 .addAttribute("status", status)
-                .addAttribute("kieuApDung", kieuApDung);
+                .addAttribute("filterKieuApDung", filterKieuApDung);
         return "redirect:/admin/voucher";
     }
 }

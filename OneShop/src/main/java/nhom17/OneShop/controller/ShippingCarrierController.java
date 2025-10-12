@@ -39,10 +39,8 @@ public class ShippingCarrierController {
         try {
             shippingCarrierService.save(request);
             redirectAttributes.addFlashAttribute("successMessage", "Lưu nhà vận chuyển thành công!");
-        } catch (DuplicateRecordException e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Đã có lỗi không mong muốn xảy ra!");
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
         redirectAttributes.addAttribute("keyword", keyword);
         redirectAttributes.addAttribute("page", page);

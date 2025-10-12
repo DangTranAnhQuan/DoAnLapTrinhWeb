@@ -8,4 +8,8 @@ import java.util.Optional;
 
 public interface ProductRepository extends JpaRepository<Product, Integer>, JpaSpecificationExecutor<Product> {
     Optional<Product> findByTenSanPhamIgnoreCase(String tenSanPham);
+    boolean existsByTenSanPhamIgnoreCase(String tenSanPham);
+    boolean existsByTenSanPhamIgnoreCaseAndMaSanPhamNot(String tenSanPham, Integer productId);
+    boolean existsByDanhMuc_MaDanhMuc(Integer categoryId);
+    boolean existsByThuongHieu_MaThuongHieu(Integer brandId);
 }

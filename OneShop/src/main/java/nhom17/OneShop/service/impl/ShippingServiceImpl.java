@@ -1,10 +1,9 @@
 package nhom17.OneShop.service.impl;
 
 import nhom17.OneShop.entity.*;
-import nhom17.OneShop.repository.OrderRepository;
-import nhom17.OneShop.repository.OrderStatusHistoryRepository;
-import nhom17.OneShop.repository.ShippingCarrierRepository;
-import nhom17.OneShop.repository.ShippingRepository;
+import nhom17.OneShop.exception.DataIntegrityViolationException;
+import nhom17.OneShop.exception.NotFoundException;
+import nhom17.OneShop.repository.*;
 import nhom17.OneShop.request.ShippingRequest;
 import nhom17.OneShop.service.ShippingService;
 import nhom17.OneShop.specification.ShippingSpecification;
@@ -32,6 +31,8 @@ public class ShippingServiceImpl implements ShippingService {
     private ShippingCarrierRepository shippingCarrierRepository;
     @Autowired // ✅ THÊM VÀO
     private OrderStatusHistoryRepository historyRepository;
+    @Autowired
+    private UserRepository userRepository;
 
     @Override
     public Page<Shipping> search(String keyword, Integer carrierId, String status, int page, int size) {
@@ -48,91 +49,102 @@ public class ShippingServiceImpl implements ShippingService {
     @Override
     @Transactional
     public void save(ShippingRequest request) {
-        Order order = orderRepository.findById(request.getMaDonHang())
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng với mã: " + request.getMaDonHang()));
+        // Bước 1: Validate
+        validateShippingRequest(request);
 
-        ShippingCarrier carrier = shippingCarrierRepository.findById(request.getMaNVC())
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy nhà vận chuyển!"));
+        // Bước 2: Chuẩn bị Entity
+        Shipping shipping = prepareShippingEntity(request);
 
-        Shipping shipping;
-        String newShippingStatus = request.getTrangThai();
-        String oldOrderStatus = order.getTrangThai();
+        // Bước 3: Map dữ liệu và xử lý nghiệp vụ
+        mapRequestToEntity(request, shipping);
 
-        // Chế độ SỬA
-        if (request.getMaVanChuyen() != null) {
-            shipping = shippingRepository.findById(request.getMaVanChuyen())
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn vận chuyển!"));
-
-            shipping.setNhaVanChuyen(carrier);
-            shipping.setTrangThai(newShippingStatus);
-
-            if ("Đã giao".equals(newShippingStatus) && shipping.getGiaoLuc() == null) {
-                shipping.setGiaoLuc(LocalDateTime.now());
-            }
-
-            // Chế độ THÊM MỚI
-        } else {
-            // ✅ KIỂM TRA QUAN TRỌNG: Đơn hàng này đã có đơn vận chuyển chưa?
-            if (shippingRepository.existsByDonHang_MaDonHang(request.getMaDonHang())) {
-                throw new RuntimeException("Đơn hàng #" + request.getMaDonHang() + " đã có đơn vận chuyển. Không thể tạo thêm.");
-            }
-
-            shipping = new Shipping();
-            shipping.setDonHang(order);
-
-            String randomCode = UUID.randomUUID().toString().substring(0, 10).toUpperCase();
-            shipping.setMaVanDon(randomCode);
-
-            shipping.setTrangThai("Đã khởi tạo");
-            shipping.setGuiLuc(LocalDateTime.now());
-            shipping.setNhaVanChuyen(carrier);
-
-            newShippingStatus = "Đã khởi tạo";
-        }
-
-        // Logic cập nhật trạng thái đơn hàng (giữ nguyên)
-        String newOrderStatus = null;
-        switch (newShippingStatus) {
-            case "Đang giao":
-                newOrderStatus = "Đang giao";
-                break;
-            case "Đã giao":
-                newOrderStatus = "Đã giao";
-                break;
-            case "Trả hàng":
-                newOrderStatus = "Trả hàng-Hoàn tiền";
-                break;
-        }
-
-        // ✅ LOGIC MỚI: Nếu trạng thái đơn hàng có thay đổi, thì tạo lịch sử
-        if (newOrderStatus != null && !Objects.equals(oldOrderStatus, newOrderStatus)) {
-            // Cập nhật trạng thái mới cho đơn hàng
-            order.setTrangThai(newOrderStatus);
-
-            // Tạo một bản ghi lịch sử
-            OrderStatusHistory history = new OrderStatusHistory();
-            history.setDonHang(order);
-            history.setTuTrangThai(oldOrderStatus);
-            history.setDenTrangThai(newOrderStatus);
-            history.setThoiDiemThayDoi(LocalDateTime.now());
-
-            // Tạm gán người thực hiện là admin (bạn có thể thay đổi sau khi có hệ thống đăng nhập)
-            User adminUser = new User();
-            adminUser.setMaNguoiDung(1);
-            history.setNguoiThucHien(adminUser);
-
-            // Lưu lịch sử và đơn hàng
-            historyRepository.save(history);
-            orderRepository.save(order);
-        }
-
-        // Cuối cùng, lưu đơn vận chuyển
+        // Bước 4: Lưu
         shippingRepository.save(shipping);
     }
 
+    private void validateShippingRequest(ShippingRequest request) {
+        if (request.getMaVanChuyen() == null) { // Chỉ kiểm tra khi tạo mới
+            if (shippingRepository.existsByDonHang_MaDonHang(request.getMaDonHang())) {
+                throw new DataIntegrityViolationException("Đơn hàng #" + request.getMaDonHang() + " đã có đơn vận chuyển. Không thể tạo thêm.");
+            }
+        }
+    }
+
+    private Shipping prepareShippingEntity(ShippingRequest request) {
+        if (request.getMaVanChuyen() == null) {
+            Shipping newShipping = new Shipping();
+            newShipping.setMaVanDon(UUID.randomUUID().toString().substring(0, 10).toUpperCase());
+            newShipping.setGuiLuc(LocalDateTime.now());
+            return newShipping;
+        }
+        return findById(request.getMaVanChuyen());
+    }
+
+    private void mapRequestToEntity(ShippingRequest request, Shipping shipping) {
+        Order order = orderRepository.findById(request.getMaDonHang())
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy đơn hàng với mã: " + request.getMaDonHang()));
+
+        ShippingCarrier carrier = shippingCarrierRepository.findById(request.getMaNVC())
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy nhà vận chuyển với ID: " + request.getMaNVC()));
+
+        shipping.setDonHang(order);
+        shipping.setNhaVanChuyen(carrier);
+
+        String oldOrderStatus = order.getTrangThai();
+        String newShippingStatus = request.getTrangThai();
+
+        if (request.getMaVanChuyen() == null) { // Trường hợp Thêm mới
+            shipping.setTrangThai("Đã khởi tạo");
+        } else {
+            if (!Objects.equals(shipping.getTrangThai(), newShippingStatus)) {
+                shipping.setTrangThai(newShippingStatus);
+                if ("Đã giao".equals(newShippingStatus) && shipping.getGiaoLuc() == null) {
+                    shipping.setGiaoLuc(LocalDateTime.now());
+                }
+
+                String newOrderStatus = mapShippingStatusToOrderStatus(newShippingStatus);
+                if (newOrderStatus != null) {
+                    updateOrderStatusAndLog(order, newOrderStatus, oldOrderStatus);
+                }
+            }
+        }
+    }
+
+    private String mapShippingStatusToOrderStatus(String shippingStatus) {
+        switch (shippingStatus) {
+            case "Đang giao": return "Đang giao";
+            case "Đã giao": return "Đã giao";
+            case "Trả hàng": return "Trả hàng-Hoàn tiền";
+            default: return null;
+        }
+    }
+
+    private void updateOrderStatusAndLog(Order order, String newStatus, String oldStatus) {
+        if (newStatus != null && !Objects.equals(oldStatus, newStatus)) {
+            order.setTrangThai(newStatus);
+
+            OrderStatusHistory history = new OrderStatusHistory();
+            history.setDonHang(order);
+            history.setTuTrangThai(oldStatus);
+            history.setDenTrangThai(newStatus);
+            history.setThoiDiemThayDoi(LocalDateTime.now());
+
+            // Lấy đối tượng User thực sự từ DB thay vì tạo mới
+            User adminUser = userRepository.findById(1)
+                    .orElseThrow(() -> new NotFoundException("Không tìm thấy tài khoản admin với ID 1 để ghi lịch sử."));
+            history.setNguoiThucHien(adminUser);
+
+            historyRepository.save(history);
+        }
+    }
+
     @Override
+    @Transactional
     public void delete(Long id) {
-        // Cân nhắc: Có thể bạn muốn thêm logic cập nhật lại trạng thái đơn hàng khi xóa
+        Shipping shipping = findById(id);
+        if ("Đang giao".equals(shipping.getTrangThai()) || "Đã giao".equals(shipping.getTrangThai())) {
+            throw new DataIntegrityViolationException("Không thể xóa đơn vận chuyển đang hoặc đã giao hàng.");
+        }
         shippingRepository.deleteById(id);
     }
 }

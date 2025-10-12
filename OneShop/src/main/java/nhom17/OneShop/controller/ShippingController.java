@@ -53,7 +53,7 @@ public class ShippingController {
             shippingService.save(request);
             redirectAttributes.addFlashAttribute("successMessage", "Lưu thông tin vận chuyển thành công!");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
 
         // ✅ SỬA LỖI: Truyền giá trị của biến, không phải chuỗi ký tự
@@ -80,7 +80,7 @@ public class ShippingController {
             shippingService.save(request);
             redirectAttributes.addFlashAttribute("successMessage", "Đã tạo đơn vận chuyển cho đơn hàng #" + request.getMaDonHang());
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
 
         // Redirect về trang Orders với đầy đủ state
@@ -104,9 +104,9 @@ public class ShippingController {
                                  @RequestParam(defaultValue = "10") int size) {
         try {
             shippingService.delete(id);
-            redirectAttributes.addFlashAttribute("successMessage", "Đã xóa thông tin vận chuyển!");
+            redirectAttributes.addFlashAttribute("successMessage", "Đã xóa đơn vận chuyển thành công!");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
 
         // ✅ SỬA LỖI: Truyền giá trị của biến, không phải chuỗi ký tự

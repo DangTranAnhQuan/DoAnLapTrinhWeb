@@ -10,4 +10,6 @@ import java.util.Optional;
 public interface ShippingCarrierRepository extends JpaRepository<ShippingCarrier, Integer> {
     Page<ShippingCarrier> findByTenNVCContainingIgnoreCase(String keyword, Pageable pageable);
     Optional<ShippingCarrier> findByTenNVCIgnoreCase(String tenNVC);
+    boolean existsByTenNVCIgnoreCase(String tenNVC);
+    boolean existsByTenNVCIgnoreCaseAndMaNVCNot(String tenNVC, Integer maNVC);
 }

@@ -125,7 +125,7 @@ public class UserController {
                     .addAttribute("tierId", tierId)
                     .addAttribute("status", status);
             return "redirect:/admin/user";
-        } catch (DuplicateRecordException e) {
+        } catch (Exception e) {
             model.addAttribute("errorMessage", e.getMessage());
             model.addAttribute("roles", roleRepository.findAll());
             model.addAttribute("tiers", membershipTierRepository.findAll());
@@ -147,7 +147,7 @@ public class UserController {
             userService.delete(id);
             redirectAttributes.addFlashAttribute("successMessage", "Xóa người dùng thành công!");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Không thể xóa người dùng này.");
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
         redirectAttributes.addAttribute("page", page)
                 .addAttribute("size", size)

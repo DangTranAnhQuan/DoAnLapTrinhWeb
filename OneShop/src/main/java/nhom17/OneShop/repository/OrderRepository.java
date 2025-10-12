@@ -14,6 +14,8 @@ import java.util.List;
 
 public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecificationExecutor<Order> {
 
+    boolean existsByNguoiDung_MaNguoiDung(Integer userId);
+
     @Query(value = "SELECT COALESCE(SUM(o.TongTien), 0), COUNT(o.MaDonHang) " +
             "FROM DonHang o " +
             "WHERE o.TrangThai = N'Đã giao' AND o.NgayDat >= :startDate AND o.NgayDat < :endDate",

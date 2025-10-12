@@ -26,7 +26,7 @@
                     <tr><th>Mã SP</th><th>Tên sản phẩm</th><th class="text-end">Số lượng</th><th class="text-end">Giá nhập</th><th class="text-end">Thành tiền</th></tr>
                     </thead>
                     <tbody>
-                    <tr th:each="detail : ${receipt.importDetailList}">
+                    <tr th:each="detail : ${receipt.chiTietPhieuNhapList}">
                         <td th:text="${detail.sanPham.maSanPham}"></td>
                         <td>
                             <div class="d-flex align-items-center">

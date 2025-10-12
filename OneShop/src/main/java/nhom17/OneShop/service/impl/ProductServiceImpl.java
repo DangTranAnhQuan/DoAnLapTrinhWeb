@@ -4,6 +4,7 @@ import nhom17.OneShop.entity.Category;
 import nhom17.OneShop.entity.Product;
 import nhom17.OneShop.entity.Brand;
 import nhom17.OneShop.exception.DuplicateRecordException;
+import nhom17.OneShop.exception.NotFoundException;
 import nhom17.OneShop.repository.BrandRepository;
 import nhom17.OneShop.repository.CategoryRepository;
 import nhom17.OneShop.repository.ProductRepository;
@@ -18,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
@@ -75,60 +77,66 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Transactional
     public void save(ProductRequest productRequest) {
-        Optional<Product> existingProduct = productRepository.findByTenSanPhamIgnoreCase(productRequest.getTenSanPham());
-        if (existingProduct.isPresent()) {
-            if (productRequest.getMaSanPham() == null || !existingProduct.get().getMaSanPham().equals(productRequest.getMaSanPham())) {
-                throw new DuplicateRecordException("Tên sản phẩm '" + productRequest.getTenSanPham() + "' đã tồn tại.");
-            }
-        }
+        validateUniqueProductName(productRequest);
+        Product product = prepareProductEntity(productRequest);
+        String oldImage = product.getHinhAnh();
+        mapRequestToEntity(productRequest, product);
+        productRepository.save(product);
 
-        Product product;
-        if (productRequest.getMaSanPham() != null) {
-            product = productRepository.findById(productRequest.getMaSanPham()).orElse(new Product());
+        if (StringUtils.hasText(productRequest.getHinhAnh()) && StringUtils.hasText(oldImage) && !oldImage.equals(productRequest.getHinhAnh())) {
+            storageService.deleteFile(oldImage);
+        }
+    }
+
+    private void validateUniqueProductName(ProductRequest request) {
+        if (request.getMaSanPham() == null) {
+            if (productRepository.existsByTenSanPhamIgnoreCase(request.getTenSanPham())) {
+                throw new DuplicateRecordException("Tên sản phẩm '" + request.getTenSanPham() + "' đã tồn tại.");
+            }
         } else {
-            product = new Product();
-        }
-
-        // Xử lý ảnh
-        if (StringUtils.hasText(productRequest.getHinhAnh())) {
-            String oldImage = product.getHinhAnh();
-            product.setHinhAnh(productRequest.getHinhAnh());
-            if (StringUtils.hasText(oldImage) && !oldImage.equals(product.getHinhAnh())) {
-                storageService.deleteFile(oldImage);
+            if (productRepository.existsByTenSanPhamIgnoreCaseAndMaSanPhamNot(request.getTenSanPham(), request.getMaSanPham())) {
+                throw new DuplicateRecordException("Tên sản phẩm '" + request.getTenSanPham() + "' đã được sử dụng.");
             }
         }
+    }
 
-        // Lấy đối tượng DanhMuc và ThuongHieu từ ID
-        Category danhMuc = categoryRepository.findById(productRequest.getMaDanhMuc())
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy danh mục với ID: " + productRequest.getMaDanhMuc()));
-        Brand thuongHieu = brandRepository.findById(productRequest.getMaThuongHieu())
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy thương hiệu với ID: " + productRequest.getMaThuongHieu()));
+    private Product prepareProductEntity(ProductRequest request) {
+        if (request.getMaSanPham() != null) {
+            return findById(request.getMaSanPham());
+        }
+        return new Product();
+    }
 
+    private void mapRequestToEntity(ProductRequest request, Product product) {
+        Category danhMuc = categoryRepository.findById(request.getMaDanhMuc())
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy danh mục với ID: " + request.getMaDanhMuc()));
+        Brand thuongHieu = brandRepository.findById(request.getMaThuongHieu())
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy thương hiệu với ID: " + request.getMaThuongHieu()));
+
+        product.setTenSanPham(request.getTenSanPham());
+        product.setMoTa(request.getMoTa());
+        product.setGiaBan(request.getGiaBan());
+        product.setGiaNiemYet(request.getGiaNiemYet());
+        product.setHanSuDung(request.getHanSuDung());
+        product.setKichHoat(request.isKichHoat());
         product.setDanhMuc(danhMuc);
         product.setThuongHieu(thuongHieu);
-
-        // Cập nhật các thông tin khác
-        product.setTenSanPham(productRequest.getTenSanPham());
-        product.setMoTa(productRequest.getMoTa());
-        product.setGiaBan(productRequest.getGiaBan());
-        product.setGiaNiemYet(productRequest.getGiaNiemYet());
-        product.setHanSuDung(productRequest.getHanSuDung());
-        product.setKichHoat(productRequest.isKichHoat());
-
-        productRepository.save(product);
+        if (StringUtils.hasText(request.getHinhAnh())) {
+            product.setHinhAnh(request.getHinhAnh());
+        }
     }
 
     @Override
+    @Transactional
     public void delete(int id) {
-        Optional<Product> productOpt = productRepository.findById(id);
-        if (productOpt.isPresent()) {
-            Product sanPham = productOpt.get();
-            if (StringUtils.hasText(sanPham.getHinhAnh())) {
-                storageService.deleteFile(sanPham.getHinhAnh());
-            }
-            productRepository.deleteById(id);
+        Product productToDelete = findById(id);
+
+        if (StringUtils.hasText(productToDelete.getHinhAnh())) {
+            storageService.deleteFile(productToDelete.getHinhAnh());
         }
+        productRepository.delete(productToDelete);
     }
 
     @Override

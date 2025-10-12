@@ -11,6 +11,7 @@
     <span th:text="${voucherRequest.maKhuyenMai == null ? 'Thêm mới' : 'Chỉnh sửa'}"></span>
 </h4>
 <main layout:fragment="content">
+    <!-- Action của form vẫn sạch sẽ -->
     <form th:action="@{/admin/voucher/save}" th:object="${voucherRequest}" method="post">
         <div class="card">
             <div class="card-body">
@@ -22,7 +23,7 @@
                 <input type="hidden" name="size" th:value="${size}">
                 <input type="hidden" name="keyword" th:value="${keyword}">
                 <input type="hidden" name="status" th:value="${status}">
-                <input type="hidden" name="kieuApDung" th:value="${kieuApDung}">
+                <input type="hidden" name="filterKieuApDung" th:value="${filterKieuApDung}">
 
                 <div class="row">
                     <div class="mb-3 col-md-6">
@@ -33,7 +34,16 @@
                         </div>
                     </div>
                     <div class="mb-3 col-md-6"><label class="form-label">Tên chiến dịch</label><input type="text" th:field="*{tenChienDich}" class="form-control" required></div>
-                    <div class="mb-3 col-md-6"><label class="form-label">Kiểu áp dụng</label><select th:field="*{kieuApDung}" class="form-select"><option value="0">Phần trăm (%)</option><option value="1">Số tiền cố định (₫)</option></select></div>
+
+                    <div class="mb-3 col-md-6">
+                        <label class="form-label">Kiểu áp dụng</label>
+                        <select th:field="*{kieuApDung}" class="form-select" required>
+                            <option th:value="0">Phần trăm (%)</option>
+                            <option th:value="1">Số tiền cố định (₫)</option>
+                        </select>
+                    </div>
+
+                    <!-- ... các trường input khác giữ nguyên ... -->
                     <div class="mb-3 col-md-6"><label class="form-label">Giá trị</label><input type="number" th:field="*{giaTri}" class="form-control" required placeholder="Nếu là %, nhập 10. Nếu là tiền, nhập 10000"></div>
                     <div class="mb-3 col-md-6"><label class="form-label">Bắt đầu lúc</label><input type="datetime-local" th:field="*{batDauLuc}" class="form-control" required></div>
                     <div class="mb-3 col-md-6"><label class="form-label">Kết thúc lúc</label><input type="datetime-local" th:field="*{ketThucLuc}" class="form-control" required></div>
@@ -44,7 +54,7 @@
                     <div class="mb-3 col-md-12"><label class="form-label">Trạng thái</label><select th:field="*{trangThai}" class="form-select"><option value="1">Hoạt động</option><option value="0">Ngừng</option></select></div>
                 </div>
                 <div class="mt-3">
-                    <a th:href="@{/admin/voucher(page=${page}, size=${size}, keyword=${keyword}, status=${status}, kieuApDung=${kieuApDung})}" class="btn btn-outline-secondary">Hủy</a>
+                    <a th:href="@{/admin/voucher(page=${page}, size=${size}, keyword=${keyword}, status=${status}, filterKieuApDung=${filterKieuApDung})}" class="btn btn-outline-secondary">Hủy</a>
                     <button type="submit" class="btn btn-primary" th:text="${voucherRequest.maKhuyenMai == null ? 'Lưu' : 'Cập nhật'}"></button>
                 </div>
             </div>

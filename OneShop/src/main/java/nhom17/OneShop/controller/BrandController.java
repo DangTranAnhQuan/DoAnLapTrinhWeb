@@ -52,10 +52,8 @@ public class BrandController {
             }
             brandService.save(brandRequest);
             redirectAttributes.addFlashAttribute("successMessage", "Lưu thương hiệu thành công!");
-        } catch (DuplicateRecordException e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Đã có lỗi không mong muốn xảy ra!");
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
 
         // Giữ lại tham số phân trang và filter khi redirect
@@ -73,9 +71,12 @@ public class BrandController {
                               @RequestParam(required = false) String keyword,
                               @RequestParam(required = false) Boolean status,
                               RedirectAttributes redirectAttributes) {
-        brandService.delete(id);
-
-        // Giữ lại tham số phân trang và filter khi redirect
+        try {
+            brandService.delete(id);
+            redirectAttributes.addFlashAttribute("successMessage", "Xóa thương hiệu thành công!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
         redirectAttributes.addAttribute("page", page);
         redirectAttributes.addAttribute("size", size);
         if (keyword != null) redirectAttributes.addAttribute("keyword", keyword);

@@ -137,13 +137,8 @@ public class ProductController {
             redirectAttributes.addAttribute("page", page);
             redirectAttributes.addAttribute("size", size);
             return "redirect:/admin/product";
-        } catch (DuplicateRecordException e) {
-            model.addAttribute("errorMessage", e.getMessage());
-            model.addAttribute("categories", categoryRepository.findAll());
-            model.addAttribute("brands", brandRepository.findAll());
-            return "admin/products/addOrEditProduct";
         } catch (Exception e) {
-            model.addAttribute("errorMessage", "Lỗi: " + e.getMessage());
+            model.addAttribute("errorMessage", e.getMessage());
             model.addAttribute("categories", categoryRepository.findAll());
             model.addAttribute("brands", brandRepository.findAll());
             return "admin/products/addOrEditProduct";

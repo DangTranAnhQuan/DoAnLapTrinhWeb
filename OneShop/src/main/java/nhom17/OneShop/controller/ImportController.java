@@ -87,7 +87,7 @@ public class ImportController {
         request.setMaNCC(phieuNhap.getNhaCungCap().getMaNCC());
 
         List<ImportDetailRequest> detailRequests = new ArrayList<>();
-        for (ImportDetail detail : phieuNhap.getImportDetailList()) {
+        for (ImportDetail detail : phieuNhap.getChiTietPhieuNhapList()) {
             ImportDetailRequest detailDto = new ImportDetailRequest();
             detailDto.setMaSanPham(detail.getSanPham().getMaSanPham());
             detailDto.setSoLuong(detail.getSoLuong());
@@ -118,7 +118,7 @@ public class ImportController {
             importService.save(importRequest);
             redirectAttributes.addFlashAttribute("successMessage", "Lưu phiếu nhập thành công!");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
         redirectAttributes.addAttribute("keyword", keyword);
         redirectAttributes.addAttribute("supplierId", supplierId);
