@@ -166,4 +166,10 @@ public class ProductServiceImpl implements ProductService {
 
         return productRepository.findAll(spec, pageable);
     }
+    @Override
+    public Page<Product> searchProductsForUser(String keyword, int page, int size) {
+        // Sắp xếp theo ngày tạo mới nhất làm mặc định
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("ngayTao").descending());
+        return productRepository.searchForUser(keyword, pageable);
+    }
 }

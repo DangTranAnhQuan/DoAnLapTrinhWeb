@@ -193,7 +193,7 @@
                                         </td>
                                         <td class="text-end" th:text="${#numbers.formatDecimal(o.tongTien,0,'COMMA',0,'POINT')} + ' ₫'"></td>
                                         <td class="text-end">
-                                            <a th:href="@{/order-details/{id}(id=${o.maDonHang})}" class="btn btn-sm btn-outline-primary">Xem</a>
+                                            <a th:href="@{/order-details/{id}(id=${o.maDonHang})}" class="btn btn-outline-primary">Xem</a>
                                         </td>
                                     </tr>
                                     </tbody>

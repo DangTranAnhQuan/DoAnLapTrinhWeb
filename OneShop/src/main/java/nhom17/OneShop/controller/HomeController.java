@@ -77,6 +77,7 @@ public class HomeController {
 
     @GetMapping("/shop")
     public String shopPage(Model model,
+                           @RequestParam(name = "keyword", required = false) String keyword,
                            @RequestParam(name = "categoryId", required = false) Integer categoryId,
                            @RequestParam(name = "minPrice", required = false) String minPriceStr,
                            @RequestParam(name = "maxPrice", required = false) String maxPriceStr,
@@ -85,27 +86,37 @@ public class HomeController {
                            @RequestParam(name = "page", defaultValue = "1") int page,
                            @RequestParam(name = "size", defaultValue = "9") int size) {
 
-        BigDecimal minPrice = null;
-        if (minPriceStr != null && !minPriceStr.isEmpty()) {
-            try {
-                String cleanPrice = minPriceStr.replaceAll("[.,₫\\s]", "");
-                minPrice = new BigDecimal(cleanPrice);
-            } catch (NumberFormatException e) {
-                System.err.println("Invalid minPrice format: " + minPriceStr);
-            }
-        }
+        Page<Product> productPage;
 
-        BigDecimal maxPrice = null;
-        if (maxPriceStr != null && !maxPriceStr.isEmpty()) {
-            try {
-                String cleanPrice = maxPriceStr.replaceAll("[.,₫\\s]", "");
-                maxPrice = new BigDecimal(cleanPrice);
-            } catch (NumberFormatException e) {
-                System.err.println("Invalid maxPrice format: " + maxPriceStr);
+        // Ưu tiên tìm kiếm theo keyword trước
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            productPage = productService.searchProductsForUser(keyword, page, size);
+            model.addAttribute("searchResult", "Kết quả tìm kiếm cho: '" + keyword + "'");
+        } else {
+            // Nếu không có keyword, thì lọc như cũ
+            BigDecimal minPrice = null;
+            if (minPriceStr != null && !minPriceStr.isEmpty()) {
+                try {
+                    String cleanPrice = minPriceStr.replaceAll("[.,₫\\s]", "");
+                    minPrice = new BigDecimal(cleanPrice);
+                } catch (NumberFormatException e) {
+                    System.err.println("Invalid minPrice format: " + minPriceStr);
+                }
             }
-        }
 
-        Page<Product> productPage = productService.searchUserProducts(categoryId, minPrice, maxPrice, sort, brandIds, page, size);
+            BigDecimal maxPrice = null;
+            if (maxPriceStr != null && !maxPriceStr.isEmpty()) {
+                try {
+                    String cleanPrice = maxPriceStr.replaceAll("[.,₫\\s]", "");
+                    maxPrice = new BigDecimal(cleanPrice);
+                } catch (NumberFormatException e) {
+                    System.err.println("Invalid maxPrice format: " + maxPriceStr);
+                }
+            }
+            productPage = productService.searchUserProducts(categoryId, minPrice, maxPrice, sort, brandIds, page, size);
+            model.addAttribute("minPrice", minPrice);
+            model.addAttribute("maxPrice", maxPrice);
+        }
 
         List<Category> categoryList = categoryService.findAll();
         List<Brand> brandList = brandRepository.findAll();
@@ -119,10 +130,10 @@ public class HomeController {
         model.addAttribute("pageSize", size);
         model.addAttribute("sort", sort);
         model.addAttribute("selectedCategoryId", categoryId);
-        model.addAttribute("minPrice", minPrice);
-        model.addAttribute("maxPrice", maxPrice);
         model.addAttribute("selectedBrandIds", brandIds);
+        model.addAttribute("keyword", keyword); // Luôn gửi keyword về view
 
+        // Sửa lại tên view template cho đúng với file controller cũ của bạn
         return "user/shop/shop-sidebar";
     }
 
@@ -196,5 +207,15 @@ public class HomeController {
             return ResponseEntity.ok(product);
         }
         return ResponseEntity.notFound().build();
+    }
+    @GetMapping("/api/search")
+    @ResponseBody
+    public ResponseEntity<List<Product>> liveSearchProducts(@RequestParam(value = "keyword", required = false) String keyword) {
+        if (keyword == null || keyword.trim().length() < 2) { // Chỉ tìm khi có ít nhất 2 ký tự
+            return ResponseEntity.ok(Collections.emptyList()); // Trả về danh sách rỗng
+        }
+        // Tìm kiếm và chỉ lấy trang đầu tiên, giới hạn 5 sản phẩm
+        Page<Product> productPage = productService.searchProductsForUser(keyword, 1, 5);
+        return ResponseEntity.ok(productPage.getContent());
     }
 }

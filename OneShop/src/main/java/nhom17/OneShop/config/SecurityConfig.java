@@ -20,15 +20,14 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(
-                                "/", "/shop/**", "/product/**", "/sign-in", "/sign-up", "/forgot-password",
-                                "/forgot-password/send-otp",
-                                "/forgot-password/verify",
-                                "/forgot-password/reset",
+                                "/", "/shop/**", "/product/**", "/sign-in", "/sign-up", "/forgot-password/**",
+                                "/reset-password/**",
                                 "/contact", "/about-us",
                                 "/web/**", "/uploads/**",
                                 "/admin/assets/**",
                                 "/api/**"
                         ).permitAll()
+                        .requestMatchers("/my-orders/**").authenticated()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )

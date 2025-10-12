@@ -11,6 +11,8 @@ public interface ProductService {
     Page<Product> searchProducts(String keyword, Boolean status, Integer categoryId, Integer brandId, String sort, int page, int size);
     Page<Product> searchUserProducts(Integer categoryId, BigDecimal minPrice, BigDecimal maxPrice, String sort, List<Integer> brandIds, int page, int size);
 
+    // PHƯƠNG THỨC MỚI CHO TÌM KIẾM HEADER
+    Page<Product> searchProductsForUser(String keyword, int page, int size);
     Product findById(int id);
 
     void save(ProductRequest productRequest);
