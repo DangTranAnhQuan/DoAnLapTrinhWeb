@@ -8,64 +8,129 @@
 <head>
     <title th:text="${product.tenSanPham}"></title>
     <style>
-        .rating-form .rating-stars { display: inline-block; direction: rtl; }
-        .rating-form .rating-stars input[type="radio"] { display: none; }
-        .rating-form .rating-stars label { font-size: 28px; color: #d1d1d1; cursor: pointer; padding: 0 2px; }
-        .rating-form .rating-stars label:hover,
-        .rating-form .rating-stars label:hover ~ label,
-        .rating-form .rating-stars input[type="radio"]:checked ~ label { color: #ffdc00; }
+        .product-meta ul li i {
+  padding-right: 5px !important;
+}
+        .product-meta ul li i{
+        margin-left: 20px;
+      }
+      .old-price {
+       text-decoration: line-through;
+       color: #6c757d;
+       margin-left: 10px;
+     }
+     .helper-note{
+       font-size: 18px; line-height: 1.5; font-weight: 600; color: #4b5563;
+     }
+
+     /* ========== SAO ĐÁNH GIÁ (ẩn radio chấm tròn, chỉ hiện ngôi sao) ========== */
+     .rating-form .rating-stars{ display:inline-block; direction: rtl; }
+
+     /* Quy tắc này có độ ưu tiên cao hơn để ghi đè lên CSS của template */
+     .comment-respond .rating-form .rating-stars input[type="radio"] {
+       position: absolute !important;
+       overflow: hidden !important;
+       width: 1px !important;
+       height: 1px !important;
+       padding: 0 !important;
+       margin: -1px !important; /* Di chuyển ra khỏi màn hình */
+       border: 0 !important;
+       clip: rect(0, 0, 0, 0) !important;
+       white-space: nowrap !important;
+       /* Thêm appearance để vô hiệu hóa giao diện gốc trên một số trình duyệt */
+       appearance: none !important;
+       -webkit-appearance: none !important;
+       -moz-appearance: none !important;
+     }
+     /* ======================================================================= */
+
+     .rating-form .rating-stars label{
+       font-size:28px; color:#d1d1d1; cursor:pointer; padding:0 2px;
+       user-select:none; line-height:1;
+     }
+     .rating-form .rating-stars label:hover,
+     .rating-form .rating-stars label:hover ~ label,
+     .rating-form .rating-stars input[type="radio"]:checked ~ label{ color:#ffdc00; }
+
+     .review-media img, .review-media video{ max-width:120px; max-height:120px; border-radius:8px; object-fit:cover; cursor:pointer; }
+     .preview-container{ margin-top:15px; display:flex; gap:15px; }
+     .preview-box{ display:none; }
+     .preview-box img, .preview-box video{ max-width:120px; max-height:120px; border-radius:8px; object-fit:cover; }
+     .upload-card{ position:relative; border:2px dashed #ff5a7a; background:#ffe5ec; border-radius:12px; padding:18px 20px; cursor:pointer; }
+     .upload-card h6{ margin:0; font-weight:800; color:#d6336c; display:flex; align-items:center; gap:10px; }
+     .upload-card h6 i{ font-size:18px; }
+     .upload-card input[type="file"]{ position:absolute; inset:0; width:100%; height:100%; opacity:0; cursor:pointer; z-index:2; }
+     .media-error{ display:none; margin-top:8px; font-size:18px; font-weight:800; color:#d32f2f; }
+     .axil-btn{ cursor:pointer; } .text-muted{ color:#6c757d; } .ms-2{ margin-left:.5rem; } .small{ font-size:.875rem; }
     </style>
 </head>
 
 <body>
 <main layout:fragment="content">
+    <!-- ================== THÔNG TIN SẢN PHẨM ================== -->
     <div class="axil-single-product-area bg-color-white">
-        <div class="single-product-thumb axil-section-gapcommon single-product-modern">
+        <div class="single-product-thumb axil-section-gapcommon">
             <div class="container">
-                <div class="row row--20">
-                    <div class="col-lg-6 mb--40">
+                <div class="row">
+                    <div class="col-lg-7 mb--40">
                         <div class="row">
-                            <div class="col-lg-12">
-                                <div class="product-large-thumbnail-4 single-product-thumbnail axil-product">
-                                    <div class="thumbnail">
-                                        <img th:src="@{'/uploads/' + ${product.hinhAnh}}" th:alt="${product.tenSanPham}">
+                            <div class="col-lg-10 order-lg-2">
+                                <div class="single-product-thumbnail-wrap zoom-gallery">
+                                    <div class="single-product-thumbnail product-large-thumbnail-3 axil-product">
+                                        <div class="thumbnail">
+                                            <a th:href="@{'/uploads/' + ${product.hinhAnh}}" class="popup-zoom">
+                                                <img th:src="@{'/uploads/' + ${product.hinhAnh}}" th:alt="${product.tenSanPham}">
+                                            </a>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-lg-12">
-                                <div class="small-thumb-wrapper product-small-thumb-4 slick-layout-wrapper--10 axil-slick-arrow arrow-both-side">
+                            <div class="col-lg-2 order-lg-1">
+                                <div class="product-small-thumb-3 small-thumb-wrapper">
                                     <div class="small-thumb-img">
-                                        <img th:src="@{'/uploads/' + ${product.hinhAnh}}" alt="samll-thumb">
+                                        <img th:src="@{'/uploads/' + ${product.hinhAnh}}" alt="product thumb">
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-6 mb--40">
+
+                    <div class="col-lg-5 mb--40">
                         <div class="single-product-content">
                             <div class="inner">
                                 <h2 class="product-title" th:text="${product.tenSanPham}"></h2>
+
                                 <div class="price-amount-wrapper d-flex align-items-center">
                                     <span class="price current-price" th:text="${#numbers.formatDecimal(product.giaBan, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></span>
                                     <span class="price old-price" th:text="${#numbers.formatDecimal(product.giaNiemYet, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></span>
                                 </div>
+
                                 <div class="product-rating">
                                     <div class="star-rating">
-                                        <span th:text="${#numbers.formatDecimal(averageRating, 1, 1)}"></span> <i class="fas fa-star"></i>
+                                        <span th:text="${#numbers.formatDecimal(averageRating, 1, 1)}"></span>
+                                        <i class="fas fa-star"></i>
                                     </div>
-                                    <div class="review-number" th:text="'(' + ${totalReviews} + ' đánh giá)'"></div>
+                                    <div class="review-link">
+                                        <a href="#reviews" th:text="'(' + ${totalReviews} + ' đánh giá)'"></a>
+                                    </div>
                                 </div>
+
+                                <div class="product-meta">
+                                    <ul class="d-flex">
+                                        <li><i class="fal fa-check"></i>Trong kho</li>
+                                        <li><i class="fal fa-check"></i>Miễn phí vận chuyển</li>
+                                    </ul>
+                                </div>
+
                                 <div class="description" th:utext="${product.moTa}"></div>
 
                                 <form th:action="@{/cart/add}" method="post">
                                     <input type="hidden" name="productId" th:value="${product.maSanPham}">
                                     <div class="product-variation quantity-variant-wrapper">
                                         <h6 class="title">Số lượng</h6>
-                                        <div class="pro-qty">
-                                            <input type="number" name="quantity" value="1" min="1">
-                                        </div>
+                                        <div class="pro-qty"><input type="number" name="quantity" value="1" min="1"></div>
                                     </div>
-                                    <div class="product-action-wrapper">
+                                    <div class="product-action-wrapper d-flex-center">
                                         <ul class="product-action d-flex-center mb--0">
                                             <li class="add-to-cart">
                                                 <button type="submit" class="axil-btn btn-bg-primary">
@@ -75,97 +140,96 @@
                                         </ul>
                                     </div>
                                 </form>
+
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
+    <!-- ======================================================== -->
 
-        <div class="woocommerce-tabs wc-tabs-wrapper bg-lighter wc-tab-style-two">
-            <div class="container">
-                <ul class="nav tabs" role="tablist">
-                    <li class="nav-item" role="presentation"><a class="active" data-bs-toggle="tab" href="#description">Mô tả sản phẩm</a></li>
-                    <li class="nav-item" role="presentation"><a data-bs-toggle="tab" href="#reviews">Đánh giá</a></li>
-                </ul>
-                <div class="tab-content">
-                    <div class="tab-pane fade show active" id="description" role="tabpanel">
-                        <div class="product-desc-wrapper" th:utext="${product.moTa}"></div>
-                    </div>
-                    <div class="tab-pane fade" id="reviews" role="tabpanel">
-                        <div class="reviews-wrapper">
-                            <div class="row">
-                                <div class="col-lg-6 mb--40">
-                                    <div class="axil-comment-area pro-desc-commnet-area">
-                                        <h5 class="title" th:text="${totalReviews} + ' đánh giá cho sản phẩm này'"></h5>
-                                        <ul class="comment-list">
-                                            <li th:if="${reviews.isEmpty()}"><p>Chưa có đánh giá nào cho sản phẩm này.</p></li>
-                                            <li th:each="review : ${reviews}" class="comment">
-                                                <div class="comment-body">
-                                                    <div class="single-comment">
-                                                        <div class="comment-inner">
-                                                            <h6 class="commenter" th:text="${review.nguoiDung != null ? review.nguoiDung.hoTen : 'Người dùng ẩn danh'}"></h6>
-                                                            <div class="comment-text">
-                                                                <p th:text="${review.binhLuan}"></p>
-                                                            </div>
+    <div class="woocommerce-tabs wc-tabs-wrapper bg-lighter wc-tab-style-two">
+        <div class="container">
+            <ul class="nav tabs" role="tablist">
+                <li class="nav-item" role="presentation"><a class="active" data-bs-toggle="tab" href="#description">Mô tả sản phẩm</a></li>
+                <li class="nav-item" role="presentation"><a data-bs-toggle="tab" href="#reviews">Đánh giá</a></li>
+            </ul>
+
+            <div class="tab-content">
+                <div class="tab-pane fade show active" id="description" role="tabpanel">
+                    <div class="product-desc-wrapper" th:utext="${product.moTa}"></div>
+                </div>
+
+                <div class="tab-pane fade" id="reviews" role="tabpanel">
+                    <div class="reviews-wrapper">
+                        <div class="row">
+                            <!-- Danh sách đánh giá -->
+                            <div class="col-lg-6 mb--40">
+                                <div class="axil-comment-area pro-desc-commnet-area">
+                                    <h5 class="title" th:text="${totalReviews} + ' đánh giá cho sản phẩm này'"></h5>
+                                    <ul class="comment-list">
+                                        <li th:if="${reviews.isEmpty()}"><p>Chưa có đánh giá nào.</p></li>
+                                        <li th:each="review : ${reviews}" class="comment">
+                                            <div class="comment-body">
+                                                <div class="single-comment">
+                                                    <div class="comment-inner">
+                                                        <h6 class="commenter" th:text="${review.nguoiDung?.hoTen}">Người dùng</h6>
+                                                        <div class="comment-text"><p th:text="${review.binhLuan}">Nội dung bình luận</p></div>
+                                                        <div class="review-media mt-3 d-flex gap-3">
+                                                            <a th:if="${review.imageUrl}" th:href="@{'/uploads/reviews/' + ${review.imageUrl}}">
+                                                                <img th:src="@{'/uploads/reviews/' + ${review.imageUrl}}" alt="Review Image">
+                                                            </a>
+                                                            <video th:if="${review.videoUrl}" controls>
+                                                                <source th:src="@{'/uploads/reviews/' + ${review.videoUrl}}">
+                                                            </video>
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
-                                <div class="col-lg-6 mb--40">
-                                    <div class="comment-respond pro-des-commend-respond mt--0">
-                                        <h5 class="title mb--30">Thêm đánh giá</h5>
-                                        <div sec:authorize="isAuthenticated()">
-                                            <form th:action="@{/submit-review}" method="post" class="rating-form">
-                                                <input type="hidden" name="productId" th:value="${product.maSanPham}">
-                                                <p class="your-rating mb-2">Đánh giá của bạn <span class="require">*</span></p>
-                                                <div class="rating-stars mb-4">
-                                                    <input type="radio" id="star5" name="rating" value="5" required/><label for="star5" title="5 sao">★</label>
-                                                    <input type="radio" id="star4" name="rating" value="4" required/><label for="star4" title="4 sao">★</label>
-                                                    <input type="radio" id="star3" name="rating" value="3" required/><label for="star3" title="3 sao">★</label>
-                                                    <input type="radio" id="star2" name="rating" value="2" required/><label for="star2" title="2 sao">★</label>
-                                                    <input type="radio" id="star1" name="rating" value="1" required/><label for="star1" title="1 sao">★</label>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label>Bình luận của bạn</label>
-                                                    <textarea name="comment" placeholder="Viết bình luận ở đây..." required></textarea>
-                                                </div>
-                                                <div class="form-submit"><button type="submit" class="axil-btn btn-bg-primary w-auto">Gửi đánh giá</button></div>
-                                            </form>
-                                        </div>
-                                        <div sec:authorize="!isAuthenticated()">
-                                            <div class="alert alert-warning">Vui lòng <a th:href="@{/sign-in}">đăng nhập</a> để để lại đánh giá.</div>
-                                        </div>
-                                    </div>
+                                            </div>
+                                        </li>
+                                    </ul>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <div th:if="${recentlyViewedProducts != null and !recentlyViewedProducts.isEmpty()}" class="axil-new-arrivals-product-area fullwidth-container flash-sale-area section-gap-80-35">
-            <div class="container ml--xxl-0">
-                <div class="section-title-border slider-section-title">
-                    <h2 class="title">Sản phẩm đã xem gần đây 💥</h2>
-                </div>
-                <div class="recently-viwed-activation slick-layout-wrapper--15 axil-slick-angle angle-top-slide">
-                    <div th:each="recentProduct : ${recentlyViewedProducts}" class="slick-single-layout">
-                        <div class="axil-product product-style-eight">
-                            <div class="thumbnail">
-                                <a th:href="@{/product/{id}(id=${recentProduct.maSanPham})}">
-                                    <img th:src="@{'/uploads/' + ${recentProduct.hinhAnh}}" alt="Product Images">
-                                </a>
-                            </div>
-                            <div class="product-content">
-                                <div class="inner">
-                                    <h5 class="title"><a th:href="@{/product/{id}(id=${recentProduct.maSanPham})}" th:text="${recentProduct.tenSanPham}"></a></h5>
-                                    <div class="product-price-variant">
-                                        <span class="price current-price" th:text="${#numbers.formatDecimal(recentProduct.giaBan, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></span>
+                            <!-- Form thêm đánh giá -->
+                            <div class="col-lg-6 mb--40">
+                                <div class="comment-respond pro-des-commend-respond mt--0">
+                                    <h5 class="title mb--30">Thêm đánh giá</h5>
+                                    <div sec:authorize="isAuthenticated()">
+                                        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+                                        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+                                        <form th:action="@{/submit-review}" method="post" enctype="multipart/form-data" class="rating-form">
+                                            <input type="hidden" name="productId" th:value="${product.maSanPham}">
+                                            <p class="your-rating mb-2">Đánh giá của bạn <span class="require">*</span></p>
+                                            <div class="rating-stars mb-4">
+                                                <input type="radio" id="star5" name="rating" value="5" required/><label for="star5" title="5 sao">★</label>
+                                                <input type="radio" id="star4" name="rating" value="4"/><label for="star4" title="4 sao">★</label>
+                                                <input type="radio" id="star3" name="rating" value="3"/><label for="star3" title="3 sao">★</label>
+                                                <input type="radio" id="star2" name="rating" value="2"/><label for="star2" title="2 sao">★</label>
+                                                <input type="radio" id="star1" name="rating" value="1"/><label for="star1" title="1 sao">★</label>
+                                            </div>
+                                            <div class="form-group"><label>Bình luận của bạn</label><textarea name="comment" placeholder="Viết bình luận ở đây..." required></textarea></div>
+                                            <div class="form-group mb-3">
+                                                <div class="upload-card">
+                                                    <h6><i class="fas fa-paperclip"></i> Thêm ảnh hoặc video</h6>
+                                                    <input id="mediaFile" name="mediaFile" type="file" accept="image/*,video/mp4,video/quicktime">
+                                                </div>
+                                                <small id="mediaName" class="text-muted ms-2"></small>
+                                                <div id="mediaError" class="media-error"></div>
+                                                <div class="helper-note">Chỉ đính kèm <b>1 file</b> (ảnh hoặc video), tối đa 20MB.</div>
+                                            </div>
+                                            <div class="preview-container">
+                                                <div class="preview-box" id="image-preview-box"><img id="image-preview" alt="Xem trước ảnh"></div>
+                                                <div class="preview-box" id="video-preview-box"><video id="video-preview" controls></video></div>
+                                            </div>
+                                            <div class="form-submit"><button type="submit" class="axil-btn btn-bg-primary w-auto">Gửi đánh giá</button></div>
+                                        </form>
+                                    </div>
+                                    <div sec:authorize="!isAuthenticated()">
+                                        <div class="alert alert-warning">Vui lòng <a th:href="@{/sign-in}">đăng nhập</a> để để lại đánh giá.</div>
                                     </div>
                                 </div>
                             </div>
@@ -176,5 +240,81 @@
         </div>
     </div>
 </main>
+
+<th:block layout:fragment="script">
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+          const MAX_SIZE = 20 * 1024 * 1024; // 20MB
+          const mediaInput      = document.getElementById('mediaFile');
+          const mediaName       = document.getElementById('mediaName');
+          const mediaError      = document.getElementById('mediaError');
+          const imagePreviewBox = document.getElementById('image-preview-box');
+          const imagePreview    = document.getElementById('image-preview');
+          const videoPreviewBox = document.getElementById('video-preview-box');
+          const videoPreview    = document.getElementById('video-preview');
+
+          function resetPreview(){
+            imagePreviewBox.style.display = 'none';
+            videoPreviewBox.style.display = 'none';
+            imagePreview.removeAttribute('src');
+            if (!videoPreview.paused) { videoPreview.pause(); }
+            videoPreview.removeAttribute('src');
+          }
+          function showError(msg){
+            mediaError.textContent = msg;
+            mediaError.style.display = 'block';
+          }
+          function clearError(){
+            mediaError.textContent = '';
+            mediaError.style.display = 'none';
+          }
+
+          if (mediaInput) {
+            mediaInput.addEventListener('change', function (e) {
+              resetPreview();
+              clearError();
+              mediaName.textContent = '';
+
+              const file = e.target.files && e.target.files[0];
+              if (!file) return;
+
+              if (file.size > MAX_SIZE) {
+                showError('File vượt quá 20MB. Vui lòng chọn file nhỏ hơn.');
+                mediaInput.value = '';
+                return;
+              }
+
+              mediaName.textContent = file.name;
+
+              const type = (file.type || '').toLowerCase();
+              if (type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function (evt) {
+                  imagePreview.src = evt.target.result;
+                  imagePreviewBox.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+              } else if (type === 'video/mp4' || type === 'video/quicktime' || type.startsWith('video/')) {
+                const url = URL.createObjectURL(file);
+                videoPreview.src = url;
+                videoPreviewBox.style.display = 'block';
+              } else {
+                showError('Định dạng không hỗ trợ. Chỉ nhận ảnh hoặc video MP4/MOV.');
+                mediaInput.value = '';
+                mediaName.textContent = '';
+              }
+              if (window.location.hash === '#reviews') {
+            const reviewTabButton = document.querySelector('a[data-bs-toggle="tab"][href="#reviews"]');
+            if (reviewTabButton) {
+                // Sử dụng API của Bootstrap 5 để kích hoạt tab
+                const tab = new bootstrap.Tab(reviewTabButton);
+                tab.show();
+            }
+          }
+            });
+          }
+        });
+    </script>
+</th:block>
 </body>
 </html>

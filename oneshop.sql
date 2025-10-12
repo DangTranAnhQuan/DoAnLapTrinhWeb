@@ -251,6 +251,8 @@ CREATE TABLE DanhGia (
     DiemDanhGia TINYINT NOT NULL CHECK (DiemDanhGia BETWEEN 1 AND 5),
     BinhLuan NVARCHAR(500),
     NgayTao DATETIME2 DEFAULT SYSUTCDATETIME(),
+	ImageUrl NVARCHAR(255),
+	VideoUrl NVARCHAR(255)
     PRIMARY KEY (MaSanPham, MaNguoiDung),
     FOREIGN KEY (MaSanPham) REFERENCES SanPham(MaSanPham),
     FOREIGN KEY (MaNguoiDung) REFERENCES NguoiDung(MaNguoiDung)
