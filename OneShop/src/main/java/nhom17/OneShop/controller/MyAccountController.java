@@ -117,6 +117,7 @@ import nhom17.OneShop.entity.DiaChi;
 import nhom17.OneShop.entity.NguoiDung;
 import nhom17.OneShop.repository.DiaChiRepository;
 import nhom17.OneShop.repository.NguoiDungRepository;
+import nhom17.OneShop.service.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -124,6 +125,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
@@ -134,6 +136,7 @@ public class MyAccountController {
     @Autowired private NguoiDungRepository nguoiDungRepository;
     @Autowired private DiaChiRepository diaChiRepository;
     @Autowired private PasswordEncoder passwordEncoder;
+    @Autowired private StorageService storageService;
 
     // My Account (tab-panel)
     @GetMapping("/my-account")
@@ -208,6 +211,41 @@ public class MyAccountController {
             ra.addFlashAttribute("error", "Bạn không có quyền xóa địa chỉ này.");
         }
         return "redirect:/my-account?tab=addresses";
+    }
+
+    /**
+     * Xử lý việc cập nhật ảnh đại diện.
+     */
+    @PostMapping("/my-account/update-avatar")
+    public String updateAvatar(@RequestParam("avatarFile") MultipartFile avatarFile,
+                               RedirectAttributes redirectAttributes) {
+        if (avatarFile.isEmpty()) {
+            redirectAttributes.addFlashAttribute("error", "Vui lòng chọn một file ảnh.");
+            return "redirect:/my-account?tab=account";
+        }
+
+        try {
+            NguoiDung currentUser = getCurrentUser();
+
+            // Lưu file mới vào thư mục 'avatars'
+            String fileName = storageService.storeFile(avatarFile, "avatars");
+
+            // Xóa file ảnh cũ nếu có
+            if (currentUser.getAnhDaiDien() != null && !currentUser.getAnhDaiDien().isEmpty()) {
+                storageService.deleteFile("avatars/" + currentUser.getAnhDaiDien());
+            }
+
+            // Cập nhật đường dẫn ảnh mới cho người dùng và lưu vào CSDL
+            currentUser.setAnhDaiDien(fileName);
+            nguoiDungRepository.save(currentUser);
+
+            redirectAttributes.addFlashAttribute("success", "Cập nhật ảnh đại diện thành công!");
+
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Lỗi khi tải lên ảnh: " + e.getMessage());
+        }
+
+        return "redirect:/my-account?tab=account";
     }
 
     private NguoiDung getCurrentUser() {
