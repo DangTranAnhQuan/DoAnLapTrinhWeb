@@ -7,21 +7,18 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.*;
+
 import java.util.UUID;
 
 @Service
 public class StorageServiceImpl implements StorageService {
-    // ✅ Hardcode the root path here instead of injecting it
-    private final Path rootStorageFolder = Paths.get("./uploads");
 
-    // ✅ Use a simple, no-argument constructor
+    // Gốc lưu trữ tĩnh: map /uploads/** -> file:uploads/ (WebMvcConfigurer)
+    private final Path rootStorageFolder = Paths.get("uploads");
+
     public StorageServiceImpl() {
         try {
-            // Create the root directory if it doesn't exist
             Files.createDirectories(this.rootStorageFolder);
         } catch (IOException e) {
             throw new RuntimeException("Cannot initialize storage", e);
@@ -30,32 +27,42 @@ public class StorageServiceImpl implements StorageService {
 
     @Override
     public String storeFile(MultipartFile file, String subFolder) {
-        if (file.isEmpty()) {
-            return null;
-        }
-        // This logic remains the same
-        Path destinationFolder = this.rootStorageFolder.resolve(subFolder).normalize();
         try {
+            if (file == null || file.isEmpty()) {
+                throw new IllegalArgumentException("File rỗng");
+            }
+
+            // Tạo thư mục uploads/<subFolder> nếu chưa có
+            Path destinationFolder = (subFolder == null || subFolder.isBlank())
+                    ? this.rootStorageFolder
+                    : this.rootStorageFolder.resolve(subFolder).normalize();
             Files.createDirectories(destinationFolder);
+
+            // Tạo tên file ngắn gọn + giữ phần mở rộng (nếu có)
+            String ext = FilenameUtils.getExtension(file.getOriginalFilename());
+            String base = UUID.randomUUID().toString().replace("-", "");
+            String generatedFileName = (ext == null || ext.isBlank())
+                    ? base
+                    : base + "." + ext.toLowerCase();
+
+            Path destinationFilePath = destinationFolder.resolve(generatedFileName).normalize();
+
+            // Sao chép nội dung (ghi đè nếu trùng)
+            try (InputStream inputStream = file.getInputStream()) {
+                Files.copy(inputStream, destinationFilePath, StandardCopyOption.REPLACE_EXISTING);
+            }
+
+            // QUAN TRỌNG: Trả về CHỈ TÊN FILE để ghép "/uploads/<subFolder>/"+name ở view
+            return generatedFileName;
+
         } catch (IOException e) {
-            throw new RuntimeException("Cannot create subfolder for storage", e);
+            throw new RuntimeException("Failed to store file: " + e.getMessage(), e);
         }
-        String fileExtension = FilenameUtils.getExtension(file.getOriginalFilename());
-        String generatedFileName = UUID.randomUUID().toString().replace("-", "") + "." + fileExtension;
-        Path destinationFilePath = destinationFolder.resolve(generatedFileName).normalize();
-        try (InputStream inputStream = file.getInputStream()) {
-            Files.copy(inputStream, destinationFilePath, StandardCopyOption.REPLACE_EXISTING);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to store file.", e);
-        }
-        return subFolder + "/" + generatedFileName;
     }
 
     @Override
     public void deleteFile(String filePath) {
-        if (filePath == null || filePath.isEmpty()) {
-            return;
-        }
+        if (filePath == null || filePath.isBlank()) return;
         try {
             Path file = this.rootStorageFolder.resolve(filePath).normalize();
             Files.deleteIfExists(file);

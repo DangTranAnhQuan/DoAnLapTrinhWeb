@@ -9,7 +9,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
-public class GioHangId implements Serializable {
+public class CartId implements Serializable {
     private Integer nguoiDung;
     private Integer sanPham;
 }

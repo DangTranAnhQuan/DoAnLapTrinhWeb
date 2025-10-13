@@ -23,4 +23,10 @@ public class Rating {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MaNguoiDung")
     private User nguoiDung;
+
+    @Column(name = "ImageUrl")
+    private String imageUrl;
+
+    @Column(name = "VideoUrl")
+    private String videoUrl;
 }

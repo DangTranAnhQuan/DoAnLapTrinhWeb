@@ -1,5 +1,6 @@
 package nhom17.OneShop.service.impl;
 
+import nhom17.OneShop.entity.Brand;
 import nhom17.OneShop.entity.Category;
 import nhom17.OneShop.entity.Product;
 import nhom17.OneShop.entity.Brand;
@@ -21,11 +22,10 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
-import java.math.BigDecimal;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
@@ -66,8 +66,6 @@ public class ProductServiceImpl implements ProductService {
         if (brandId != null) {
             spec = spec.and(ProductSpecification.inBrand(brandId));
         }
-
-        // 3. Thực thi query
         return productRepository.findAll(spec, pageable);
     }
 
@@ -140,29 +138,37 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Page<Product> searchUserProducts(Integer categoryId, BigDecimal minPrice, BigDecimal maxPrice, String sortOption, int page, int size) {
+    public Page<Product> searchUserProducts(Integer categoryId, BigDecimal minPrice, BigDecimal maxPrice, String sortOption, List<Integer> brandIds, int page, int size) {
         int pageNumber = page > 0 ? page - 1 : 0;
 
         Sort sort;
-        // ... (code switch/case để tạo Sort giữ nguyên như cũ)
-        if (sortOption == null || sortOption.isEmpty()) {
+        if (sortOption == null || sortOption.isEmpty() || sortOption.equals("newest")) {
             sort = Sort.by("ngayTao").descending();
         } else {
-             switch (sortOption) {
-                case "price_asc": sort = Sort.by("giaBan").ascending(); break;
-                case "price_desc": sort = Sort.by("giaBan").descending(); break;
-                case "oldest": sort = Sort.by("ngayTao").ascending(); break;
-                case "newest": default: sort = Sort.by("ngayTao").descending(); break;
+            switch (sortOption) {
+                case "price_asc":
+                    sort = Sort.by("giaBan").ascending();
+                    break;
+                case "price_desc":
+                    sort = Sort.by("giaBan").descending();
+                    break;
+                case "oldest":
+                    sort = Sort.by("ngayTao").ascending();
+                    break;
+                default:
+                    sort = Sort.by("ngayTao").descending();
+                    break;
             }
         }
 
         Pageable pageable = PageRequest.of(pageNumber, size, sort);
 
-        // Sử dụng Specification để tạo câu truy vấn động
+        // Bắt đầu câu truy vấn với điều kiện cơ bản là sản phẩm phải được kích hoạt
         Specification<Product> spec = (root, query, cb) -> cb.isTrue(root.get("kichHoat"));
 
+        // Thêm các điều kiện lọc nếu chúng tồn tại
         if (categoryId != null) {
-            spec = spec.and((root, query, cb) -> cb.equal(root.get("danhMuc").get("maDanhMuc"), categoryId));
+            spec = spec.and(ProductSpecification.inCategory(categoryId));
         }
         if (minPrice != null) {
             spec = spec.and((root, query, cb) -> cb.greaterThanOrEqualTo(root.get("giaBan"), minPrice));
@@ -170,8 +176,16 @@ public class ProductServiceImpl implements ProductService {
         if (maxPrice != null) {
             spec = spec.and((root, query, cb) -> cb.lessThanOrEqualTo(root.get("giaBan"), maxPrice));
         }
+        if (brandIds != null && !brandIds.isEmpty()) {
+            spec = spec.and(ProductSpecification.inBrands(brandIds));
+        }
 
         return productRepository.findAll(spec, pageable);
     }
-
+    @Override
+    public Page<Product> searchProductsForUser(String keyword, int page, int size) {
+        // Sắp xếp theo ngày tạo mới nhất làm mặc định
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("ngayTao").descending());
+        return productRepository.searchForUser(keyword, pageable);
+    }
 }

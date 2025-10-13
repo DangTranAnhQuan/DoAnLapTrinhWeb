@@ -8,6 +8,7 @@ import nhom17.OneShop.repository.OrderStatusHistoryRepository;
 import nhom17.OneShop.request.DashboardDataDTO;
 import nhom17.OneShop.request.OrderUpdateRequest;
 import nhom17.OneShop.request.TopSellingProductDTO;
+import nhom17.OneShop.repository.UserRepository;
 import nhom17.OneShop.service.OrderService;
 import nhom17.OneShop.specification.OrderSpecification;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -147,5 +151,33 @@ public class OrderServiceImpl implements OrderService {
         data.setRevenueByCategoryData(revenueByCategoryRaw.stream().map(row -> new BigDecimal(row[1].toString())).collect(Collectors.toList()));
 
         return data;
+    }
+
+//    User
+    @Autowired private UserRepository nguoiDungRepository;
+
+    @Override
+    public List<Order> findOrdersForCurrentUser() {
+        User currentUser = getCurrentUser();
+        return orderRepository.findByNguoiDungOrderByNgayDatDesc(currentUser);
+    }
+
+    @Override
+    public Order findOrderByIdForCurrentUser(Long orderId) {
+        User currentUser = getCurrentUser();
+        Order order = orderRepository.findByIdWithDetails(orderId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng."));
+
+        // Kiểm tra bảo mật: đảm bảo đơn hàng này thuộc về người dùng đang đăng nhập
+        if (!order.getNguoiDung().getMaNguoiDung().equals(currentUser.getMaNguoiDung())) {
+            throw new AccessDeniedException("Bạn không có quyền xem đơn hàng này.");
+        }
+        return order;
+    }
+
+    private User getCurrentUser() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String username = ((UserDetails) principal).getUsername();
+        return nguoiDungRepository.findByEmail(username).orElseThrow();
     }
 }

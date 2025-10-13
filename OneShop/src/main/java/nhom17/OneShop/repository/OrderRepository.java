@@ -3,6 +3,7 @@ package nhom17.OneShop.repository;
 import nhom17.OneShop.entity.Order;
 import nhom17.OneShop.request.TopSellingProductDTO;
 import org.springframework.data.domain.Pageable;
+import nhom17.OneShop.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -11,9 +12,15 @@ import org.springframework.data.repository.query.Param;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecificationExecutor<Order> {
+    List<Order> findByNguoiDungOrderByNgayDatDesc(User nguoiDung);
+    @Query("SELECT d FROM DonHang d LEFT JOIN FETCH d.donHangChiTiets WHERE d.maDonHang = :orderId")
+    Optional<Order> findByIdWithDetails(@Param("orderId") Long orderId);
 
+
+//    Admin
     boolean existsByNguoiDung_MaNguoiDung(Integer userId);
 
     @Query(value = "SELECT COALESCE(SUM(o.TongTien), 0), COUNT(o.MaDonHang) " +

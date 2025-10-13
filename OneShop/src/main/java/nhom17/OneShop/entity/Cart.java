@@ -3,14 +3,13 @@ package nhom17.OneShop.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.Formula;
-
 import java.math.BigDecimal;
 
 @Data
 @Entity
 @Table(name = "GioHang")
-@IdClass(GioHangId.class)
-public class GioHang {
+@IdClass(CartId.class)
+public class Cart {
     private Integer soLuong;
     private BigDecimal donGia;
 

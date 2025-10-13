@@ -8,9 +8,11 @@ import nhom17.OneShop.exception.NotFoundException;
 import nhom17.OneShop.repository.MembershipTierRepository;
 import nhom17.OneShop.repository.OrderRepository;
 import nhom17.OneShop.repository.RoleRepository;
+import nhom17.OneShop.entity.Role;
 import nhom17.OneShop.repository.UserRepository;
 import nhom17.OneShop.request.UserRequest;
 import nhom17.OneShop.service.StorageService;
+import nhom17.OneShop.request.SignUpRequest;
 import nhom17.OneShop.service.UserService;
 import nhom17.OneShop.specification.UserSpecification;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +22,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -32,10 +35,10 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserRepository userRepository;
-    @Autowired private
-    RoleRepository roleRepository;
-    @Autowired private
-    MembershipTierRepository membershipTierRepository;
+    @Autowired
+    private RoleRepository roleRepository;
+    @Autowired
+    private MembershipTierRepository membershipTierRepository;
     @Autowired
     private StorageService storageService;
     @Autowired
@@ -151,5 +154,37 @@ public class UserServiceImpl implements UserService {
             storageService.deleteFile(userToDelete.getAnhDaiDien());
         }
         userRepository.delete(userToDelete);
+    }
+
+
+//    User
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Override
+    public User registerNewUser(SignUpRequest signUpRequest) {
+        // Kiểm tra xem email đã tồn tại chưa
+        if (userRepository.findByEmail(signUpRequest.getEmail()).isPresent()) {
+            throw new RuntimeException("Email đã tồn tại: " + signUpRequest.getEmail());
+        }
+
+        if (userRepository.findByTenDangNhap(signUpRequest.getTenDangNhap()).isPresent()) {
+            throw new RuntimeException("Tên đăng nhập đã tồn tại: " + signUpRequest.getTenDangNhap());
+        }
+
+        User newUser = new User();
+        newUser.setHoTen(signUpRequest.getHoTen());
+        newUser.setEmail(signUpRequest.getEmail());
+        newUser.setTenDangNhap(signUpRequest.getTenDangNhap());
+        // ✅ MÃ HÓA MẬT KHẨU TRƯỚC KHI LƯU
+        newUser.setMatKhau(passwordEncoder.encode(signUpRequest.getPassword()));
+
+        // Thiết lập vai trò mặc định cho người dùng mới là "USER"
+        Role userRole = new Role();
+        userRole.setMaVaiTro(2); // Giả sử ID của vai trò "User" là 2
+        newUser.setVaiTro(userRole);
+        newUser.setTrangThai(1); // Kích hoạt tài khoản
+
+        return userRepository.save(newUser);
     }
 }
