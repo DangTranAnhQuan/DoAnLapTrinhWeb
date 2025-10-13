@@ -113,10 +113,10 @@
 //}
 package nhom17.OneShop.controller;
 
-import nhom17.OneShop.entity.DiaChi;
-import nhom17.OneShop.entity.NguoiDung;
-import nhom17.OneShop.repository.DiaChiRepository;
-import nhom17.OneShop.repository.NguoiDungRepository;
+import nhom17.OneShop.entity.Address;
+import nhom17.OneShop.entity.User;
+import nhom17.OneShop.repository.AddressRepository;
+import nhom17.OneShop.repository.UserRepository;
 import nhom17.OneShop.service.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -133,8 +133,8 @@ import java.util.List;
 @Controller
 public class MyAccountController {
 
-    @Autowired private NguoiDungRepository nguoiDungRepository;
-    @Autowired private DiaChiRepository diaChiRepository;
+    @Autowired private UserRepository nguoiDungRepository;
+    @Autowired private AddressRepository diaChiRepository;
     @Autowired private PasswordEncoder passwordEncoder;
     @Autowired private StorageService storageService;
 
@@ -142,8 +142,8 @@ public class MyAccountController {
     @GetMapping("/my-account")
     public String myAccountPage(Model model,
                                 @RequestParam(name = "tab", required = false, defaultValue = "account") String activeTab) {
-        NguoiDung currentUser = getCurrentUser();
-        List<DiaChi> addresses = diaChiRepository.findByNguoiDung_MaNguoiDung(currentUser.getMaNguoiDung());
+        User currentUser = getCurrentUser();
+        List<Address> addresses = diaChiRepository.findByNguoiDung_MaNguoiDung(currentUser.getMaNguoiDung());
         model.addAttribute("user", currentUser);
         model.addAttribute("addresses", addresses);
         model.addAttribute("activeTab", activeTab);
@@ -152,8 +152,8 @@ public class MyAccountController {
 
     // Update profile (ở tab account)
     @PostMapping("/my-account/update-details")
-    public String updateDetails(@ModelAttribute NguoiDung user, RedirectAttributes ra) {
-        NguoiDung currentUser = getCurrentUser();
+    public String updateDetails(@ModelAttribute User user, RedirectAttributes ra) {
+        User currentUser = getCurrentUser();
         currentUser.setHoTen(user.getHoTen());
         currentUser.setSoDienThoai(user.getSoDienThoai());
         nguoiDungRepository.save(currentUser);
@@ -167,7 +167,7 @@ public class MyAccountController {
                                  @RequestParam String newPassword,
                                  @RequestParam String confirmPassword,
                                  RedirectAttributes ra) {
-        NguoiDung currentUser = getCurrentUser();
+        User currentUser = getCurrentUser();
         if (!passwordEncoder.matches(currentPassword, currentUser.getMatKhau())) {
             ra.addFlashAttribute("error", "Mật khẩu hiện tại không đúng.");
             return "redirect:/my-account?tab=account";
@@ -185,14 +185,14 @@ public class MyAccountController {
     // Add address form
     @GetMapping("/my-account/add-address")
     public String showAddAddressForm(Model model) {
-        model.addAttribute("address", new DiaChi());
+        model.addAttribute("address", new Address());
         return "user/account/address-form";
     }
 
     // Save address (ở tab addresses)
     @PostMapping("/my-account/add-address")
-    public String saveNewAddress(@ModelAttribute DiaChi address, RedirectAttributes ra) {
-        NguoiDung currentUser = getCurrentUser();
+    public String saveNewAddress(@ModelAttribute Address address, RedirectAttributes ra) {
+        User currentUser = getCurrentUser();
         address.setNguoiDung(currentUser);
         diaChiRepository.save(address);
         ra.addFlashAttribute("success", "Thêm địa chỉ mới thành công!");
@@ -202,8 +202,8 @@ public class MyAccountController {
     // Delete address (ở tab addresses)
     @PostMapping("/my-account/delete-address/{id}")
     public String deleteAddress(@PathVariable("id") Integer addressId, RedirectAttributes ra) {
-        NguoiDung currentUser = getCurrentUser();
-        DiaChi address = diaChiRepository.findById(addressId).orElseThrow();
+        User currentUser = getCurrentUser();
+        Address address = diaChiRepository.findById(addressId).orElseThrow();
         if (address.getNguoiDung().getMaNguoiDung().equals(currentUser.getMaNguoiDung())) {
             diaChiRepository.deleteById(addressId);
             ra.addFlashAttribute("success", "Xóa địa chỉ thành công!");
@@ -225,7 +225,7 @@ public class MyAccountController {
         }
 
         try {
-            NguoiDung currentUser = getCurrentUser();
+            User currentUser = getCurrentUser();
 
             // Lưu file mới vào thư mục 'avatars'
             String fileName = storageService.storeFile(avatarFile, "avatars");
@@ -248,7 +248,7 @@ public class MyAccountController {
         return "redirect:/my-account?tab=account";
     }
 
-    private NguoiDung getCurrentUser() {
+    private User getCurrentUser() {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String username = ((UserDetails) principal).getUsername();
         return nguoiDungRepository.findByEmail(username).orElseThrow();

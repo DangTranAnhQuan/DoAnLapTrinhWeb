@@ -104,8 +104,8 @@
 package nhom17.OneShop.controller;
 
 import jakarta.servlet.http.HttpSession;
-import nhom17.OneShop.entity.NguoiDung;
-import nhom17.OneShop.repository.NguoiDungRepository;
+import nhom17.OneShop.entity.User;
+import nhom17.OneShop.repository.UserRepository;
 import nhom17.OneShop.service.OtpService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -121,7 +121,7 @@ public class ForgotPasswordController {
 
     private static final String ATTR_OTP_VERIFIED = "otpVerified";
 
-    @Autowired private NguoiDungRepository nguoiDungRepository;
+    @Autowired private UserRepository nguoiDungRepository;
     @Autowired private OtpService otpService;
     @Autowired private PasswordEncoder passwordEncoder;
 
@@ -216,7 +216,7 @@ public class ForgotPasswordController {
             return "user/account/reset-password";
         }
 
-        NguoiDung user = nguoiDungRepository.findByEmail(email).orElse(null);
+        User user = nguoiDungRepository.findByEmail(email).orElse(null);
         if (user == null) {
             return "redirect:/forgot-password";
         }

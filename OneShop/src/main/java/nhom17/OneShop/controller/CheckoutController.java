@@ -138,11 +138,11 @@
 package nhom17.OneShop.controller;
 
 import jakarta.servlet.http.HttpSession;
-import nhom17.OneShop.entity.DiaChi;
-import nhom17.OneShop.entity.GioHang;
-import nhom17.OneShop.entity.NguoiDung;
-import nhom17.OneShop.repository.DiaChiRepository;
-import nhom17.OneShop.repository.NguoiDungRepository;
+import nhom17.OneShop.entity.Address;
+import nhom17.OneShop.entity.Cart;
+import nhom17.OneShop.entity.User;
+import nhom17.OneShop.repository.AddressRepository;
+import nhom17.OneShop.repository.UserRepository;
 import nhom17.OneShop.service.CartService;
 import nhom17.OneShop.service.CheckoutService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -163,29 +163,29 @@ public class CheckoutController {
 
     @Autowired private CartService cartService;
     @Autowired private CheckoutService checkoutService;
-    @Autowired private DiaChiRepository diaChiRepository;
-    @Autowired private NguoiDungRepository nguoiDungRepository;
+    @Autowired private AddressRepository diaChiRepository;
+    @Autowired private UserRepository nguoiDungRepository;
 
     // Trang checkout: hiển thị địa chỉ + tóm tắt đơn + lựa chọn phương thức thanh toán
     @GetMapping("/checkout")
     public String showCheckoutPage(Model model, HttpSession session) {
-        List<GioHang> cartItems = cartService.getCartItems();
+        List<Cart> cartItems = cartService.getCartItems();
         if (cartItems.isEmpty()) {
             return "redirect:/cart";
         }
 
-        NguoiDung currentUser = getCurrentUser();
-        List<DiaChi> addresses = diaChiRepository.findByNguoiDung_MaNguoiDung(currentUser.getMaNguoiDung());
+        User currentUser = getCurrentUser();
+        List<Address> addresses = diaChiRepository.findByNguoiDung_MaNguoiDung(currentUser.getMaNguoiDung());
 
         BigDecimal subtotal = cartItems.stream()
-                .map(GioHang::getThanhTien)
+                .map(Cart::getThanhTien)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         BigDecimal couponDiscount = (BigDecimal) session.getAttribute("cartDiscount");
         if (couponDiscount == null) couponDiscount = BigDecimal.ZERO;
 
         BigDecimal membershipDiscount = BigDecimal.ZERO;
-        Optional<NguoiDung> userOpt = nguoiDungRepository.findByEmailWithMembership(currentUser.getEmail());
+        Optional<User> userOpt = nguoiDungRepository.findByEmailWithMembership(currentUser.getEmail());
         if (userOpt.isPresent() && userOpt.get().getHangThanhVien() != null) {
             BigDecimal percent = userOpt.get().getHangThanhVien().getPhanTramGiamGia();
             if (percent != null && percent.compareTo(BigDecimal.ZERO) > 0) {
@@ -248,7 +248,7 @@ public class CheckoutController {
     // Trang sửa địa chỉ trong flow checkout
     @GetMapping("/checkout/edit-address/{id}")
     public String showEditAddressForm(@PathVariable("id") Integer addressId, Model model) {
-        DiaChi address = diaChiRepository.findById(addressId)
+        Address address = diaChiRepository.findById(addressId)
                 .orElseThrow(() -> new RuntimeException("Địa chỉ không tồn tại."));
         model.addAttribute("address", address);
         return "user/shop/edit-address";
@@ -256,7 +256,7 @@ public class CheckoutController {
 
     // Lưu địa chỉ đã sửa (hỗ trợ 'return' để quay lại /my-account?tab=addresses)
     @PostMapping("/checkout/save-address")
-    public String saveAddress(@ModelAttribute DiaChi address,
+    public String saveAddress(@ModelAttribute Address address,
                               @RequestParam(value = "return", required = false) String returnUrl,
                               RedirectAttributes ra) {
         diaChiRepository.save(address);
@@ -283,7 +283,7 @@ public class CheckoutController {
     }
     // =========================================================================================
 
-    private NguoiDung getCurrentUser() {
+    private User getCurrentUser() {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String username = ((UserDetails) principal).getUsername();
         return nguoiDungRepository.findByEmail(username).orElseThrow();

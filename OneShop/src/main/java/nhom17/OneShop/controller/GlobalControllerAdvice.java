@@ -1,8 +1,8 @@
 package nhom17.OneShop.controller;
 
-import nhom17.OneShop.entity.GioHang;
-import nhom17.OneShop.entity.NguoiDung;
-import nhom17.OneShop.repository.NguoiDungRepository;
+import nhom17.OneShop.entity.Cart;
+import nhom17.OneShop.entity.User;
+import nhom17.OneShop.repository.UserRepository;
 import nhom17.OneShop.service.CartService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -19,10 +19,10 @@ public class GlobalControllerAdvice {
     @Autowired
     private CartService cartService;
     @Autowired
-    private NguoiDungRepository nguoiDungRepository;
+    private UserRepository nguoiDungRepository;
 
     @ModelAttribute("globalCartItems")
-    public List<GioHang> getGlobalCartItems() {
+    public List<Cart> getGlobalCartItems() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated() && !"anonymousUser".equals(authentication.getPrincipal())) {
             try {
@@ -34,7 +34,7 @@ public class GlobalControllerAdvice {
         return Collections.emptyList();
     }
     @ModelAttribute("globalCurrentUser")
-    public NguoiDung getCurrentUser() {
+    public User getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated() && !"anonymousUser".equals(authentication.getPrincipal())) {
             String email = authentication.getName();

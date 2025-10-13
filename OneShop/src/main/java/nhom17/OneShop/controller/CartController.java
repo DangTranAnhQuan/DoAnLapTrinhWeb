@@ -1,9 +1,9 @@
 package nhom17.OneShop.controller;
 
 import jakarta.servlet.http.HttpSession;
-import nhom17.OneShop.entity.GioHang;
-import nhom17.OneShop.entity.KhuyenMai;
-import nhom17.OneShop.repository.KhuyenMaiRepository;
+import nhom17.OneShop.entity.Cart;
+import nhom17.OneShop.entity.Voucher;
+import nhom17.OneShop.repository.VoucherRepository;
 import nhom17.OneShop.service.CartService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -24,15 +24,15 @@ public class CartController {
     @Autowired
     private CartService cartService;
     @Autowired
-    private KhuyenMaiRepository khuyenMaiRepository;
+    private VoucherRepository khuyenMaiRepository;
 
     @GetMapping("/cart")
     public String viewCart(Model model, HttpSession session) {
-        List<GioHang> cartItems = cartService.getCartItems();
+        List<Cart> cartItems = cartService.getCartItems();
         model.addAttribute("cartItems", cartItems);
 
         BigDecimal subtotal = cartItems.stream()
-                .map(GioHang::getThanhTien)
+                .map(Cart::getThanhTien)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         BigDecimal discount = (BigDecimal) session.getAttribute("cartDiscount");
@@ -75,10 +75,10 @@ public class CartController {
 
     @PostMapping("/cart/apply-coupon")
     public String applyCoupon(@RequestParam("coupon_code") String couponCode, HttpSession session, RedirectAttributes redirectAttributes) {
-        Optional<KhuyenMai> couponOpt = khuyenMaiRepository.findByMaKhuyenMaiAndTrangThai(couponCode, 1); // 1 = Active
+        Optional<Voucher> couponOpt = khuyenMaiRepository.findByMaKhuyenMaiAndTrangThai(couponCode, 1); // 1 = Active
 
         if (couponOpt.isPresent() && couponOpt.get().getKetThucLuc().isAfter(LocalDateTime.now())) {
-            KhuyenMai coupon = couponOpt.get();
+            Voucher coupon = couponOpt.get();
             session.setAttribute("cartDiscount", coupon.getGiaTri());
             session.setAttribute("appliedCouponCode", coupon.getMaKhuyenMai());
             redirectAttributes.addFlashAttribute("success", "Áp dụng mã giảm giá thành công!");

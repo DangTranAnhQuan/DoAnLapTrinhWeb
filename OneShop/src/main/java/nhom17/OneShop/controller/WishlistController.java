@@ -1,9 +1,9 @@
 package nhom17.OneShop.controller;
 
-import nhom17.OneShop.entity.NguoiDung;
+import nhom17.OneShop.entity.User;
 import nhom17.OneShop.entity.Product;
-import nhom17.OneShop.entity.SanPhamYeuThich;
-import nhom17.OneShop.repository.NguoiDungRepository;
+import nhom17.OneShop.entity.WishList;
+import nhom17.OneShop.repository.UserRepository;
 import nhom17.OneShop.repository.ProductRepository;
 import nhom17.OneShop.repository.WishlistRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,14 +27,14 @@ public class WishlistController {
     @Autowired
     private WishlistRepository wishlistRepository;
     @Autowired
-    private NguoiDungRepository nguoiDungRepository;
+    private UserRepository nguoiDungRepository;
     @Autowired
     private ProductRepository productRepository;
 
     @GetMapping("/wishlist")
     public String viewWishlist(Model model) {
-        NguoiDung currentUser = getCurrentUser();
-        List<SanPhamYeuThich> wishlistItems = wishlistRepository.findByNguoiDung(currentUser);
+        User currentUser = getCurrentUser();
+        List<WishList> wishlistItems = wishlistRepository.findByNguoiDung(currentUser);
         model.addAttribute("wishlistItems", wishlistItems);
         return "user/shop/wishlist";
     }
@@ -43,10 +43,10 @@ public class WishlistController {
     @ResponseBody
     public ResponseEntity<?> toggleWishlist(@PathVariable("productId") Integer productId) {
         try {
-            NguoiDung currentUser = getCurrentUser();
+            User currentUser = getCurrentUser();
             Product product = productRepository.findById(productId)
                     .orElseThrow(() -> new RuntimeException("Sản phẩm không tồn tại"));
-            Optional<SanPhamYeuThich> wishlistItemOpt = wishlistRepository.findByNguoiDungAndSanPham_MaSanPham(currentUser, productId);
+            Optional<WishList> wishlistItemOpt = wishlistRepository.findByNguoiDungAndSanPham_MaSanPham(currentUser, productId);
 
             String status;
 
@@ -54,7 +54,7 @@ public class WishlistController {
                 wishlistRepository.delete(wishlistItemOpt.get());
                 status = "removed";
             } else {
-                SanPhamYeuThich newItem = new SanPhamYeuThich();
+                WishList newItem = new WishList();
                 newItem.setNguoiDung(currentUser);
                 newItem.setSanPham(product);
                 wishlistRepository.save(newItem);
@@ -71,7 +71,7 @@ public class WishlistController {
         }
     }
 
-    private NguoiDung getCurrentUser() {
+    private User getCurrentUser() {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (principal instanceof UserDetails) {
             String username = ((UserDetails) principal).getUsername();

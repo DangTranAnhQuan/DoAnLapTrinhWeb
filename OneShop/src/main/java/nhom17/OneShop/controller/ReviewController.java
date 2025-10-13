@@ -1,9 +1,9 @@
 package nhom17.OneShop.controller;
 
-import nhom17.OneShop.entity.NguoiDung;
+import nhom17.OneShop.entity.User;
 import nhom17.OneShop.entity.Product;
 import nhom17.OneShop.entity.Rating;
-import nhom17.OneShop.repository.NguoiDungRepository;
+import nhom17.OneShop.repository.UserRepository;
 import nhom17.OneShop.repository.ProductRepository;
 import nhom17.OneShop.repository.RatingRepository;
 import nhom17.OneShop.service.StorageService;
@@ -26,7 +26,7 @@ public class ReviewController {
     private static final long MAX_SIZE = 20L * 1024 * 1024; // 20MB
 
     @Autowired private RatingRepository ratingRepository;
-    @Autowired private NguoiDungRepository nguoiDungRepository;
+    @Autowired private UserRepository nguoiDungRepository;
     @Autowired private ProductRepository productRepository;
     @Autowired private StorageService storageService;
 
@@ -47,7 +47,7 @@ public class ReviewController {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
             String email = userDetails.getUsername();
 
-            NguoiDung currentUser = nguoiDungRepository.findByEmail(email)
+            User currentUser = nguoiDungRepository.findByEmail(email)
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng."));
 
             Product product = productRepository.findById(productId)

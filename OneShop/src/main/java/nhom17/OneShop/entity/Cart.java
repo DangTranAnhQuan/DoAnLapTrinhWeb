@@ -8,8 +8,8 @@ import java.math.BigDecimal;
 @Data
 @Entity
 @Table(name = "GioHang")
-@IdClass(GioHangId.class)
-public class GioHang {
+@IdClass(CartId.class)
+public class Cart {
     private Integer soLuong;
     private BigDecimal donGia;
 
@@ -19,7 +19,7 @@ public class GioHang {
     @Id
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MaNguoiDung")
-    private NguoiDung nguoiDung;
+    private User nguoiDung;
 
     @Id
     @ManyToOne(fetch = FetchType.LAZY)

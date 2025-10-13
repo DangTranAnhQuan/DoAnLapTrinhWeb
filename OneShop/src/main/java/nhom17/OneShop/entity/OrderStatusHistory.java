@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 @Data
 @Entity
 @Table(name = "LichSuTrangThaiDon")
-public class LichSuTrangThaiDon {
+public class OrderStatusHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long maLichSu;
@@ -20,9 +20,9 @@ public class LichSuTrangThaiDon {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MaDonHang")
-    private DonHang donHang;
+    private Order donHang;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MaQuanTriVien")
-    private NguoiDung nguoiThucHien;
+    private User nguoiThucHien;
 }

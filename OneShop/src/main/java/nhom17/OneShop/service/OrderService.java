@@ -1,10 +1,10 @@
 package nhom17.OneShop.service;
 
-import nhom17.OneShop.entity.DonHang;
+import nhom17.OneShop.entity.Order;
 import java.util.List;
 
 public interface OrderService {
-    List<DonHang> findOrdersForCurrentUser();
-    DonHang findOrderByIdForCurrentUser(Long orderId);
+    List<Order> findOrdersForCurrentUser();
+    Order findOrderByIdForCurrentUser(Long orderId);
 }
 

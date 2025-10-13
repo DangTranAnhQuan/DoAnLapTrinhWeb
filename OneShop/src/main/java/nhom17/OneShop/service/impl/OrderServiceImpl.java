@@ -1,9 +1,9 @@
 package nhom17.OneShop.service.impl;
 
-import nhom17.OneShop.entity.DonHang;
-import nhom17.OneShop.entity.NguoiDung;
-import nhom17.OneShop.repository.DonHangRepository;
-import nhom17.OneShop.repository.NguoiDungRepository;
+import nhom17.OneShop.entity.Order;
+import nhom17.OneShop.entity.User;
+import nhom17.OneShop.repository.OrderRepository;
+import nhom17.OneShop.repository.UserRepository;
 import nhom17.OneShop.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
@@ -16,19 +16,19 @@ import java.util.List;
 @Service
 public class OrderServiceImpl implements OrderService {
 
-    @Autowired private DonHangRepository donHangRepository;
-    @Autowired private NguoiDungRepository nguoiDungRepository;
+    @Autowired private OrderRepository donHangRepository;
+    @Autowired private UserRepository nguoiDungRepository;
 
     @Override
-    public List<DonHang> findOrdersForCurrentUser() {
-        NguoiDung currentUser = getCurrentUser();
+    public List<Order> findOrdersForCurrentUser() {
+        User currentUser = getCurrentUser();
         return donHangRepository.findByNguoiDungOrderByNgayDatDesc(currentUser);
     }
 
     @Override
-    public DonHang findOrderByIdForCurrentUser(Long orderId) {
-        NguoiDung currentUser = getCurrentUser();
-        DonHang order = donHangRepository.findByIdWithDetails(orderId)
+    public Order findOrderByIdForCurrentUser(Long orderId) {
+        User currentUser = getCurrentUser();
+        Order order = donHangRepository.findByIdWithDetails(orderId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng."));
 
         // Kiểm tra bảo mật: đảm bảo đơn hàng này thuộc về người dùng đang đăng nhập
@@ -38,7 +38,7 @@ public class OrderServiceImpl implements OrderService {
         return order;
     }
 
-    private NguoiDung getCurrentUser() {
+    private User getCurrentUser() {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String username = ((UserDetails) principal).getUsername();
         return nguoiDungRepository.findByEmail(username).orElseThrow();

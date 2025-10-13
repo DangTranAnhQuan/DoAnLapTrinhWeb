@@ -6,8 +6,8 @@ import lombok.Data;
 @Data
 @Entity
 @Table(name = "SanPhamYeuThich")
-@IdClass(SanPhamYeuThichId.class)
-public class SanPhamYeuThich {
+@IdClass(WishListId.class)
+public class WishList {
 
     @Id
     @ManyToOne(fetch = FetchType.LAZY)
@@ -17,5 +17,5 @@ public class SanPhamYeuThich {
     @Id
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MaNguoiDung")
-    private NguoiDung nguoiDung;
+    private User nguoiDung;
 }

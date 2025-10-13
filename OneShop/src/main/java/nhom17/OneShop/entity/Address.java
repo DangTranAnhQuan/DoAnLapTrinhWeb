@@ -6,7 +6,7 @@ import lombok.Data;
 @Data
 @Entity
 @Table(name = "DiaChi")
-public class DiaChi {
+public class Address {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer maDiaChi;
@@ -19,5 +19,5 @@ public class DiaChi {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MaNguoiDung", nullable = false)
-    private NguoiDung nguoiDung;
+    private User nguoiDung;
 }

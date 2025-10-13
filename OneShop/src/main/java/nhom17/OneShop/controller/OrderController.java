@@ -1,8 +1,8 @@
 package nhom17.OneShop.controller;
 
-import nhom17.OneShop.entity.DonHang;
-import nhom17.OneShop.entity.NguoiDung;
-import nhom17.OneShop.repository.NguoiDungRepository;
+import nhom17.OneShop.entity.Order;
+import nhom17.OneShop.entity.User;
+import nhom17.OneShop.repository.UserRepository;
 import nhom17.OneShop.service.OrderService; // Thêm import
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -15,12 +15,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 @Controller
 public class OrderController {
 
-    @Autowired private NguoiDungRepository nguoiDungRepository;
+    @Autowired private UserRepository nguoiDungRepository;
     @Autowired private OrderService orderService;
 
     @GetMapping("/my-orders")
     public String myOrders(Model model) {
-        NguoiDung currentUser = getCurrentUser();
+        User currentUser = getCurrentUser();
         model.addAttribute("user", currentUser);
 
         model.addAttribute("orders", orderService.findOrdersForCurrentUser());
@@ -31,7 +31,7 @@ public class OrderController {
     @GetMapping("/order-details/{id}")
     public String orderDetails(@PathVariable("id") Long id, Model model) {
         try {
-            DonHang order = orderService.findOrderByIdForCurrentUser(id);
+            Order order = orderService.findOrderByIdForCurrentUser(id);
             model.addAttribute("order", order);
             return "user/account/order-details";
         } catch (Exception e) {
@@ -39,7 +39,7 @@ public class OrderController {
         }
     }
 
-    private NguoiDung getCurrentUser() {
+    private User getCurrentUser() {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String username = ((UserDetails) principal).getUsername();
         return nguoiDungRepository.findByEmail(username).orElseThrow();

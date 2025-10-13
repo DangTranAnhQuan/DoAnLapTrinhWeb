@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Data
 @Entity
 @Table(name = "DonHang")
-public class DonHang {
+public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long maDonHang;
@@ -31,16 +31,16 @@ public class DonHang {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MaNguoiDung")
-    private NguoiDung nguoiDung;
+    private User nguoiDung;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MaKhuyenMai")
-    private KhuyenMai khuyenMai;
+    private Voucher khuyenMai;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MaDiaChiNhan")
-    private DiaChi diaChi;
+    private Address diaChi;
 
     @OneToMany(mappedBy = "donHang", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<DonHang_ChiTiet> donHangChiTiets;
+    private List<OrderDetail> donHangChiTiets;
 }

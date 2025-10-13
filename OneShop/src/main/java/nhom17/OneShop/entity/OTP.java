@@ -9,7 +9,7 @@ import java.util.UUID;
 @Data
 @Entity
 @Table(name = "MaXacThuc")
-public class MaXacThuc {
+public class OTP {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID maOtp;
@@ -21,5 +21,5 @@ public class MaXacThuc {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MaNguoiDung", nullable = false)
-    private NguoiDung nguoiDung;
+    private User nguoiDung;
 }

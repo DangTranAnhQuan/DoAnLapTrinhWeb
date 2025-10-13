@@ -1,8 +1,8 @@
 package nhom17.OneShop.service.impl;
 
-import nhom17.OneShop.entity.NguoiDung;
-import nhom17.OneShop.entity.VaiTro;
-import nhom17.OneShop.repository.NguoiDungRepository;
+import nhom17.OneShop.entity.User;
+import nhom17.OneShop.entity.Role;
+import nhom17.OneShop.repository.UserRepository;
 import nhom17.OneShop.request.SignUpRequest;
 import nhom17.OneShop.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,13 +13,13 @@ import org.springframework.stereotype.Service;
 public class UserServiceImpl implements UserService {
 
     @Autowired
-    private NguoiDungRepository nguoiDungRepository;
+    private UserRepository nguoiDungRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Override
-    public NguoiDung registerNewUser(SignUpRequest signUpRequest) {
+    public User registerNewUser(SignUpRequest signUpRequest) {
         // Kiểm tra xem email đã tồn tại chưa
         if (nguoiDungRepository.findByEmail(signUpRequest.getEmail()).isPresent()) {
             throw new RuntimeException("Email đã tồn tại: " + signUpRequest.getEmail());
@@ -29,7 +29,7 @@ public class UserServiceImpl implements UserService {
             throw new RuntimeException("Tên đăng nhập đã tồn tại: " + signUpRequest.getTenDangNhap());
         }
 
-        NguoiDung newUser = new NguoiDung();
+        User newUser = new User();
         newUser.setHoTen(signUpRequest.getHoTen());
         newUser.setEmail(signUpRequest.getEmail());
         newUser.setTenDangNhap(signUpRequest.getTenDangNhap());
@@ -37,7 +37,7 @@ public class UserServiceImpl implements UserService {
         newUser.setMatKhau(passwordEncoder.encode(signUpRequest.getPassword()));
 
         // Thiết lập vai trò mặc định cho người dùng mới là "USER"
-        VaiTro userRole = new VaiTro();
+        Role userRole = new Role();
         userRole.setMaVaiTro(2); // Giả sử ID của vai trò "User" là 2
         newUser.setVaiTro(userRole);
         newUser.setTrangThai(1); // Kích hoạt tài khoản

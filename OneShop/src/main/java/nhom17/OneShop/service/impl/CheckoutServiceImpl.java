@@ -15,35 +15,34 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class CheckoutServiceImpl implements CheckoutService {
 
     @Autowired private CartService cartService;
-    @Autowired private NguoiDungRepository nguoiDungRepository;
-    @Autowired private DiaChiRepository diaChiRepository;
-    @Autowired private DonHangRepository donHangRepository;
-    @Autowired private DonHangChiTietRepository donHangChiTietRepository;
-    @Autowired private GioHangRepository gioHangRepository;
+    @Autowired private UserRepository nguoiDungRepository;
+    @Autowired private AddressRepository diaChiRepository;
+    @Autowired private OrderRepository donHangRepository;
+    @Autowired private OrderDetailRepository donHangChiTietRepository;
+    @Autowired private CartRepository gioHangRepository;
     @Autowired private InventoryRepository inventoryRepository;
-    @Autowired private KhuyenMaiRepository khuyenMaiRepository; // Thêm repo khuyến mãi
+    @Autowired private VoucherRepository khuyenMaiRepository; // Thêm repo khuyến mãi
     @Autowired private HttpSession session; // Thêm HttpSession để đọc dữ liệu session
 
     @Override
     @Transactional
     public void placeOrder(Integer diaChiId, String paymentMethod) {
-        NguoiDung currentUser = getCurrentUser();
-        List<GioHang> cartItems = cartService.getCartItems();
+        User currentUser = getCurrentUser();
+        List<Cart> cartItems = cartService.getCartItems();
         if (cartItems.isEmpty()) {
             throw new IllegalStateException("Giỏ hàng trống.");
         }
 
-        DiaChi shippingAddress = diaChiRepository.findById(diaChiId)
+        Address shippingAddress = diaChiRepository.findById(diaChiId)
                 .orElseThrow(() -> new RuntimeException("Địa chỉ không hợp lệ."));
 
         // Bắt đầu tạo đơn hàng
-        DonHang order = new DonHang();
+        Order order = new Order();
         order.setNguoiDung(currentUser);
         order.setNgayDat(LocalDateTime.now());
         order.setTrangThai("Đang xử lý");
@@ -52,7 +51,7 @@ public class CheckoutServiceImpl implements CheckoutService {
 
         order.setNgayTao(LocalDateTime.now());
 
-        BigDecimal subtotal = cartItems.stream().map(GioHang::getThanhTien).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal subtotal = cartItems.stream().map(Cart::getThanhTien).reduce(BigDecimal.ZERO, BigDecimal::add);
         order.setTienHang(subtotal);
         order.setPhiVanChuyen(BigDecimal.ZERO); // Tạm thời phí ship là 0
 
@@ -65,7 +64,7 @@ public class CheckoutServiceImpl implements CheckoutService {
         // Lấy mã coupon và gán vào đơn hàng
         String appliedCouponCode = (String) session.getAttribute("appliedCouponCode");
         if (appliedCouponCode != null) {
-            KhuyenMai km = khuyenMaiRepository.findById(appliedCouponCode).orElse(null);
+            Voucher km = khuyenMaiRepository.findById(appliedCouponCode).orElse(null);
             order.setKhuyenMai(km);
         }
 
@@ -91,11 +90,11 @@ public class CheckoutServiceImpl implements CheckoutService {
         String fullAddress = String.join(", ", shippingAddress.getSoNhaDuong(), shippingAddress.getPhuongXa(), shippingAddress.getQuanHuyen(), shippingAddress.getTinhThanh());
         order.setDiaChiNhan(fullAddress);
 
-        DonHang savedOrder = donHangRepository.save(order);
+        Order savedOrder = donHangRepository.save(order);
 
         // 2. Chuyển sản phẩm từ giỏ hàng sang chi tiết đơn hàng
-        for (GioHang cartItem : cartItems) {
-            DonHang_ChiTiet orderDetail = new DonHang_ChiTiet();
+        for (Cart cartItem : cartItems) {
+            OrderDetail orderDetail = new OrderDetail();
             orderDetail.setDonHang(savedOrder);
             orderDetail.setSanPham(cartItem.getSanPham());
             orderDetail.setSoLuong(cartItem.getSoLuong());
@@ -114,7 +113,7 @@ public class CheckoutServiceImpl implements CheckoutService {
         gioHangRepository.deleteAll(cartItems);
     }
 
-    private NguoiDung getCurrentUser() {
+    private User getCurrentUser() {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String username = ((UserDetails) principal).getUsername();
         return nguoiDungRepository.findByEmail(username)
