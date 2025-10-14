@@ -17,7 +17,7 @@ import java.util.Optional;
 public interface CartRepository extends JpaRepository<Cart, CartId> {
 
     Optional<Cart> findByNguoiDungAndSanPham(User nguoiDung, Product sanPham);
-    @Query("SELECT gh FROM GioHang gh JOIN FETCH gh.sanPham WHERE gh.nguoiDung = :nguoiDung")
+    @Query("SELECT gh FROM Cart gh JOIN FETCH gh.sanPham WHERE gh.nguoiDung = :nguoiDung")
     List<Cart> findByNguoiDungWithProduct(@Param("nguoiDung") User nguoiDung);
 
     @Transactional

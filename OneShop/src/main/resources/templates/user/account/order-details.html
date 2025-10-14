@@ -35,7 +35,8 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <tr th:each="detail : ${order.donHangChiTiets}">
+                            <!-- ✅ SỬA LẠI: donHangChiTiets -> orderDetails -->
+                            <tr th:each="detail : ${order.orderDetails}">
                                 <td th:text="${detail.tenSanPham}"></td>
                                 <td th:text="${#numbers.formatDecimal(detail.donGia, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></td>
                                 <td th:text="${detail.soLuong}"></td>

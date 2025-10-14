@@ -1,22 +1,15 @@
 package nhom17.OneShop.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import nhom17.OneShop.request.DashboardDataDTO;
 import nhom17.OneShop.service.OrderService;
-import nhom17.OneShop.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-
-import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+
 
 @Controller
 @RequestMapping("/admin")

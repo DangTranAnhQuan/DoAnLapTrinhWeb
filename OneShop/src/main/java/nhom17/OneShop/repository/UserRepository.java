@@ -22,6 +22,6 @@ public interface UserRepository extends JpaRepository<User, Integer>, JpaSpecifi
 
 //    User
     Optional<User> findByTenDangNhap(String tenDangNhap);
-    @Query("SELECT u FROM NguoiDung u LEFT JOIN FETCH u.hangThanhVien WHERE u.email = :email")
+    @Query("SELECT u FROM User u LEFT JOIN FETCH u.hangThanhVien WHERE u.email = :email")
     Optional<User> findByEmailWithMembership(@Param("email") String email);
 }

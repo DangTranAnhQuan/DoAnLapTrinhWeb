@@ -328,3 +328,56 @@ CREATE TABLE VanChuyen (
     FOREIGN KEY (MaNVC) REFERENCES NhaVanChuyen(MaNVC)
 );
 GO
+
+USE OneShop;
+GO
+
+-- Xóa bảng cũ nếu có
+IF OBJECT_ID('TinNhanChat', 'U') IS NOT NULL
+    DROP TABLE TinNhanChat;
+GO
+
+IF OBJECT_ID('PhienChat', 'U') IS NOT NULL
+    DROP TABLE PhienChat;
+GO
+
+-- Tạo lại bảng PhienChat
+CREATE TABLE PhienChat (
+    MaPhienChat NVARCHAR(100) PRIMARY KEY,
+    MaNguoiDung INT,                            
+    TenKhach NVARCHAR(150),                     
+    EmailKhach NVARCHAR(255),                   
+    TinNhanDauTien DATETIME2,                   
+    TinNhanCuoiCung DATETIME2,                  
+    TrangThai NVARCHAR(20) DEFAULT N'Đang mở'   
+        CHECK (TrangThai IN (N'Đang mở', N'Đã đóng')),
+    SoTinChuaDoc INT DEFAULT 0,                 
+    
+    FOREIGN KEY (MaNguoiDung) REFERENCES NguoiDung(MaNguoiDung),
+    INDEX idx_tin_nhan_cuoi (TinNhanCuoiCung DESC)
+);
+GO
+
+-- Tạo lại bảng TinNhanChat (QUAN TRỌNG: Có MaNguoiDung)
+CREATE TABLE TinNhanChat (
+    MaTinNhan BIGINT IDENTITY(1,1) PRIMARY KEY,
+    MaPhienChat NVARCHAR(100) NOT NULL,         
+    MaNguoiDung INT,                           
+    NoiDung NVARCHAR(MAX) NOT NULL,             
+    LoaiNguoiGui NVARCHAR(20) NOT NULL          
+        CHECK (LoaiNguoiGui IN (N'CUSTOMER', N'ADMIN')),
+    ThoiGian DATETIME2 DEFAULT SYSUTCDATETIME(),
+    DaXem BIT DEFAULT 0,                        
+    
+    FOREIGN KEY (MaPhienChat) REFERENCES PhienChat(MaPhienChat),
+    FOREIGN KEY (MaNguoiDung) REFERENCES NguoiDung(MaNguoiDung),  
+    INDEX idx_phien_chat (MaPhienChat, ThoiGian)
+);
+GO
+
+PRINT N'✅ Đã tạo lại bảng thành công!';
+GO
+
+-- Kiểm tra cấu trúc bảng
+EXEC sp_columns 'TinNhanChat';
+GO
