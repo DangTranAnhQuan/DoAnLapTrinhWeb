@@ -1,10 +1,8 @@
 package nhom17.OneShop.request;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.Data;
+import org.springframework.util.StringUtils;
 
 @Data
 public class UserRequest {
@@ -19,7 +17,6 @@ public class UserRequest {
     @Pattern(regexp = "^[a-zA-Z0-9_]+$", message = "Tên đăng nhập chỉ chứa chữ cái, số và dấu gạch dưới")
     private String tenDangNhap;
 
-    @Size(min = 6, message = "Mật khẩu phải có ít nhất 6 ký tự")
     private String matKhau;
 
     @NotBlank(message = "Họ tên không được để trống")
@@ -38,4 +35,20 @@ public class UserRequest {
     private Integer maVaiTro;
 
     private Integer maHangThanhVien;
+
+    @AssertTrue(message = "Mật khẩu phải có ít nhất 6 ký tự")
+    public boolean isPasswordValid() {
+        if (maNguoiDung != null && !StringUtils.hasText(matKhau)) {
+            return true;
+        }
+
+        if (maNguoiDung == null && !StringUtils.hasText(matKhau)) {
+            return false;
+        }
+
+        if (StringUtils.hasText(matKhau) && matKhau.length() < 6) {
+            return false;
+        }
+        return true;
+    }
 }
