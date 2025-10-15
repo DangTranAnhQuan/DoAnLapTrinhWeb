@@ -1,5 +1,6 @@
 package nhom17.OneShop.controller;
 
+import jakarta.validation.Valid;
 import nhom17.OneShop.entity.ShippingCarrier;
 import nhom17.OneShop.exception.DuplicateRecordException;
 import nhom17.OneShop.request.ShippingCarrierRequest;
@@ -8,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -26,21 +28,32 @@ public class ShippingCarrierController {
         Page<ShippingCarrier> carrierPage = shippingCarrierService.search(keyword, page, size);
         model.addAttribute("carrierPage", carrierPage);
         model.addAttribute("keyword", keyword);
-        model.addAttribute("carrier", new ShippingCarrierRequest());
+        if (!model.containsAttribute("carrier")) {
+            model.addAttribute("carrier", new ShippingCarrierRequest());
+        }
         return "admin/system/shipping-carriers";
     }
 
     @PostMapping("/save")
-    public String saveCarrier(@ModelAttribute ShippingCarrierRequest request,
+    public String saveCarrier(@Valid @ModelAttribute ShippingCarrierRequest request,
+                              BindingResult bindingResult,
                               RedirectAttributes redirectAttributes,
                               @RequestParam(required = false) String keyword,
                               @RequestParam(defaultValue = "1") int page,
                               @RequestParam(defaultValue = "5") int size) {
-        try {
-            shippingCarrierService.save(request);
-            redirectAttributes.addFlashAttribute("successMessage", "Lưu nhà vận chuyển thành công!");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        if (bindingResult.hasErrors()) {
+            redirectAttributes.addFlashAttribute("errorMessage", bindingResult.getAllErrors().get(0).getDefaultMessage());
+            redirectAttributes.addFlashAttribute("carrier", request);
+        }
+        else {
+            try {
+                shippingCarrierService.save(request);
+                redirectAttributes.addFlashAttribute("successMessage", "Lưu nhà vận chuyển thành công!");
+            }
+            catch (Exception e) {
+                redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+                redirectAttributes.addFlashAttribute("carrier", request);
+            }
         }
         redirectAttributes.addAttribute("keyword", keyword);
         redirectAttributes.addAttribute("page", page);

@@ -1,5 +1,6 @@
 package nhom17.OneShop.controller;
 
+import jakarta.validation.Valid;
 import nhom17.OneShop.entity.Voucher;
 import nhom17.OneShop.exception.DuplicateRecordException;
 import nhom17.OneShop.request.VoucherRequest;
@@ -8,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -48,7 +50,10 @@ public class VoucherController {
                                   @RequestParam(required = false) Integer status,
                                   @RequestParam(required = false) Integer filterKieuApDung) {
         VoucherRequest request = new VoucherRequest();
+        boolean isEditMode = false;
+
         if (id != null) {
+            isEditMode = true;
             Voucher voucher = voucherService.findById(id);
             request.setMaKhuyenMai(voucher.getMaKhuyenMai());
             request.setTenChienDich(voucher.getTenChienDich());
@@ -62,6 +67,7 @@ public class VoucherController {
             request.setGioiHanMoiNguoi(voucher.getGioiHanMoiNguoi());
             request.setTrangThai(voucher.getTrangThai());
         }
+        model.addAttribute("isEditMode", isEditMode);
         model.addAttribute("voucherRequest", request);
         model.addAttribute("page", page);
         model.addAttribute("size", size);
@@ -72,15 +78,27 @@ public class VoucherController {
     }
 
     @PostMapping("/save")
-    public String saveVoucher(@ModelAttribute("voucherRequest") VoucherRequest request,
+    public String saveVoucher(@Valid @ModelAttribute("voucherRequest") VoucherRequest request,
+                              BindingResult bindingResult,
                               Model model,
                               RedirectAttributes redirectAttributes,
+                              @RequestParam(defaultValue = "false") boolean isEditMode,
                               @RequestParam(defaultValue = "1") int page,
                               @RequestParam(defaultValue = "5") int size,
                               @RequestParam(required = false) String keyword,
                               @RequestParam(required = false) Integer status,
                               @RequestParam(required = false) Integer filterKieuApDung) {
-        System.out.println("➡️ Giá trị kiểu áp dụng: " + request.getKieuApDung());
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("errorMessage", bindingResult.getAllErrors().get(0).getDefaultMessage());
+            model.addAttribute("isEditMode", isEditMode);
+            model.addAttribute("page", page);
+            model.addAttribute("size", size);
+            model.addAttribute("keyword", keyword);
+            model.addAttribute("status", status);
+            model.addAttribute("filterKieuApDung", filterKieuApDung);
+            return "admin/orders/addOrEditVoucher";
+        }
+
         try {
             voucherService.save(request);
             redirectAttributes.addFlashAttribute("successMessage", "Lưu khuyến mãi thành công!");
@@ -90,8 +108,15 @@ public class VoucherController {
                     .addAttribute("status", status)
                     .addAttribute("filterKieuApDung", filterKieuApDung);
             return "redirect:/admin/voucher";
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             model.addAttribute("errorMessage", e.getMessage());
+            model.addAttribute("isEditMode", isEditMode);
+            model.addAttribute("page", page);
+            model.addAttribute("size", size);
+            model.addAttribute("keyword", keyword);
+            model.addAttribute("status", status);
+            model.addAttribute("filterKieuApDung", filterKieuApDung);
             return "admin/orders/addOrEditVoucher";
         }
     }

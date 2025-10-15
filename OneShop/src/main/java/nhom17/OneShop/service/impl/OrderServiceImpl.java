@@ -61,17 +61,16 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
-    public void update(Long orderId, OrderUpdateRequest request, User adminUser) {
-        Order order = findById(orderId); // Sử dụng findById đã được "đánh thức"
+    public void update(Long orderId, OrderUpdateRequest request) {
+        Order order = findById(orderId);
         String oldStatus = order.getTrangThai();
         String newStatus = request.getTrangThai();
 
-        // Ghi lại lịch sử nếu trạng thái thay đổi
         if (!Objects.equals(oldStatus, newStatus)) {
-            logStatusChange(order, oldStatus, newStatus, adminUser);
+            User currentUser = getCurrentUser();
+            logStatusChange(order, oldStatus, newStatus, currentUser);
         }
 
-        // Cập nhật thông tin đơn hàng
         order.setTrangThai(newStatus);
         order.setPhuongThucThanhToan(request.getPhuongThucThanhToan());
         order.setTrangThaiThanhToan(request.getTrangThaiThanhToan());

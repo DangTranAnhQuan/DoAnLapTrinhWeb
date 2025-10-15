@@ -1,5 +1,6 @@
 package nhom17.OneShop.controller;
 
+import jakarta.validation.Valid;
 import nhom17.OneShop.entity.Brand;
 import nhom17.OneShop.exception.DuplicateRecordException;
 import nhom17.OneShop.request.BrandRequest;
@@ -9,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -33,27 +35,39 @@ public class BrandController {
         model.addAttribute("brandPage", brandPage);
         model.addAttribute("keyword", keyword);
         model.addAttribute("status", status);
-        model.addAttribute("brand", new BrandRequest()); // Dùng cho form add/edit
+        if (!model.containsAttribute("brand")) {
+            model.addAttribute("brand", new BrandRequest());
+        }
         return "admin/products/brands";
     }
 
     @PostMapping("/save")
-    public String saveBrand(@ModelAttribute BrandRequest brandRequest,
+    public String saveBrand(@Valid @ModelAttribute BrandRequest brandRequest,
+                            BindingResult bindingResult,
                             @RequestParam("hinhAnhFile") MultipartFile hinhAnhFile,
                             @RequestParam(defaultValue = "1") int page,
                             @RequestParam(defaultValue = "5") int size,
                             @RequestParam(required = false) String keyword,
                             @RequestParam(required = false) Boolean status,
                             RedirectAttributes redirectAttributes) {
-        try {
-            if (!hinhAnhFile.isEmpty()) {
-                String fileName = storageService.storeFile(hinhAnhFile, "brands");
-                brandRequest.setHinhAnh(fileName);
+        if (bindingResult.hasErrors()) {
+            redirectAttributes.addFlashAttribute("errorMessage", bindingResult.getAllErrors().get(0).getDefaultMessage());
+            redirectAttributes.addFlashAttribute("brand", brandRequest);
+        }
+
+        else {
+            try {
+                if (!hinhAnhFile.isEmpty()) {
+                    String fileName = storageService.storeFile(hinhAnhFile, "brands");
+                    brandRequest.setHinhAnh(fileName);
+                }
+                brandService.save(brandRequest);
+                redirectAttributes.addFlashAttribute("successMessage", "Lưu thương hiệu thành công!");
             }
-            brandService.save(brandRequest);
-            redirectAttributes.addFlashAttribute("successMessage", "Lưu thương hiệu thành công!");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            catch (Exception e) {
+                redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+                redirectAttributes.addFlashAttribute("brand", brandRequest);
+            }
         }
 
         // Giữ lại tham số phân trang và filter khi redirect

@@ -13,6 +13,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -98,8 +100,11 @@ public class ShippingServiceImpl implements ShippingService {
         } else {
             if (!Objects.equals(shipping.getTrangThai(), newShippingStatus)) {
                 shipping.setTrangThai(newShippingStatus);
-                if ("Đã giao".equals(newShippingStatus) && shipping.getGiaoLuc() == null) {
-                    shipping.setGiaoLuc(LocalDateTime.now());
+                if ("Đã giao".equals(newShippingStatus)) {
+                    if (shipping.getGiaoLuc() == null) {
+                        shipping.setGiaoLuc(LocalDateTime.now());
+                    }
+                    order.setTrangThaiThanhToan("Đã thanh toán");
                 }
 
                 String newOrderStatus = mapShippingStatusToOrderStatus(newShippingStatus);
@@ -122,17 +127,14 @@ public class ShippingServiceImpl implements ShippingService {
     private void updateOrderStatusAndLog(Order order, String newStatus, String oldStatus) {
         if (newStatus != null && !Objects.equals(oldStatus, newStatus)) {
             order.setTrangThai(newStatus);
-
             OrderStatusHistory history = new OrderStatusHistory();
             history.setDonHang(order);
             history.setTuTrangThai(oldStatus);
             history.setDenTrangThai(newStatus);
             history.setThoiDiemThayDoi(LocalDateTime.now());
 
-            // Lấy đối tượng User thực sự từ DB thay vì tạo mới
-            User adminUser = userRepository.findById(1)
-                    .orElseThrow(() -> new NotFoundException("Không tìm thấy tài khoản admin với ID 1 để ghi lịch sử."));
-            history.setNguoiThucHien(adminUser);
+            User currentUser = getCurrentUser();
+            history.setNguoiThucHien(currentUser);
 
             historyRepository.save(history);
         }
@@ -146,5 +148,11 @@ public class ShippingServiceImpl implements ShippingService {
             throw new DataIntegrityViolationException("Không thể xóa đơn vận chuyển đang hoặc đã giao hàng.");
         }
         shippingRepository.deleteById(id);
+    }
+
+    private User getCurrentUser() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String username = ((UserDetails) principal).getUsername();
+        return userRepository.findByEmail(username).orElseThrow();
     }
 }

@@ -89,11 +89,21 @@ public class ProductServiceImpl implements ProductService {
     }
 
     private void validateUniqueProductName(ProductRequest request) {
+        if (request.getGiaBan() != null && request.getGiaNiemYet() != null &&
+                request.getGiaBan().compareTo(request.getGiaNiemYet()) > 0) {
+            throw new IllegalArgumentException("Giá bán không được lớn hơn giá niêm yết.");
+        }
+
+        if (request.getMaSanPham() == null && (request.getHinhAnh() == null || request.getHinhAnh().isEmpty())) {
+            throw new IllegalArgumentException("Vui lòng chọn hình ảnh cho sản phẩm mới.");
+        }
+
         if (request.getMaSanPham() == null) {
             if (productRepository.existsByTenSanPhamIgnoreCase(request.getTenSanPham())) {
                 throw new DuplicateRecordException("Tên sản phẩm '" + request.getTenSanPham() + "' đã tồn tại.");
             }
-        } else {
+        }
+        else {
             if (productRepository.existsByTenSanPhamIgnoreCaseAndMaSanPhamNot(request.getTenSanPham(), request.getMaSanPham())) {
                 throw new DuplicateRecordException("Tên sản phẩm '" + request.getTenSanPham() + "' đã được sử dụng.");
             }

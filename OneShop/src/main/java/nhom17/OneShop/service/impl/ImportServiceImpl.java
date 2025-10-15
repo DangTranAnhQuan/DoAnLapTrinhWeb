@@ -19,7 +19,9 @@ import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class ImportServiceImpl implements ImportService {
@@ -65,6 +67,7 @@ public class ImportServiceImpl implements ImportService {
     @Override
     @Transactional
     public void save(ImportRequest importRequest) {
+        validateImportDetails(importRequest.getChiTietPhieuNhapList());
         // Bước 1: Chuẩn bị đối tượng cha (Phiếu nhập) và nhà cung cấp
         Supplier supplier = supplierRepository.findById(importRequest.getMaNCC())
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy nhà cung cấp với ID: " + importRequest.getMaNCC()));
@@ -82,6 +85,15 @@ public class ImportServiceImpl implements ImportService {
         // Bước 4: Cập nhật danh sách chi tiết của phiếu nhập và lưu
         phieuNhap.getChiTietPhieuNhapList().addAll(newChiTietList);
         importRepository.save(phieuNhap);
+    }
+
+    private void validateImportDetails(List<ImportDetailRequest> details) {
+        Set<Integer> productIds = new HashSet<>();
+        for (ImportDetailRequest detail : details) {
+            if (!productIds.add(detail.getMaSanPham())) {
+                throw new IllegalArgumentException("Sản phẩm không được trùng lặp trong một phiếu nhập.");
+            }
+        }
     }
 
     private Import prepareImportEntity(ImportRequest importRequest) {

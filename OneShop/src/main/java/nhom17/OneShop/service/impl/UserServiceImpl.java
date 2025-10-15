@@ -121,7 +121,7 @@ public class UserServiceImpl implements UserService {
             user.setAnhDaiDien(request.getAnhDaiDien());
         }
         if (StringUtils.hasText(request.getMatKhau())) {
-            user.setMatKhau(request.getMatKhau());
+            user.setMatKhau(passwordEncoder.encode(request.getMatKhau()));
         }
         Role role = roleRepository.findById(request.getMaVaiTro())
                 .orElseThrow(() -> new NotFoundException("Vai trò không hợp lệ với ID: " + request.getMaVaiTro()));
@@ -135,10 +135,6 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    /**
-     * ✅ THAY ĐỔI BÊN TRONG:
-     * - Bổ sung logic kiểm tra ràng buộc và xóa ảnh.
-     */
     @Override
     @Transactional(noRollbackFor = DataIntegrityViolationException.class)
     public void delete(int id) {

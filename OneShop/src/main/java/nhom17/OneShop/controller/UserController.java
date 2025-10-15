@@ -1,5 +1,6 @@
 package nhom17.OneShop.controller;
 
+import jakarta.validation.Valid;
 import nhom17.OneShop.entity.User;
 import nhom17.OneShop.exception.DuplicateRecordException;
 import nhom17.OneShop.repository.MembershipTierRepository;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -98,9 +100,9 @@ public class UserController {
         return "admin/user/addOrEditUser";
     }
 
-    // ✅ LƯU DỮ LIỆU (THÊM VÀ SỬA)
     @PostMapping("/save")
-    public String saveUser(@ModelAttribute("userRequest") UserRequest userRequest,
+    public String saveUser(@Valid @ModelAttribute("userRequest") UserRequest userRequest,
+                           BindingResult bindingResult,
                            @RequestParam("anhDaiDienFile") MultipartFile anhDaiDienFile,
                            Model model,
                            RedirectAttributes redirectAttributes,
@@ -110,6 +112,12 @@ public class UserController {
                            @RequestParam(required = false) Integer roleId,
                            @RequestParam(required = false) Integer tierId,
                            @RequestParam(required = false) Integer status) {
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("errorMessage", bindingResult.getAllErrors().get(0).getDefaultMessage());
+            model.addAttribute("roles", roleRepository.findAll());
+            model.addAttribute("tiers", membershipTierRepository.findAll());
+            return "admin/user/addOrEditUser";
+        }
         try {
             if (!anhDaiDienFile.isEmpty()) {
                 String fileName = storageService.storeFile(anhDaiDienFile, "avatars");
@@ -125,7 +133,8 @@ public class UserController {
                     .addAttribute("tierId", tierId)
                     .addAttribute("status", status);
             return "redirect:/admin/user";
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             model.addAttribute("errorMessage", e.getMessage());
             model.addAttribute("roles", roleRepository.findAll());
             model.addAttribute("tiers", membershipTierRepository.findAll());
@@ -133,7 +142,6 @@ public class UserController {
         }
     }
 
-    // ✅ XÓA NGƯỜI DÙNG
     @GetMapping("/delete/{id}")
     public String deleteUser(@PathVariable int id,
                              RedirectAttributes redirectAttributes,

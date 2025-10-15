@@ -110,9 +110,7 @@ public class OrderController {
                               @RequestParam(defaultValue = "1") int page,
                               @RequestParam(defaultValue = "10") int size) {
         try {
-            User adminUser = new User();
-            adminUser.setMaNguoiDung(1); // Tạm thời hardcode
-            orderService.update(id, request, adminUser);
+            orderService.update(id, request);
             redirectAttributes.addFlashAttribute("successMessage", "Cập nhật đơn hàng thành công!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());

@@ -1,13 +1,16 @@
 package nhom17.OneShop.controller;
 
+import jakarta.validation.Valid;
 import nhom17.OneShop.entity.Supplier;
 import nhom17.OneShop.exception.DuplicateRecordException;
+import nhom17.OneShop.request.ShippingCarrierRequest;
 import nhom17.OneShop.request.SupplierRequest;
 import nhom17.OneShop.service.SupplierService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -25,21 +28,32 @@ public class SupplierController {
         Page<Supplier> supplierPage = supplierService.search(keyword, page, size);
         model.addAttribute("supplierPage", supplierPage);
         model.addAttribute("keyword", keyword);
-        model.addAttribute("supplier", new SupplierRequest()); // Dùng cho modal
+        if (!model.containsAttribute("supplier")) {
+            model.addAttribute("supplier", new SupplierRequest());
+        }
         return "admin/warehouse/suppliers";
     }
 
     @PostMapping("/save")
-    public String saveSupplier(@ModelAttribute SupplierRequest supplierRequest,
+    public String saveSupplier(@Valid @ModelAttribute SupplierRequest supplierRequest,
+                               BindingResult bindingResult,
                                RedirectAttributes redirectAttributes,
                                @RequestParam(required = false) String keyword,
                                @RequestParam(defaultValue = "1") int page,
                                @RequestParam(defaultValue = "5") int size) {
-        try {
-            supplierService.save(supplierRequest);
-            redirectAttributes.addFlashAttribute("successMessage", "Lưu nhà cung cấp thành công!");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        if (bindingResult.hasErrors()) {
+            redirectAttributes.addFlashAttribute("errorMessage", bindingResult.getAllErrors().get(0).getDefaultMessage());
+            redirectAttributes.addFlashAttribute("supplier", supplierRequest);
+        }
+        else {
+            try {
+                supplierService.save(supplierRequest);
+                redirectAttributes.addFlashAttribute("successMessage", "Lưu nhà cung cấp thành công!");
+            }
+            catch (Exception e) {
+                redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+                redirectAttributes.addFlashAttribute("supplier", supplierRequest);
+            }
         }
         redirectAttributes.addAttribute("keyword", keyword);
         redirectAttributes.addAttribute("page", page);

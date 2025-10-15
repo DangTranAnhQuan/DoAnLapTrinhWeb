@@ -99,11 +99,7 @@
                                 <i class="bx bx-edit"></i>
                             </a>
 
-                            <a th:href="@{/admin/brand/delete/{id}(id=${th.maThuongHieu},
-                                            page=${brandPage.number+1},
-                                            size=${brandPage.size},
-                                            keyword=${keyword},
-                                            status=${status})}"
+                            <a th:href="@{/admin/brand/delete/{id}(id=${th.maThuongHieu})}"
                                class="btn btn-sm btn-danger"
                                onclick="return confirm('Bạn có chắc muốn xóa thương hiệu này?')">
                                 <i class="bx bx-trash"></i>
@@ -166,10 +162,6 @@
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
                     <button type="submit" class="btn btn-primary">Lưu</button>
                 </div>
-                <input type="hidden" name="page" th:value="${brandPage.number + 1}"/>
-                <input type="hidden" name="size" th:value="${brandPage.size}"/>
-                <input type="hidden" name="keyword" th:value="${keyword}"/>
-                <input type="hidden" name="status" th:value="${status}"/>
             </form>
         </div>
     </div>
@@ -179,10 +171,6 @@
             <form th:action="@{/admin/brand/save}" th:object="${brand}" method="post" class="modal-content" enctype="multipart/form-data">
                 <input type="hidden" th:field="*{maThuongHieu}">
                 <input type="hidden" th:field="*{hinhAnh}">
-                <input type="hidden" name="page" th:value="${brandPage.number + 1}"/>
-                <input type="hidden" name="size" th:value="${brandPage.size}"/>
-                <input type="hidden" name="keyword" th:value="${keyword}"/>
-                <input type="hidden" name="status" th:value="${status}"/>
 
                 <div class="modal-header bg-warning">
                     <h5 class="modal-title text-white">Chỉnh sửa thương hiệu</h5>
