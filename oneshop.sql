@@ -494,3 +494,16 @@ PRINT N'✅ Xóa xong!';
 GO
 
 
+USE OneShop;
+GO
+
+-- Kiểm tra mật khẩu của user
+SELECT 
+    MaNguoiDung,
+    Email, 
+    TenDangNhap,
+    MatKhau,
+    NgayCapNhat
+FROM NguoiDung 
+WHERE Email = '23110237@student.hcmute.edu.vn';
+GO
