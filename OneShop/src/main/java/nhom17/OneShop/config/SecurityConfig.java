@@ -25,7 +25,8 @@ public class SecurityConfig {
                                 "/contact", "/about-us",
                                 "/web/**", "/uploads/**",
                                 "/admin/assets/**",
-                                "/api/**"
+                                "/api/**",
+                                "/api/chat/**"
                         ).permitAll()
                         .requestMatchers("/my-orders/**").authenticated()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
