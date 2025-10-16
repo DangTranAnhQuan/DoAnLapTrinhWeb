@@ -41,6 +41,9 @@ public class User {
     @Column(name = "NgayCapNhat")
     private LocalDateTime ngayCapNhat;
 
+    @Column(name = "XacThucEmail")
+    private Boolean xacThucEmail = false;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "MaVaiTro")
     private Role vaiTro;

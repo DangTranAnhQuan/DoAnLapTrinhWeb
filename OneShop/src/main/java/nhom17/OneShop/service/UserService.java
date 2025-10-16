@@ -12,4 +12,10 @@ public interface UserService {
     void delete(int id);
 
     User registerNewUser(SignUpRequest signUpRequest);
+    boolean verifyEmailOtp(String email, String otp);
+    User findByEmail(String email);
+
+    void sendResetPasswordOtp(String email);
+    boolean verifyResetPasswordOtp(String email, String otp);
+    void resetPassword(String email, String newPassword);
 }
