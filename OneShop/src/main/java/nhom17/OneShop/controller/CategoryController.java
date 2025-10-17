@@ -1,14 +1,17 @@
 package nhom17.OneShop.controller;
 
+import jakarta.validation.Valid;
 import nhom17.OneShop.entity.Category;
 import nhom17.OneShop.exception.DuplicateRecordException;
 import nhom17.OneShop.request.CategoryRequest;
+import nhom17.OneShop.request.ShippingCarrierRequest;
 import nhom17.OneShop.service.CategoryService;
 import nhom17.OneShop.service.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -32,30 +35,40 @@ public class CategoryController {
         model.addAttribute("categoryPage", categoryPage);
         model.addAttribute("keyword", keyword);
         model.addAttribute("status", status);
-        model.addAttribute("category", new CategoryRequest());
+        if (!model.containsAttribute("category")) {
+            model.addAttribute("category", new CategoryRequest());
+        }
         return "admin/products/categories";
     }
 
     @PostMapping("/save")
-    public String saveCategory(@ModelAttribute CategoryRequest categoryRequest,
+    public String saveCategory(@Valid @ModelAttribute CategoryRequest categoryRequest,
+                               BindingResult bindingResult,
                                @RequestParam("hinhAnhFile") MultipartFile hinhAnhFile,
                                @RequestParam(defaultValue = "1") int page,
                                @RequestParam(defaultValue = "5") int size,
                                @RequestParam(required = false) String keyword,
                                @RequestParam(required = false) Boolean status,
                                RedirectAttributes redirectAttributes){
-        try {
-            if (!hinhAnhFile.isEmpty()) {
-                String fileName = storageService.storeFile(hinhAnhFile, "categories");
-                categoryRequest.setHinhAnh(fileName);
+        if (bindingResult.hasErrors()) {
+            redirectAttributes.addFlashAttribute("errorMessage", bindingResult.getAllErrors().get(0).getDefaultMessage());
+            redirectAttributes.addFlashAttribute("category", categoryRequest);
+        }
+        else {
+            try {
+                if (!hinhAnhFile.isEmpty()) {
+                    String fileName = storageService.storeFile(hinhAnhFile, "categories");
+                    categoryRequest.setHinhAnh(fileName);
+                }
+                categoryService.save(categoryRequest);
+                redirectAttributes.addFlashAttribute("successMessage", "Lưu danh mục thành công!");
             }
-            categoryService.save(categoryRequest);
-            redirectAttributes.addFlashAttribute("successMessage", "Lưu danh mục thành công!");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            catch (Exception e) {
+                redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+                redirectAttributes.addFlashAttribute("category", categoryRequest);
+            }
         }
 
-        // Giữ lại tham số phân trang và filter khi redirect
         redirectAttributes.addAttribute("page", page);
         redirectAttributes.addAttribute("size", size);
         if (keyword != null) redirectAttributes.addAttribute("keyword", keyword);

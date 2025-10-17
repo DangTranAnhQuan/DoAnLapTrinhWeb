@@ -1,5 +1,6 @@
 package nhom17.OneShop.controller;
 
+import jakarta.validation.Valid;
 import nhom17.OneShop.entity.MembershipTier;
 import nhom17.OneShop.exception.DuplicateRecordException;
 import nhom17.OneShop.request.MembershipTierRequest;
@@ -7,6 +8,7 @@ import nhom17.OneShop.service.MembershipTierService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -23,17 +25,30 @@ public class MembershipTierController {
     public String listTiers(Model model) {
         List<MembershipTier> tiers = membershipTierService.findAllSorted();
         model.addAttribute("tiers", tiers);
-        model.addAttribute("tierRequest", new MembershipTierRequest());
+        if (!model.containsAttribute("tierRequest")) {
+            model.addAttribute("tierRequest", new MembershipTierRequest());
+        }
         return "admin/system/membership-tiers";
     }
 
     @PostMapping("/save")
-    public String saveTier(@ModelAttribute MembershipTierRequest request, RedirectAttributes redirectAttributes) {
-        try {
-            membershipTierService.save(request);
-            redirectAttributes.addFlashAttribute("successMessage", "Lưu hạng thành viên thành công!");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+    public String saveTier(@Valid @ModelAttribute("tierRequest") MembershipTierRequest request,
+                           BindingResult bindingResult,
+                           RedirectAttributes redirectAttributes) {
+        if (bindingResult.hasErrors()) {
+            redirectAttributes.addFlashAttribute("errorMessage", bindingResult.getAllErrors().get(0).getDefaultMessage());
+            redirectAttributes.addFlashAttribute("tierRequest", request);
+        }
+        else {
+            try {
+                membershipTierService.save(request);
+                redirectAttributes.addFlashAttribute("successMessage", "Lưu hạng thành viên thành công!");
+
+            }
+            catch (Exception e) {
+                redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+                redirectAttributes.addFlashAttribute("tierRequest", request);
+            }
         }
         return "redirect:/admin/membership-tier";
     }

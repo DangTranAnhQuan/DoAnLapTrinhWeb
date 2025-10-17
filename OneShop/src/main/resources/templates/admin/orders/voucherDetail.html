@@ -49,6 +49,12 @@
 
                             <dt class="col-sm-5">Giảm tối đa:</dt>
                             <dd class="col-sm-7" th:text="${voucher.giamToiDa != null ? #numbers.formatDecimal(voucher.giamToiDa, 0, 'COMMA', 0, 'POINT') + ' ₫' : 'Không giới hạn'}"></dd>
+
+                            <dt class="col-sm-5">Giới hạn tổng số lần sử dụng:</dt>
+                            <dd class="col-sm-7" th:text="${voucher.gioiHanTongSoLan != null ? voucher.gioiHanTongSoLan + ' lần' : 'Không giới hạn'}"></dd>
+
+                            <dt class="col-sm-5">Giới hạn mỗi người:</dt>
+                            <dd class="col-sm-7" th:text="${voucher.gioiHanMoiNguoi != null ? voucher.gioiHanMoiNguoi + ' lần' : 'Không giới hạn'}"></dd>
                         </dl>
                     </div>
                 </div>

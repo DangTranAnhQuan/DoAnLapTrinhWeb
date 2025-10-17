@@ -31,13 +31,13 @@
                 <div class="row">
                     <div class="col-md-8">
                         <div class="row">
-                            <div class="mb-3 col-md-6"><label class="form-label">Họ tên</label><input type="text" class="form-control" th:field="*{hoTen}" required></div>
-                            <div class="mb-3 col-md-6"><label class="form-label">Email</label><input type="email" class="form-control" th:field="*{email}" required></div>
-                            <div class="mb-3 col-md-6"><label class="form-label">Tên đăng nhập</label><input type="text" class="form-control" th:field="*{tenDangNhap}" required></div>
-                            <div class="mb-3 col-md-6"><label class="form-label">Mật khẩu</label><input type="password" class="form-control" th:field="*{matKhau}" th:placeholder="${userRequest.maNguoiDung == null ? 'Bắt buộc' : 'Để trống nếu không đổi'}" th:required="${userRequest.maNguoiDung == null}"></div>
+                            <div class="mb-3 col-md-6"><label class="form-label">Họ tên <span class="text-danger">*</span></label><input type="text" class="form-control" th:field="*{hoTen}" required></div>
+                            <div class="mb-3 col-md-6"><label class="form-label">Email <span class="text-danger">*</span></label><input type="email" class="form-control" th:field="*{email}" required></div>
+                            <div class="mb-3 col-md-6"><label class="form-label">Tên đăng nhập <span class="text-danger">*</span></label><input type="text" class="form-control" th:field="*{tenDangNhap}" required></div>
+                            <div class="mb-3 col-md-6"><label class="form-label">Mật khẩu <span class="text-danger">*</span></label><input type="password" class="form-control" th:field="*{matKhau}" th:placeholder="${userRequest.maNguoiDung == null ? 'Bắt buộc' : 'Để trống nếu không đổi'}" th:required="${userRequest.maNguoiDung == null}"></div>
                             <div class="mb-3 col-md-6"><label class="form-label">Số điện thoại</label><input type="text" class="form-control" th:field="*{soDienThoai}"></div>
-                            <div class="mb-3 col-md-6"><label class="form-label">Vai trò</label><select class="form-select" th:field="*{maVaiTro}" required><option th:each="r : ${roles}" th:value="${r.maVaiTro}" th:text="${r.tenVaiTro}"></option></select></div>
-                            <div class="mb-3 col-md-6"><label class="form-label">Hạng thành viên</label><select class="form-select" th:field="*{maHangThanhVien}"><option value="">-- Không có --</option><option th:each="t : ${tiers}" th:value="${t.maHangThanhVien}" th:text="${t.tenHang}"></option></select></div>
+                            <div class="mb-3 col-md-6"><label class="form-label">Vai trò <span class="text-danger">*</span></label><select class="form-select" th:field="*{maVaiTro}" required><option th:each="r : ${roles}" th:value="${r.maVaiTro}" th:text="${r.tenVaiTro}"></option></select></div>
+                            <div class="mb-3 col-md-6"><label class="form-label">Hạng thành viên <span class="text-danger">*</span></label><select class="form-select" th:field="*{maHangThanhVien}"><option value="">-- Không có --</option><option th:each="t : ${tiers}" th:value="${t.maHangThanhVien}" th:text="${t.tenHang}"></option></select></div>
                             <div class="mb-3 col-md-6"><label class="form-label">Trạng thái</label><select class="form-select" th:field="*{trangThai}"><option value="1">Hoạt động</option><option value="0">Khóa</option></select></div>
                         </div>
                     </div>

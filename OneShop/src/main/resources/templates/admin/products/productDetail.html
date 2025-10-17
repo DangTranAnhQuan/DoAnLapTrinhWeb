@@ -56,7 +56,7 @@
             <div th:unless="${#lists.isEmpty(reviews)}">
                 <div th:each="review : ${reviews}" class="d-flex mb-4 border-bottom pb-3">
                     <div class="flex-shrink-0">
-                        <img th:src="@{/admin/assets/img/avatars/1.png}" alt="user" class="rounded-circle" width="50">
+                        <img th:src="${review.nguoiDung.anhDaiDien != null ? review.nguoiDung.anhDaiDien : '/admin/assets/img/avatars/default.png'}" alt="user" class="rounded-circle" width="50" height="50">
                     </div>
                     <div class="flex-grow-1 ms-3">
                         <div class="d-flex justify-content-between align-items-center">
@@ -69,6 +69,24 @@
                             </span>
                         </div>
                         <p class="mb-0" th:text="${review.binhLuan}"></p>
+
+                        <!-- HIỂN THỊ HÌNH ẢNH VÀ VIDEO NẾU CÓ -->
+                        <div class="review-media">
+                            <!-- Hiển thị hình ảnh -->
+                            <div th:if="${review.imageUrl != null}">
+                                <a th:href="@{'/uploads/' + ${review.imageUrl}}" data-bs-toggle="tooltip" title="Xem ảnh đầy đủ" target="_blank">
+                                    <img th:src="@{'/uploads/' + ${review.imageUrl}}" alt="Ảnh đánh giá">
+                                </a>
+                            </div>
+                            <!-- Hiển thị video -->
+                            <div th:if="${review.videoUrl != null}">
+                                <video controls>
+                                    <source th:src="@{'/uploads/' + ${review.videoUrl}}" type="video/mp4">
+                                    Trình duyệt của bạn không hỗ trợ thẻ video.
+                                </video>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>

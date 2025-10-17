@@ -62,7 +62,6 @@
                     <tr>
                         <th>Mã khuyến mãi</th>
                         <th>Tên chiến dịch</th>
-                        <th>Kiểu áp dụng</th>
                         <th>Giá trị</th>
                         <th>Bắt đầu</th>
                         <th>Kết thúc</th>
@@ -74,7 +73,6 @@
                     <tr th:each="v : ${voucherPage.content}">
                         <td th:text="${v.maKhuyenMai}" class="fw-semibold"></td>
                         <td th:text="${v.tenChienDich}"></td>
-                        <td><span th:if="${v.kieuApDung == 0}" class="badge bg-label-info">Phần trăm</span><span th:if="${v.kieuApDung == 1}" class="badge bg-label-primary">Số tiền</span></td>
                         <td th:text="${v.kieuApDung == 0} ? ${v.giaTri} + '%' : ${#numbers.formatDecimal(v.giaTri, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></td>
                         <td th:text="${#temporals.format(v.batDauLuc, 'dd/MM/yyyy HH:mm')}"></td>
                         <td th:text="${#temporals.format(v.ketThucLuc, 'dd/MM/yyyy HH:mm')}"></td>

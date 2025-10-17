@@ -100,11 +100,7 @@
                             </a>
 
                             <!-- Nút Xóa -->
-                            <a th:href="@{/admin/category/delete/{id}(id=${dm.maDanhMuc},
-                                            page=${categoryPage.number+1},
-                                            size=${categoryPage.size},
-                                            keyword=${keyword},
-                                            status=${status})}"
+                            <a th:href="@{/admin/category/delete/{id}(id=${dm.maDanhMuc})}"
                                class="btn btn-sm btn-danger"
                                onclick="return confirm('Bạn có chắc muốn xóa danh mục này?')">
                                 <i class="bx bx-trash"></i>
@@ -118,33 +114,14 @@
             <!-- Phân trang -->
             <nav th:if="${categoryPage.totalPages > 0}" class="mt-4">
                 <ul class="pagination justify-content-center">
-                    <!-- Trang trước -->
                     <li class="page-item" th:classappend="${categoryPage.first} ? 'disabled'">
-                        <a class="page-link"
-                           th:href="@{/admin/category(page=${categoryPage.number},
-                                                      size=${categoryPage.size},
-                                                      keyword=${keyword},
-                                                      status=${status})}">&laquo;</a>
+                        <a class="page-link" th:href="@{/admin/category(page=${categoryPage.number}, size=${categoryPage.size}, keyword=${keyword}, status=${status})}">&laquo;</a>
                     </li>
-
-                    <!-- Các trang -->
-                    <li class="page-item"
-                        th:each="i : ${#numbers.sequence(1, categoryPage.totalPages)}"
-                        th:classappend="${i == categoryPage.number + 1} ? 'active'">
-                        <a class="page-link" th:text="${i}"
-                           th:href="@{/admin/category(page=${i},
-                                                      size=${categoryPage.size},
-                                                      keyword=${keyword},
-                                                      status=${status})}"></a>
+                    <li class="page-item" th:each="i : ${#numbers.sequence(1, categoryPage.totalPages)}" th:classappend="${i == categoryPage.number + 1} ? 'active'">
+                        <a class="page-link" th:text="${i}" th:href="@{/admin/category(page=${i}, size=${categoryPage.size}, keyword=${keyword}, status=${status})}"></a>
                     </li>
-
-                    <!-- Trang tiếp -->
                     <li class="page-item" th:classappend="${categoryPage.last} ? 'disabled'">
-                        <a class="page-link"
-                           th:href="@{/admin/category(page=${categoryPage.number + 2},
-                                                      size=${categoryPage.size},
-                                                      keyword=${keyword},
-                                                      status=${status})}">&raquo;</a>
+                        <a class="page-link" th:href="@{/admin/category(page=${categoryPage.number + 2}, size=${categoryPage.size}, keyword=${keyword}, status=${status})}">&raquo;</a>
                     </li>
                 </ul>
             </nav>
@@ -169,7 +146,7 @@
                         <input type="file" name="hinhAnhFile" class="form-control" accept="image/png, image/jpeg">
                     </div>
                     <div class="form-check form-switch mb-3">
-                        <input class="form-check-input" type="checkbox" th:field="*{kichHoat}">
+                        <input class="form-check-input" type="checkbox" th:field="*{kichHoat}" checked>
                         <label class="form-check-label">Kích hoạt</label>
                     </div>
                 </div>
@@ -177,11 +154,6 @@
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
                     <button type="submit" class="btn btn-primary">Lưu</button>
                 </div>
-                <!-- Hidden giữ state -->
-                <input type="hidden" name="page" th:value="${categoryPage.number + 1}"/>
-                <input type="hidden" name="size" th:value="${categoryPage.size}"/>
-                <input type="hidden" name="keyword" th:value="${keyword}"/>
-                <input type="hidden" name="status" th:value="${status}"/>
             </form>
         </div>
     </div>
@@ -192,11 +164,6 @@
             <form th:action="@{/admin/category/save}" th:object="${category}" method="post" class="modal-content" enctype="multipart/form-data">
                 <input type="hidden" th:field="*{maDanhMuc}">
                 <input type="hidden" th:field="*{hinhAnh}">
-                <!-- Hidden giữ state -->
-                <input type="hidden" name="page" th:value="${categoryPage.number + 1}"/>
-                <input type="hidden" name="size" th:value="${categoryPage.size}"/>
-                <input type="hidden" name="keyword" th:value="${keyword}"/>
-                <input type="hidden" name="status" th:value="${status}"/>
 
                 <div class="modal-header bg-warning">
                     <h5 class="modal-title text-white">Chỉnh sửa danh mục</h5>

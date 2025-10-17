@@ -1,5 +1,6 @@
 package nhom17.OneShop.controller;
 
+import jakarta.validation.Valid;
 import nhom17.OneShop.entity.ImportDetail;
 import nhom17.OneShop.entity.Import;
 import nhom17.OneShop.repository.ProductRepository;
@@ -12,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -106,25 +108,52 @@ public class ImportController {
         return "admin/warehouse/importForm"; // Dùng chung form
     }
 
-    // ✅ Xử lý cả Thêm và Sửa
     @PostMapping("/save")
-    public String saveImport(@ModelAttribute ImportRequest importRequest,
+    public String saveImport(@Valid @ModelAttribute ImportRequest importRequest,
+                             BindingResult bindingResult,
+                             Model model,
                              RedirectAttributes redirectAttributes,
                              @RequestParam(required = false) String keyword,
                              @RequestParam(required = false) Integer supplierId,
                              @RequestParam(defaultValue = "1") int page,
                              @RequestParam(defaultValue = "5") int size) {
+        if (bindingResult.hasErrors()) {
+            String errorMessage = bindingResult.getAllErrors().get(0).getDefaultMessage();
+
+            model.addAttribute("errorMessage", errorMessage);
+
+            model.addAttribute("suppliers", supplierRepository.findAll(Sort.by("tenNCC")));
+            model.addAttribute("products", productRepository.findAll(Sort.by("tenSanPham")));
+            model.addAttribute("keyword", keyword);
+            model.addAttribute("supplierId", supplierId);
+            model.addAttribute("page", page);
+            model.addAttribute("size", size);
+
+            return "admin/warehouse/importForm";
+        }
+
         try {
             importService.save(importRequest);
+
             redirectAttributes.addFlashAttribute("successMessage", "Lưu phiếu nhập thành công!");
+            redirectAttributes.addAttribute("keyword", keyword);
+            redirectAttributes.addAttribute("supplierId", supplierId);
+            redirectAttributes.addAttribute("page", page);
+            redirectAttributes.addAttribute("size", size);
+            return "redirect:/admin/import";
+
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            model.addAttribute("errorMessage", e.getMessage());
+
+            model.addAttribute("suppliers", supplierRepository.findAll(Sort.by("tenNCC")));
+            model.addAttribute("products", productRepository.findAll(Sort.by("tenSanPham")));
+            model.addAttribute("keyword", keyword);
+            model.addAttribute("supplierId", supplierId);
+            model.addAttribute("page", page);
+            model.addAttribute("size", size);
+
+            return "admin/warehouse/importForm";
         }
-        redirectAttributes.addAttribute("keyword", keyword);
-        redirectAttributes.addAttribute("supplierId", supplierId);
-        redirectAttributes.addAttribute("page", page);
-        redirectAttributes.addAttribute("size", size);
-        return "redirect:/admin/import";
     }
 
     // ✅ Thêm phương thức Xóa

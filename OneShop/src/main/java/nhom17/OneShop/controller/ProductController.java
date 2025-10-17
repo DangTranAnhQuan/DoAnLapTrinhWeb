@@ -1,5 +1,6 @@
 package nhom17.OneShop.controller;
 
+import jakarta.validation.Valid;
 import nhom17.OneShop.entity.Rating;
 import nhom17.OneShop.entity.Product;
 import nhom17.OneShop.exception.DuplicateRecordException;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -111,7 +113,8 @@ public class ProductController {
     }
 
     @PostMapping("/save")
-    public String saveProduct(@ModelAttribute("product") ProductRequest productRequest,
+    public String saveProduct(@Valid @ModelAttribute("product") ProductRequest productRequest,
+                              BindingResult bindingResult,
                               @RequestParam("hinhAnhFile") MultipartFile hinhAnhFile,
                               Model model,
                               RedirectAttributes redirectAttributes,
@@ -122,6 +125,13 @@ public class ProductController {
                               @RequestParam(required = false) String sort,
                               @RequestParam(defaultValue = "1") int page,
                               @RequestParam(defaultValue = "5") int size) {
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("errorMessage", bindingResult.getAllErrors().get(0).getDefaultMessage());
+            model.addAttribute("categories", categoryRepository.findAll());
+            model.addAttribute("brands", brandRepository.findAll());
+            return "admin/products/addOrEditProduct";
+        }
+
         try {
             if (!hinhAnhFile.isEmpty()) {
                 String fileName = storageService.storeFile(hinhAnhFile, "products");

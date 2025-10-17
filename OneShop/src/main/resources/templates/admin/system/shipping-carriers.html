@@ -48,14 +48,14 @@
                         <td th:text="${c.maNVC}"></td>
                         <td th:text="${c.tenNVC}"></td>
                         <td th:text="${c.soDienThoai}"></td>
-                        <td><a th:href="${c.website}" th:text="${c.website}" target="_blank"></a></td>
+                        <td><a th:if="${c.website}" th:href="${c.website}" th:text="${c.website}" target="_blank"></a></td>
                         <td>
                             <button type="button" class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editCarrierModal"
                                     th:data-id="${c.maNVC}" th:data-name="${c.tenNVC}" th:data-phone="${c.soDienThoai}" th:data-website="${c.website}">
                                 <i class="bx bx-edit"></i>
                             </button>
                             <a th:href="@{/admin/shipping-carrier/delete/{id}(id=${c.maNVC}, page=${carrierPage.number + 1}, size=${carrierPage.size}, keyword=${keyword})}"
-                               class="btn btn-sm btn-danger" onclick="return confirm('Bạn có chắc muốn xóa?')"><i class="bx bx-trash"></i></a>
+                               class="btn btn-sm btn-danger" onclick="return confirm('Bạn có chắc muốn xóa nhà vận chuyển này?')"><i class="bx bx-trash"></i></a>
                         </td>
                     </tr>
                     <tr th:if="${carrierPage.empty}"><td colspan="5" class="text-center py-3">Không có nhà vận chuyển nào.</td></tr>
@@ -73,34 +73,36 @@
     </div>
 
     <div class="modal fade" id="addCarrierModal" tabindex="-1">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-centered">
             <form th:action="@{/admin/shipping-carrier/save}" th:object="${carrier}" method="post" class="modal-content">
                 <div class="modal-header bg-primary"><h5 class="modal-title text-white">Thêm nhà vận chuyển</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
                 <div class="modal-body">
-                    <div class="mb-3"><label class="form-label">Tên NVC</label><input type="text" th:field="*{tenNVC}" class="form-control" required></div>
-                    <div class="mb-3"><label class="form-label">Số điện thoại</label><input type="text" th:field="*{soDienThoai}" class="form-control"></div>
-                    <div class="mb-3"><label class="form-label">Website</label><input type="text" th:field="*{website}" class="form-control"></div>
+                    <div class="mb-3"><label class="form-label">Tên NVC <span class="text-danger">*</span></label><input type="text" th:field="*{tenNVC}" class="form-control" required></div>
+                    <div class="mb-3"><label class="form-label">Số điện thoại <span class="text-danger">*</span></label><input type="tel" th:field="*{soDienThoai}" class="form-control" required></div>
+                    <div class="mb-3"><label class="form-label">Website</label><input type="url" th:field="*{website}" class="form-control" placeholder="https://example.com"></div>
                 </div>
-                <div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Đóng</button><button type="submit" class="btn btn-primary">Lưu</button></div>
+                <div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button><button type="submit" class="btn btn-primary">Lưu</button></div>
                 <input type="hidden" name="page" th:value="${carrierPage.number + 1}"/><input type="hidden" name="size" th:value="${carrierPage.size}"/><input type="hidden" name="keyword" th:value="${keyword}"/>
             </form>
         </div>
     </div>
+
     <div class="modal fade" id="editCarrierModal" tabindex="-1">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-centered">
             <form th:action="@{/admin/shipping-carrier/save}" th:object="${carrier}" method="post" class="modal-content">
                 <input type="hidden" th:field="*{maNVC}">
                 <div class="modal-header bg-warning"><h5 class="modal-title text-white">Chỉnh sửa nhà vận chuyển</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
                 <div class="modal-body">
-                    <div class="mb-3"><label class="form-label">Tên NVC</label><input type="text" th:field="*{tenNVC}" class="form-control" required></div>
-                    <div class="mb-3"><label class="form-label">Số điện thoại</label><input type="text" th:field="*{soDienThoai}" class="form-control"></div>
-                    <div class="mb-3"><label class="form-label">Website</label><input type="text" th:field="*{website}" class="form-control"></div>
+                    <div class="mb-3"><label class="form-label">Tên NVC <span class="text-danger">*</span></label><input type="text" th:field="*{tenNVC}" class="form-control" required></div>
+                    <div class="mb-3"><label class="form-label">Số điện thoại <span class="text-danger">*</span></label><input type="tel" th:field="*{soDienThoai}" class="form-control" required></div>
+                    <div class="mb-3"><label class="form-label">Website</label><input type="url" th:field="*{website}" class="form-control" placeholder="https://example.com"></div>
                 </div>
-                <div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Đóng</button><button type="submit" class="btn btn-warning">Cập nhật</button></div>
+                <div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button><button type="submit" class="btn btn-warning">Cập nhật</button></div>
                 <input type="hidden" name="page" th:value="${carrierPage.number + 1}"/><input type="hidden" name="size" th:value="${carrierPage.size}"/><input type="hidden" name="keyword" th:value="${keyword}"/>
             </form>
         </div>
     </div>
 </main>
+
 </body>
 </html>

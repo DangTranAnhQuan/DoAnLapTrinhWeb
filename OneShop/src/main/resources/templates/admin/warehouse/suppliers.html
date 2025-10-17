@@ -17,7 +17,7 @@
                 <div class="col-md-5">
                     <label class="form-label">Tìm kiếm nhà cung cấp</label>
                     <div class="input-group">
-                        <input type="text" class="form-control" name="keyword" th:value="${keyword}" placeholder="Nhập tên nhà cung cấp...">
+                        <input type="text" class="form-control" name="keyword" th:value="${keyword}" placeholder="Nhập tên, SĐT, địa chỉ...">
                         <button class="btn btn-outline-primary" type="submit"><i class="bx bx-search"></i></button>
                     </div>
                 </div>
@@ -46,6 +46,7 @@
                 <span th:text="${errorMessage}"></span>
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
+
             <div class="table-responsive text-nowrap">
                 <table id="suppliersTable" class="table table-hover">
                     <thead>
@@ -71,17 +72,18 @@
                                 <i class="bx bx-edit"></i>
                             </button>
                             <a th:href="@{/admin/supplier/delete/{id}(id=${ncc.maNCC}, page=${supplierPage.number + 1}, size=${supplierPage.size}, keyword=${keyword})}"
-                               class="btn btn-sm btn-danger" onclick="return confirm('Bạn có chắc muốn xóa?')">
+                               class="btn btn-sm btn-danger" onclick="return confirm('Bạn có chắc muốn xóa nhà cung cấp này?')">
                                 <i class="bx bx-trash"></i>
                             </a>
                         </td>
                     </tr>
                     <tr th:if="${supplierPage.empty}">
-                        <td colspan="5" class="text-center py-3">Không có nhà cung cấp nào.</td>
+                        <td colspan="5" class="text-center py-3">Không có nhà cung cấp nào để hiển thị.</td>
                     </tr>
                     </tbody>
                 </table>
             </div>
+
             <nav th:if="${supplierPage.totalPages > 0}" class="mt-4">
                 <ul class="pagination justify-content-center">
                     <li class="page-item" th:classappend="${supplierPage.first} ? 'disabled'"><a class="page-link" th:href="@{/admin/supplier(page=${supplierPage.number}, size=${supplierPage.size}, keyword=${keyword})}">&laquo;</a></li>
@@ -92,48 +94,71 @@
         </div>
     </div>
 
-    <div class="modal fade" id="addSupplierModal" tabindex="-1">
-        <div class="modal-dialog">
+    <div class="modal fade" id="addSupplierModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
             <form th:action="@{/admin/supplier/save}" th:object="${supplier}" method="post" class="modal-content">
                 <div class="modal-header bg-primary">
                     <h5 class="modal-title text-white">Thêm nhà cung cấp</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="mb-3"><label class="form-label">Tên NCC</label><input type="text" th:field="*{tenNCC}" class="form-control" required></div>
-                    <div class="mb-3"><label class="form-label">Số điện thoại</label><input type="text" th:field="*{sdt}" class="form-control" required></div>
-                    <div class="mb-3"><label class="form-label">Địa chỉ</label><textarea th:field="*{diaChi}" class="form-control" rows="3" required></textarea></div>
+                    <div class="mb-3">
+                        <label class="form-label">Tên NCC <span class="text-danger">*</span></label>
+                        <input type="text" th:field="*{tenNCC}" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Số điện thoại <span class="text-danger">*</span></label>
+                        <input type="tel" th:field="*{sdt}" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Địa chỉ <span class="text-danger">*</span></label>
+                        <textarea th:field="*{diaChi}" class="form-control" rows="3" required></textarea>
+                    </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
                     <button type="submit" class="btn btn-primary">Lưu</button>
                 </div>
-                <input type="hidden" name="page" th:value="${supplierPage.number + 1}"/><input type="hidden" name="size" th:value="${supplierPage.size}"/><input type="hidden" name="keyword" th:value="${keyword}"/>
+                <input type="hidden" name="page" th:value="${supplierPage.number + 1}"/>
+                <input type="hidden" name="size" th:value="${supplierPage.size}"/>
+                <input type="hidden" name="keyword" th:value="${keyword}"/>
             </form>
         </div>
     </div>
 
-    <div class="modal fade" id="editSupplierModal" tabindex="-1">
-        <div class="modal-dialog">
+    <div class="modal fade" id="editSupplierModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
             <form th:action="@{/admin/supplier/save}" th:object="${supplier}" method="post" class="modal-content">
-                <input type="hidden" th:field="*{maNCC}">
+                <input type="hidden" name="maNCC">
                 <div class="modal-header bg-warning">
                     <h5 class="modal-title text-white">Chỉnh sửa nhà cung cấp</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="mb-3"><label class="form-label">Tên NCC</label><input type="text" th:field="*{tenNCC}" class="form-control" required></div>
-                    <div class="mb-3"><label class="form-label">Số điện thoại</label><input type="text" th:field="*{sdt}" class="form-control" required></div>
-                    <div class="mb-3"><label class="form-label">Địa chỉ</label><textarea th:field="*{diaChi}" class="form-control" rows="3" required></textarea></div>
+                    <div class="mb-3">
+                        <label class="form-label">Tên NCC <span class="text-danger">*</span></label>
+                        <input type="text" name="tenNCC" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Số điện thoại <span class="text-danger">*</span></label>
+                        <input type="tel" name="sdt" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Địa chỉ <span class="text-danger">*</span></label>
+                        <textarea name="diaChi" class="form-control" rows="3" required></textarea>
+                    </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
                     <button type="submit" class="btn btn-warning">Cập nhật</button>
                 </div>
-                <input type="hidden" name="page" th:value="${supplierPage.number + 1}"/><input type="hidden" name="size" th:value="${supplierPage.size}"/><input type="hidden" name="keyword" th:value="${keyword}"/>
+                <input type="hidden" name="page" th:value="${supplierPage.number + 1}"/>
+                <input type="hidden" name="size" th:value="${supplierPage.size}"/>
+                <input type="hidden" name="keyword" th:value="${keyword}"/>
             </form>
         </div>
     </div>
 </main>
+
 </body>
 </html>

@@ -505,5 +505,5 @@ SELECT
     MatKhau,
     NgayCapNhat
 FROM NguoiDung 
-WHERE Email = '23110237@student.hcmute.edu.vn';
+WHERE Email = '23110292@student.hcmute.edu.vn';
 GO

@@ -1,5 +1,6 @@
 package nhom17.OneShop.controller;
 
+import jakarta.validation.Valid;
 import nhom17.OneShop.entity.Shipping;
 import nhom17.OneShop.repository.ShippingCarrierRepository;
 import nhom17.OneShop.request.ShippingRequest;
@@ -8,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -30,9 +32,9 @@ public class ShippingController {
 
         model.addAttribute("shippingPage", shippingPage);
         model.addAttribute("carriers", shippingCarrierRepository.findAll());
-        model.addAttribute("shippingRequest", new ShippingRequest()); // Cho modal
-
-        // Giữ lại trạng thái bộ lọc
+        if (!model.containsAttribute("shippingRequest")) {
+            model.addAttribute("shippingRequest", new ShippingRequest());
+        }
         model.addAttribute("keyword", keyword);
         model.addAttribute("carrierId", carrierId);
         model.addAttribute("status", status);
@@ -41,22 +43,29 @@ public class ShippingController {
     }
 
     @PostMapping("/save")
-    public String saveShipping(@ModelAttribute ShippingRequest request,
+    public String saveShipping(@Valid @ModelAttribute ShippingRequest request,
+                               BindingResult bindingResult,
                                RedirectAttributes redirectAttributes,
-                               // Nhận các tham số state từ hidden input trong form
                                @RequestParam(required = false) String keyword,
                                @RequestParam(required = false) Integer carrierId,
                                @RequestParam(required = false) String status,
                                @RequestParam(defaultValue = "1") int page,
                                @RequestParam(defaultValue = "10") int size) {
-        try {
-            shippingService.save(request);
-            redirectAttributes.addFlashAttribute("successMessage", "Lưu thông tin vận chuyển thành công!");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        if (bindingResult.hasErrors()) {
+            redirectAttributes.addFlashAttribute("errorMessage", bindingResult.getAllErrors().get(0).getDefaultMessage());
+            redirectAttributes.addFlashAttribute("shippingRequest", request);
+        }
+        else {
+            try {
+                shippingService.save(request);
+                redirectAttributes.addFlashAttribute("successMessage", "Lưu thông tin vận chuyển thành công!");
+            }
+            catch (Exception e) {
+                redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+                redirectAttributes.addFlashAttribute("shippingRequest", request);
+            }
         }
 
-        // ✅ SỬA LỖI: Truyền giá trị của biến, không phải chuỗi ký tự
         redirectAttributes.addAttribute("keyword", keyword);
         redirectAttributes.addAttribute("carrierId", carrierId);
         redirectAttributes.addAttribute("status", status);
@@ -109,7 +118,6 @@ public class ShippingController {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
 
-        // ✅ SỬA LỖI: Truyền giá trị của biến, không phải chuỗi ký tự
         redirectAttributes.addAttribute("keyword", keyword);
         redirectAttributes.addAttribute("carrierId", carrierId);
         redirectAttributes.addAttribute("status", status);
