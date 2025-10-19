@@ -168,8 +168,9 @@ GO
 
 -- 4. Mã xác thực (OTP Codes)
 CREATE TABLE MaXacThuc (
-    MaXacThucId BIGINT IDENTITY(1,1) PRIMARY KEY,
-    MaNguoiDung INT NOT NULL,
+    MaOtp UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    MaNguoiDung INT NULL,                   
+    Email NVARCHAR(255),                     
     MaSo NVARCHAR(10) NOT NULL,
     MucDich NVARCHAR(30) CHECK (MucDich IN (N'Đăng ký', N'Quên mật khẩu', N'Đăng nhập')),
     HetHanLuc DATETIME2 NOT NULL,
@@ -385,7 +386,7 @@ GO
 CREATE TABLE TinNhanChat (
     MaTinNhan BIGINT IDENTITY(1,1) PRIMARY KEY,
     MaPhienChat NVARCHAR(100) NOT NULL,         
-    MaNguoiDung INT,                           
+    MaNguoiDung INT,                            -- ✅ CỘT NÀY QUAN TRỌNG
     NoiDung NVARCHAR(MAX) NOT NULL,             
     LoaiNguoiGui NVARCHAR(20) NOT NULL          
         CHECK (LoaiNguoiGui IN (N'CUSTOMER', N'ADMIN')),
@@ -393,7 +394,7 @@ CREATE TABLE TinNhanChat (
     DaXem BIT DEFAULT 0,                        
     
     FOREIGN KEY (MaPhienChat) REFERENCES PhienChat(MaPhienChat),
-    FOREIGN KEY (MaNguoiDung) REFERENCES NguoiDung(MaNguoiDung),  
+    FOREIGN KEY (MaNguoiDung) REFERENCES NguoiDung(MaNguoiDung),  -- ✅ FOREIGN KEY
     INDEX idx_phien_chat (MaPhienChat, ThoiGian)
 );
 GO
@@ -403,4 +404,129 @@ GO
 
 -- Kiểm tra cấu trúc bảng
 EXEC sp_columns 'TinNhanChat';
+GO
+
+-------------------------------
+-------------------------------
+-- CHỨC NĂNG GỬI MÃ OTP -------
+-------------------------------
+-------------------------------
+
+USE OneShop;
+GO
+
+
+-- Xóa nếu đã tồn tại
+DROP TABLE IF EXISTS DangKyTamThoi;
+GO
+
+-- Tạo bảng lưu thông tin đăng ký tạm
+CREATE TABLE DangKyTamThoi (
+    MaDangKy INT IDENTITY(1,1) PRIMARY KEY,
+    Email NVARCHAR(255) NOT NULL UNIQUE,
+    TenDangNhap NVARCHAR(100) NOT NULL,
+    MatKhau NVARCHAR(255) NOT NULL,
+    HoTen NVARCHAR(150) NOT NULL,
+    NgayTao DATETIME2 DEFAULT SYSUTCDATETIME(),
+    HetHanLuc DATETIME2 NOT NULL
+);
+GO
+
+
+-- Kiểm tra nếu cột chưa tồn tại thì mới thêm
+IF NOT EXISTS (
+    SELECT * FROM INFORMATION_SCHEMA.COLUMNS 
+    WHERE TABLE_NAME = 'NguoiDung' 
+    AND COLUMN_NAME = 'XacThucEmail'
+)
+BEGIN
+    ALTER TABLE NguoiDung 
+    ADD XacThucEmail BIT DEFAULT 0;
+    PRINT N'✅ Đã thêm cột XacThucEmail vào bảng NguoiDung!';
+END
+ELSE
+BEGIN
+    PRINT N'ℹ️ Cột XacThucEmail đã tồn tại, bỏ qua!';
+END
+GO
+
+
+-- Đặt XacThucEmail = 1 cho các tài khoản đã tồn tại
+UPDATE NguoiDung 
+SET XacThucEmail = 1 
+WHERE XacThucEmail IS NULL OR XacThucEmail = 0;
+
+
+
+
+---------------------------
+---------------------------
+---- test nhanh, xóa ------
+---------------------------
+---------------------------
+
+SELECT * FROM NguoiDung
+
+DELETE FROM MaXacThuc 
+WHERE MaNguoiDung IN (
+    SELECT MaNguoiDung FROM NguoiDung 
+    WHERE Email IN (
+        'dangquan1912@gmail.com'
+    )
+);
+
+DELETE FROM NguoiDung 
+WHERE Email IN (
+   'dangquan1912@gmail.com'
+);  
+
+
+SELECT * FROM NguoiDung 
+WHERE Email IN ('dangquan1912@gmail.com');
+
+DELETE FROM DangKyTamThoi;
+DELETE FROM MaXacThuc;
+-- 1. Kiểm tra bảng DangKyTamThoi
+SELECT * FROM DangKyTamThoi;
+
+-- 2. Kiểm tra bảng MaXacThuc
+SELECT * FROM MaXacThuc ORDER BY NgayTao DESC;
+
+-- 3. Kiểm tra bảng NguoiDung
+SELECT * FROM NguoiDung ORDER BY NgayTao DESC;
+
+
+
+-- Xóa nhanh cho test
+DELETE FROM MaXacThuc WHERE Email IN ('dangquan1912@gmail.com');
+DELETE FROM DangKyTamThoi WHERE Email IN ('dangquan1912@gmail.com');
+
+DELETE FROM TinNhanChat WHERE MaPhienChat IN (
+    SELECT MaPhienChat FROM PhienChat WHERE MaNguoiDung IN (
+        SELECT MaNguoiDung FROM NguoiDung WHERE Email IN ('dangquan1912@gmail.com')
+    )
+);
+
+DELETE FROM PhienChat WHERE MaNguoiDung IN (
+    SELECT MaNguoiDung FROM NguoiDung WHERE Email IN ('dangquan1912@gmail.com')
+);
+
+DELETE FROM NguoiDung WHERE Email IN ('dangquan1912@gmail.com');
+
+PRINT N'✅ Xóa xong!';
+GO
+
+
+USE OneShop;
+GO
+
+-- Kiểm tra mật khẩu của user
+SELECT 
+    MaNguoiDung,
+    Email, 
+    TenDangNhap,
+    MatKhau,
+    NgayCapNhat
+FROM NguoiDung 
+WHERE Email = '23110237@student.hcmute.edu.vn';
 GO

@@ -1,5 +1,6 @@
 package nhom17.OneShop.service.impl;
 
+import jakarta.persistence.criteria.JoinType;
 import nhom17.OneShop.entity.Inventory;
 import nhom17.OneShop.repository.InventoryRepository;
 import nhom17.OneShop.service.InventoryService;
@@ -20,8 +21,8 @@ public class InventoryServiceImpl implements InventoryService {
 
     @Override
     public Page<Inventory> findAll(String keyword, String sort, int page, int size) {
-        // Xử lý logic sắp xếp
-        Sort sortable = Sort.by("maSanPham").ascending(); // Mặc định
+        // Sắp xếp
+        Sort sortable = Sort.by("maSanPham").ascending();
         if (StringUtils.hasText(sort)) {
             switch (sort) {
                 case "qty_asc":
@@ -30,17 +31,24 @@ public class InventoryServiceImpl implements InventoryService {
                 case "qty_desc":
                     sortable = Sort.by("soLuongTon").descending();
                     break;
+                default:
+                    break;
             }
         }
         Pageable pageable = PageRequest.of(page - 1, size, sortable);
 
-        // Xử lý logic tìm kiếm
+        // Tìm kiếm
         Specification<Inventory> spec = (root, query, cb) -> cb.conjunction();
+
         if (StringUtils.hasText(keyword)) {
-            spec = spec.and((root, query, cb) ->
-                    cb.like(root.get("sanPham").get("tenSanPham"), "%" + keyword + "%")
-            );
+            String kw = "%" + keyword.toLowerCase().trim() + "%";
+            spec = spec.and((root, query, cb) -> {
+                // join sang Product (sanPham) để filter theo tenSanPham
+                var product = root.join("sanPham", JoinType.LEFT);
+                return cb.like(cb.lower(product.get("tenSanPham")), kw);
+            });
         }
+
         return inventoryRepository.findAll(spec, pageable);
     }
 }

@@ -3,6 +3,13 @@ package nhom17.OneShop.service.impl;
 import nhom17.OneShop.entity.*;
 import nhom17.OneShop.repository.*;
 import nhom17.OneShop.dto.DashboardDataDTO;
+import nhom17.OneShop.entity.Order;
+import nhom17.OneShop.entity.OrderStatusHistory;
+import nhom17.OneShop.entity.User;
+import nhom17.OneShop.exception.NotFoundException;
+import nhom17.OneShop.repository.OrderRepository;
+import nhom17.OneShop.repository.OrderStatusHistoryRepository;
+import nhom17.OneShop.repository.RatingRepository;
 import nhom17.OneShop.request.OrderUpdateRequest;
 import nhom17.OneShop.dto.TopSellingProductDTO;
 import nhom17.OneShop.service.OrderService;
@@ -17,12 +24,16 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import nhom17.OneShop.entity.Inventory;
+import nhom17.OneShop.entity.OrderDetail;
+import nhom17.OneShop.repository.InventoryRepository;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.YearMonth;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -34,6 +45,9 @@ public class OrderServiceImpl implements OrderService {
     private OrderRepository orderRepository;
 
     @Autowired
+    private RatingRepository ratingRepository;
+
+    @Autowired
     private OrderStatusHistoryRepository historyRepository;
 
     @Autowired
@@ -41,6 +55,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     MembershipTierRepository membershipTierRepository;
+
+    @Autowired
+    private InventoryRepository inventoryRepository;
 
     @Override
     public Page<Order> findAll(String keyword, String status, String paymentMethod, String paymentStatus, String shippingMethod, int page, int size) {
@@ -116,6 +133,42 @@ public class OrderServiceImpl implements OrderService {
         order.setTrangThaiThanhToan(request.getTrangThaiThanhToan());
         order.setNgayCapNhat(LocalDateTime.now());
 
+        orderRepository.save(order);
+    }
+    @Override
+    @Transactional
+    public void cancelOrder(Long orderId, User currentUser) {
+        // 1. Tìm đơn hàng và kiểm tra tồn tại
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy đơn hàng #" + orderId));
+
+        // 2. Kiểm tra bảo mật: Đơn hàng phải thuộc về người dùng hiện tại
+        if (!order.getNguoiDung().getMaNguoiDung().equals(currentUser.getMaNguoiDung())) {
+            throw new AccessDeniedException("Bạn không có quyền hủy đơn hàng này.");
+        }
+
+        // 3. Kiểm tra logic nghiệp vụ: Chỉ hủy khi ở trạng thái "Đang xử lý"
+        if (!"Đang xử lý".equals(order.getTrangThai())) {
+            throw new IllegalStateException("Chỉ có thể hủy đơn hàng khi ở trạng thái 'Đang xử lý'.");
+        }
+
+        // 4. Hoàn trả số lượng sản phẩm về kho
+        for (OrderDetail detail : order.getOrderDetails()) {
+            Inventory inventory = inventoryRepository.findBySanPham(detail.getSanPham())
+                    .orElseGet(() -> {
+                        Inventory newInventory = new Inventory();
+                        newInventory.setSanPham(detail.getSanPham());
+                        newInventory.setSoLuongTon(0);
+                        return newInventory;
+                    });
+
+            inventory.setSoLuongTon(inventory.getSoLuongTon() + detail.getSoLuong());
+            inventoryRepository.save(inventory);
+        }
+
+        // 5. Cập nhật trạng thái đơn hàng và lưu lại
+        order.setTrangThai("Đã hủy");
+        order.setNgayCapNhat(LocalDateTime.now());
         orderRepository.save(order);
     }
 
@@ -274,4 +327,25 @@ public class OrderServiceImpl implements OrderService {
         String username = ((UserDetails) principal).getUsername();
         return nguoiDungRepository.findByEmail(username).orElseThrow();
     }
+
+    @Override
+    public boolean hasCompletedPurchase(Integer userId, Integer productId) {
+        return orderRepository.hasCompletedPurchase(userId, productId);
+    }
+
+    @Override
+    public boolean canUserReviewProduct(Integer userId, Integer productId) {
+        if (userId == null || productId == null) {
+            return false;
+        }
+        // Kiểm tra xem đã mua và đơn hàng đã hoàn thành chưa
+        boolean hasPurchased = orderRepository.hasCompletedPurchase(userId, productId);
+        if (!hasPurchased) {
+            return false;
+        }
+        // Kiểm tra xem đã đánh giá sản phẩm này bao giờ chưa
+        boolean hasReviewed = ratingRepository.existsByNguoiDung_MaNguoiDungAndSanPham_MaSanPham(userId, productId);
+        return !hasReviewed;
+    }
+
 }

@@ -16,6 +16,9 @@ public interface ProductService {
     Product findById(int id);
 
     void save(ProductRequest productRequest);
-
     void delete(int id);
+
+    List<Product> findNewestProducts(int limit);
+    List<Product> findMostDiscountedProducts(int limit);
+    List<Product> findTopSellingProducts(int limit);
 }

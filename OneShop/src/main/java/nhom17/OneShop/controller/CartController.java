@@ -6,6 +6,7 @@ import nhom17.OneShop.entity.Voucher;
 import nhom17.OneShop.repository.VoucherRepository;
 import nhom17.OneShop.service.CartService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -55,9 +56,16 @@ public class CartController {
 
     @PostMapping("/cart/add")
     public String addToCart(@RequestParam("productId") Integer productId,
-                            @RequestParam(name="quantity", defaultValue="1") int quantity) {
-        cartService.addToCart(productId, quantity);
-        return "redirect:/cart";
+                            @RequestParam(name="quantity", defaultValue="1") int quantity,
+                            RedirectAttributes redirectAttributes) {
+        try {
+            cartService.addToCart(productId, quantity);
+            redirectAttributes.addFlashAttribute("successMessage", "Đã thêm sản phẩm vào giỏ hàng!");
+            return "redirect:/cart";
+        } catch (RuntimeException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/product/" + productId;
+        }
     }
 
     @PostMapping("/cart/update")

@@ -21,7 +21,6 @@ public class StorageServiceImpl implements StorageService {
     // ✅ Use a simple, no-argument constructor
     public StorageServiceImpl() {
         try {
-            // Create the root directory if it doesn't exist
             Files.createDirectories(this.rootStorageFolder);
         } catch (IOException e) {
             throw new RuntimeException("Cannot initialize storage", e);
