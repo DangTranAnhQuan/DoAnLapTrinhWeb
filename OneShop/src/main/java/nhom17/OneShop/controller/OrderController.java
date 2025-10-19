@@ -1,10 +1,9 @@
 package nhom17.OneShop.controller;
 
-import nhom17.OneShop.entity.Order;
-import nhom17.OneShop.entity.OrderStatusHistory;
-import nhom17.OneShop.entity.User;
+import nhom17.OneShop.entity.*;
 import nhom17.OneShop.repository.OrderStatusHistoryRepository;
 import nhom17.OneShop.repository.ShippingCarrierRepository;
+import nhom17.OneShop.repository.ShippingFeeRepository;
 import nhom17.OneShop.request.OrderUpdateRequest;
 import nhom17.OneShop.request.ShippingRequest;
 import nhom17.OneShop.service.OrderService;
@@ -16,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/admin/order") // Controller này chỉ dành cho admin
@@ -24,25 +24,31 @@ public class OrderController {
     @Autowired private OrderService orderService;
     @Autowired private OrderStatusHistoryRepository historyRepository;
     @Autowired private ShippingCarrierRepository shippingCarrierRepository;
+    @Autowired
+    private ShippingFeeRepository shippingFeeRepository;
 
-    // ✅ Xóa UserRepository và các phương thức của User khỏi đây
 
     @GetMapping
     public String listOrders(@RequestParam(required = false) String keyword,
                              @RequestParam(required = false) String status,
                              @RequestParam(required = false) String paymentMethod,
                              @RequestParam(required = false) String paymentStatus,
+                             @RequestParam(required = false) String shippingMethod,
                              @RequestParam(defaultValue = "1") int page,
                              @RequestParam(defaultValue = "10") int size,
                              Model model) {
 
-        Page<Order> orderPage = orderService.findAll(keyword, status, paymentMethod, paymentStatus, page, size);
+        Page<Order> orderPage = orderService.findAll(keyword, status, paymentMethod, paymentStatus, shippingMethod, page, size);
+        Map<Long, List<ShippingFee>> carriersWithFeesByOrder = orderService.getCarriersWithFeesByOrder(orderPage.getContent());
+        List<String> shippingMethods = shippingFeeRepository.findDistinctPhuongThucVanChuyen();
+        model.addAttribute("carriersWithFeesByOrder", carriersWithFeesByOrder);
         model.addAttribute("orderPage", orderPage);
         model.addAttribute("keyword", keyword);
         model.addAttribute("status", status);
         model.addAttribute("paymentMethod", paymentMethod);
         model.addAttribute("paymentStatus", paymentStatus);
-        model.addAttribute("carriers", shippingCarrierRepository.findAll());
+        model.addAttribute("shippingMethod", shippingMethod);
+        model.addAttribute("shippingMethods", shippingMethods);
         model.addAttribute("shippingRequest", new ShippingRequest());
         return "admin/orders/orders";
     }
@@ -53,6 +59,7 @@ public class OrderController {
                                   @RequestParam(required = false) String status,
                                   @RequestParam(required = false) String paymentMethod,
                                   @RequestParam(required = false) String paymentStatus,
+                                  @RequestParam(required = false) String shippingMethod,
                                   @RequestParam(defaultValue = "1") int page,
                                   @RequestParam(defaultValue = "10") int size) {
         Order order = orderService.findById(id);
@@ -70,6 +77,7 @@ public class OrderController {
         model.addAttribute("status", status);
         model.addAttribute("paymentMethod", paymentMethod);
         model.addAttribute("paymentStatus", paymentStatus);
+        model.addAttribute("shippingMethod", shippingMethod);
         model.addAttribute("page", page);
         model.addAttribute("size", size);
         return "admin/orders/orderDetail";
@@ -81,6 +89,7 @@ public class OrderController {
                                    @RequestParam(required = false) String status,
                                    @RequestParam(required = false) String paymentMethod,
                                    @RequestParam(required = false) String paymentStatus,
+                                   @RequestParam(required = false) String shippingMethod,
                                    @RequestParam(defaultValue = "1") int page,
                                    @RequestParam(defaultValue = "10") int size) {
         Order order = orderService.findById(id);
@@ -94,6 +103,7 @@ public class OrderController {
         model.addAttribute("status", status);
         model.addAttribute("paymentMethod", paymentMethod);
         model.addAttribute("paymentStatus", paymentStatus);
+        model.addAttribute("shippingMethod", shippingMethod);
         model.addAttribute("page", page);
         model.addAttribute("size", size);
         return "admin/orders/orderHistory";
@@ -107,6 +117,7 @@ public class OrderController {
                               @RequestParam(required = false) String status,
                               @RequestParam(required = false) String paymentMethod,
                               @RequestParam(required = false) String paymentStatus,
+                              @RequestParam(required = false) String shippingMethod,
                               @RequestParam(defaultValue = "1") int page,
                               @RequestParam(defaultValue = "10") int size) {
         try {
@@ -119,6 +130,7 @@ public class OrderController {
         redirectAttributes.addAttribute("status", status);
         redirectAttributes.addAttribute("paymentMethod", paymentMethod);
         redirectAttributes.addAttribute("paymentStatus", paymentStatus);
+        redirectAttributes.addAttribute("shippingMethod", shippingMethod);
         redirectAttributes.addAttribute("page", page);
         redirectAttributes.addAttribute("size", size);
         return "redirect:/admin/order/" + id;

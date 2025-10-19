@@ -2,7 +2,9 @@ package nhom17.OneShop.controller;
 
 import jakarta.validation.Valid;
 import nhom17.OneShop.entity.Shipping;
+import nhom17.OneShop.entity.ShippingCarrier;
 import nhom17.OneShop.repository.ShippingCarrierRepository;
+import nhom17.OneShop.repository.ShippingFeeRepository;
 import nhom17.OneShop.request.ShippingRequest;
 import nhom17.OneShop.service.ShippingService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,23 +15,31 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 @Controller
 @RequestMapping("/admin/shipping")
 public class ShippingController {
 
     @Autowired
     private ShippingService shippingService;
-    @Autowired private ShippingCarrierRepository shippingCarrierRepository;
+    @Autowired
+    private ShippingCarrierRepository shippingCarrierRepository;
+    @Autowired
+    private ShippingFeeRepository shippingFeeRepository;
 
     @GetMapping
     public String listShippings(@RequestParam(required = false) String keyword,
                                 @RequestParam(required = false) Integer carrierId,
                                 @RequestParam(required = false) String status,
+                                @RequestParam(required = false) String shippingMethod,
                                 @RequestParam(defaultValue = "1") int page,
                                 @RequestParam(defaultValue = "10") int size, // Tăng size mặc định
                                 Model model) {
-        Page<Shipping> shippingPage = shippingService.search(keyword, carrierId, status, page, size);
-
+        Page<Shipping> shippingPage = shippingService.search(keyword, carrierId, status, shippingMethod, page, size);
+        List<String> shippingMethods = shippingFeeRepository.findDistinctPhuongThucVanChuyen();
         model.addAttribute("shippingPage", shippingPage);
         model.addAttribute("carriers", shippingCarrierRepository.findAll());
         if (!model.containsAttribute("shippingRequest")) {
@@ -38,8 +48,10 @@ public class ShippingController {
         model.addAttribute("keyword", keyword);
         model.addAttribute("carrierId", carrierId);
         model.addAttribute("status", status);
+        model.addAttribute("shippingMethod", shippingMethod); // <-- THÊM VÀO
+        model.addAttribute("shippingMethods", shippingMethods);
 
-        return "admin/orders/shippings"; // Thư mục shipping
+        return "admin/orders/shippings";
     }
 
     @PostMapping("/save")
@@ -49,6 +61,7 @@ public class ShippingController {
                                @RequestParam(required = false) String keyword,
                                @RequestParam(required = false) Integer carrierId,
                                @RequestParam(required = false) String status,
+                               @RequestParam(required = false) String shippingMethod,
                                @RequestParam(defaultValue = "1") int page,
                                @RequestParam(defaultValue = "10") int size) {
         if (bindingResult.hasErrors()) {
@@ -69,6 +82,7 @@ public class ShippingController {
         redirectAttributes.addAttribute("keyword", keyword);
         redirectAttributes.addAttribute("carrierId", carrierId);
         redirectAttributes.addAttribute("status", status);
+        redirectAttributes.addAttribute("shippingMethod", shippingMethod);
         redirectAttributes.addAttribute("page", page);
         redirectAttributes.addAttribute("size", size);
 
@@ -78,11 +92,11 @@ public class ShippingController {
     @PostMapping("/saveFromOrder")
     public String saveFromOrder(@ModelAttribute ShippingRequest request,
                                 RedirectAttributes redirectAttributes,
-                                // Nhận các tham số state của trang Orders
                                 @RequestParam(required = false) String keyword,
                                 @RequestParam(required = false) String status,
                                 @RequestParam(required = false) String paymentMethod,
                                 @RequestParam(required = false) String paymentStatus,
+                                @RequestParam(required = false) String shippingMethod,
                                 @RequestParam(defaultValue = "1") int page,
                                 @RequestParam(defaultValue = "10") int size) {
         try {
@@ -97,6 +111,7 @@ public class ShippingController {
         redirectAttributes.addAttribute("status", status);
         redirectAttributes.addAttribute("paymentMethod", paymentMethod);
         redirectAttributes.addAttribute("paymentStatus", paymentStatus);
+        redirectAttributes.addAttribute("shippingMethod", shippingMethod);
         redirectAttributes.addAttribute("page", page);
         redirectAttributes.addAttribute("size", size);
 
@@ -109,6 +124,7 @@ public class ShippingController {
                                  @RequestParam(required = false) String keyword,
                                  @RequestParam(required = false) Integer carrierId,
                                  @RequestParam(required = false) String status,
+                                 @RequestParam(required = false) String shippingMethod,
                                  @RequestParam(defaultValue = "1") int page,
                                  @RequestParam(defaultValue = "10") int size) {
         try {
@@ -121,6 +137,7 @@ public class ShippingController {
         redirectAttributes.addAttribute("keyword", keyword);
         redirectAttributes.addAttribute("carrierId", carrierId);
         redirectAttributes.addAttribute("status", status);
+        redirectAttributes.addAttribute("shippingMethod", shippingMethod);
         redirectAttributes.addAttribute("page", page);
         redirectAttributes.addAttribute("size", size);
 

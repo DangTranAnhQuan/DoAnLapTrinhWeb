@@ -1,14 +1,10 @@
 package nhom17.OneShop.service.impl;
 
-import nhom17.OneShop.entity.Order;
-import nhom17.OneShop.entity.OrderStatusHistory;
-import nhom17.OneShop.entity.User;
-import nhom17.OneShop.repository.OrderRepository;
-import nhom17.OneShop.repository.OrderStatusHistoryRepository;
-import nhom17.OneShop.request.DashboardDataDTO;
+import nhom17.OneShop.entity.*;
+import nhom17.OneShop.repository.*;
+import nhom17.OneShop.dto.DashboardDataDTO;
 import nhom17.OneShop.request.OrderUpdateRequest;
-import nhom17.OneShop.request.TopSellingProductDTO;
-import nhom17.OneShop.repository.UserRepository;
+import nhom17.OneShop.dto.TopSellingProductDTO;
 import nhom17.OneShop.service.OrderService;
 import nhom17.OneShop.specification.OrderSpecification;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,12 +23,8 @@ import java.math.RoundingMode;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.YearMonth;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -44,12 +36,18 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     private OrderStatusHistoryRepository historyRepository;
 
+    @Autowired
+    ShippingFeeRepository shippingFeeRepository;
+
+    @Autowired
+    MembershipTierRepository membershipTierRepository;
+
     @Override
-    public Page<Order> findAll(String keyword, String status, String paymentMethod, String paymentStatus, int page, int size) {
+    public Page<Order> findAll(String keyword, String status, String paymentMethod, String paymentStatus, String shippingMethod, int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size, Sort.by("ngayTao").descending());
 
         return orderRepository.findAll(
-                OrderSpecification.filterOrders(keyword, status, paymentMethod, paymentStatus),
+                OrderSpecification.filterOrders(keyword, status, paymentMethod, paymentStatus, shippingMethod),
                 pageable
         );
     }
@@ -58,6 +56,46 @@ public class OrderServiceImpl implements OrderService {
     public Order findById(long id) {
         return orderRepository.findById(id).orElse(null);
     }
+
+    @Override
+    public Map<Long, List<ShippingFee>> getCarriersWithFeesByOrder(List<Order> danhSachDonHang) {
+        Map<Long, List<ShippingFee>> ketQua = new HashMap<>();
+
+        for (Order donHang : danhSachDonHang) {
+            String phuongThuc = donHang.getPhuongThucVanChuyen();
+            String tinhThanh = null;
+
+            if (donHang.getDiaChi() != null && donHang.getDiaChi().getTinhThanh() != null) {
+                tinhThanh = donHang.getDiaChi().getTinhThanh().trim();
+            }
+
+            // Nếu thiếu thông tin, bỏ qua
+            if (phuongThuc == null || tinhThanh == null) {
+                ketQua.put(donHang.getMaDonHang(), Collections.emptyList());
+                continue;
+            }
+
+            // Lấy danh sách phí theo phương thức & tỉnh thành
+            List<ShippingFee> danhSachPhi = shippingFeeRepository
+                    .findByPhuongThucVanChuyenIgnoreCaseAndCacTinhApDung_Id_TenTinhThanh(phuongThuc, tinhThanh);
+
+            // Loại bỏ trùng lặp theo nhà vận chuyển (nếu có)
+            List<ShippingFee> danhSachPhiKhongTrung = new ArrayList<>();
+            Set<Integer> maNhaVanChuyenDaCo = new HashSet<>();
+
+            for (ShippingFee phi : danhSachPhi) {
+                ShippingCarrier nhaVanChuyen = phi.getNhaVanChuyen();
+                if (nhaVanChuyen != null && maNhaVanChuyenDaCo.add(nhaVanChuyen.getMaNVC())) {
+                    danhSachPhiKhongTrung.add(phi);
+                }
+            }
+
+            ketQua.put(donHang.getMaDonHang(), danhSachPhiKhongTrung);
+        }
+        return ketQua;
+    }
+
+
 
     @Override
     @Transactional
@@ -70,6 +108,8 @@ public class OrderServiceImpl implements OrderService {
             User currentUser = getCurrentUser();
             logStatusChange(order, oldStatus, newStatus, currentUser);
         }
+
+        updateLoyaltyPoints(order, oldStatus, newStatus);
 
         order.setTrangThai(newStatus);
         order.setPhuongThucThanhToan(request.getPhuongThucThanhToan());
@@ -87,6 +127,61 @@ public class OrderServiceImpl implements OrderService {
         history.setThoiDiemThayDoi(LocalDateTime.now());
         history.setNguoiThucHien(adminUser);
         historyRepository.save(history);
+    }
+
+    @Override
+    @Transactional
+    public void updateLoyaltyPoints(Order order, String oldStatus, String newStatus) {
+        User user = order.getNguoiDung();
+        if (user == null || user.getMaNguoiDung() == null) {
+            return;
+        }
+
+        int points = calculatePointsFromOrder(order);
+        if (points == 0) {
+            return;
+        }
+
+        if (!"Đã giao".equals(oldStatus) && "Đã giao".equals(newStatus)) {
+            adjustUserPoints(user, points);
+        }
+
+        else if ("Đã giao".equals(oldStatus) && "Trả hàng-Hoàn tiền".equals(newStatus)) {
+            adjustUserPoints(user, -points);
+        }
+    }
+
+    private int calculatePointsFromOrder(Order order) {
+        BigDecimal tienHang = order.getTienHang(); //
+        if (tienHang == null || tienHang.compareTo(BigDecimal.ZERO) <= 0) {
+            return 0;
+        }
+        return tienHang.divide(new BigDecimal("10000"), 0, RoundingMode.FLOOR).intValue();
+    }
+
+    private void adjustUserPoints(User user, int pointsToAdjust) {
+        User userToUpdate = nguoiDungRepository.findById(user.getMaNguoiDung()).orElse(null);
+        if (userToUpdate == null) return;
+
+        int newTotalPoints = userToUpdate.getDiemTichLuy() + pointsToAdjust;
+        userToUpdate.setDiemTichLuy(Math.max(0, newTotalPoints));
+
+        capNhatHangThanhVien(userToUpdate);
+
+        nguoiDungRepository.save(userToUpdate);
+    }
+
+    private void capNhatHangThanhVien(User user) {
+        int currentPoints = user.getDiemTichLuy();
+
+        List<MembershipTier> eligibleTiers = membershipTierRepository.findByDiemToiThieuLessThanEqualOrderByDiemToiThieuDesc(currentPoints);
+
+        if (!eligibleTiers.isEmpty()) {
+            MembershipTier newTier = eligibleTiers.get(0);
+            if (user.getHangThanhVien() == null || !newTier.getMaHangThanhVien().equals(user.getHangThanhVien().getMaHangThanhVien())) {
+                user.setHangThanhVien(newTier);
+            }
+        }
     }
 
     @Override

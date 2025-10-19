@@ -76,6 +76,7 @@
                         <input type="hidden" name="status" th:value="${status}">
                         <input type="hidden" name="paymentMethod" th:value="${paymentMethod}">
                         <input type="hidden" name="paymentStatus" th:value="${paymentStatus}">
+                        <input type="hidden" name="shippingMethod" th:value="${shippingMethod}">
 
                         <div class="mb-3">
                             <label class="form-label">Trạng thái đơn hàng</label>
@@ -103,12 +104,12 @@
                             </select>
                         </div>
                         <div class="d-grid gap-2 mt-3">
-                            <a th:href="@{/admin/order(page=${page}, size=${size}, keyword=${keyword}, status=${status}, paymentMethod=${paymentMethod}, paymentStatus=${paymentStatus})}"
+                            <a th:href="@{/admin/order(page=${page}, size=${size}, keyword=${keyword}, status=${status}, paymentMethod=${paymentMethod}, paymentStatus=${paymentStatus}, shippingMethod=${shippingMethod})}"
                                class="btn btn-outline-secondary">
                                 Quay lại danh sách
                             </a>
                             <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
-                            <a th:href="@{/admin/order/{id}/history(id=${order.maDonHang}, page=${page}, size=${size}, keyword=${keyword}, status=${status}, paymentMethod=${paymentMethod}, paymentStatus=${paymentStatus})}"
+                            <a th:href="@{/admin/order/{id}/history(id=${order.maDonHang}, page=${page}, size=${size}, keyword=${keyword}, status=${status}, paymentMethod=${paymentMethod}, paymentStatus=${paymentStatus}, shippingMethod=${shippingMethod})}"
                                class="btn btn-outline-info">
                                 Xem lịch sử
                             </a>

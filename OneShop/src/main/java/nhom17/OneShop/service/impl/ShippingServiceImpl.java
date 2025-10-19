@@ -5,6 +5,7 @@ import nhom17.OneShop.exception.DataIntegrityViolationException;
 import nhom17.OneShop.exception.NotFoundException;
 import nhom17.OneShop.repository.*;
 import nhom17.OneShop.request.ShippingRequest;
+import nhom17.OneShop.service.OrderService;
 import nhom17.OneShop.service.ShippingService;
 import nhom17.OneShop.specification.ShippingSpecification;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,11 +36,13 @@ public class ShippingServiceImpl implements ShippingService {
     private OrderStatusHistoryRepository historyRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private OrderService orderService;
 
     @Override
-    public Page<Shipping> search(String keyword, Integer carrierId, String status, int page, int size) {
+    public Page<Shipping> search(String keyword, Integer carrierId, String status, String shippingMethod, int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size, Sort.by("guiLuc").descending());
-        Specification<Shipping> spec = ShippingSpecification.filterBy(keyword, carrierId, status);
+        Specification<Shipping> spec = ShippingSpecification.filterBy(keyword, carrierId, status, shippingMethod);
         return shippingRepository.findAll(spec, pageable);
     }
 
@@ -109,6 +112,7 @@ public class ShippingServiceImpl implements ShippingService {
 
                 String newOrderStatus = mapShippingStatusToOrderStatus(newShippingStatus);
                 if (newOrderStatus != null) {
+                    orderService.updateLoyaltyPoints(order, oldOrderStatus, newOrderStatus);
                     updateOrderStatusAndLog(order, newOrderStatus, oldOrderStatus);
                 }
             }

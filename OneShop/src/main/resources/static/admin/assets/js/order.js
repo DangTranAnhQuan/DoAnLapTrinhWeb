@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const trackingCode = button.dataset.trackingCode;
             const carrierId = button.dataset.carrierId;
             const status = button.dataset.status;
+            const method = button.dataset.method;
 
             // Tìm các trường input/select trong modal
             const maVanChuyenInput = modal.querySelector('#editMaVanChuyen');
@@ -22,6 +23,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const maVanDonText = modal.querySelector('#editMaVanDonText');
             const maNVCSelect = modal.querySelector('#editMaNVC');
             const trangThaiSelect = modal.querySelector('#editTrangThai');
+            const phuongThucInput = modal.querySelector('#editPhuongThuc');
 
             // Gán dữ liệu vào các trường trong form
             if (maVanChuyenInput) maVanChuyenInput.value = shippingId;
@@ -29,6 +31,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (maVanDonText) maVanDonText.textContent = trackingCode;
             if (maNVCSelect) maNVCSelect.value = carrierId;
             if (trangThaiSelect) trangThaiSelect.value = status;
+            if (phuongThucInput) phuongThucInput.value = method;
         });
     }
 
@@ -48,14 +51,27 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     const createShippingModal = document.getElementById('createShippingModal');
-                if (createShippingModal) {
-                    createShippingModal.addEventListener('show.bs.modal', function (event) {
-                        const button = event.relatedTarget;
-                        const orderId = button.dataset.orderId;
-                        const modal = this;
+    if (createShippingModal) {
+        createShippingModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const modal = this;
 
-                        modal.querySelector('#createShipping_maDonHang').value = orderId;
-                        modal.querySelector('#orderIdInModal').textContent = orderId;
-                    });
-                }
+            const orderId = button.dataset.orderId;
+            const phuongThuc = button.dataset.phuongthuc;
+
+            modal.querySelector('#createShipping_maDonHang').value = orderId;
+            modal.querySelector('#orderIdInModal').textContent = orderId;
+            modal.querySelector('#phuongThucVanChuyen').value = phuongThuc;
+
+            const allGroups = modal.querySelectorAll('#nhaVanChuyenSelect optgroup');
+            allGroups.forEach(g => g.style.display = 'none');
+
+            const currentGroup = modal.querySelector(`#nhaVanChuyenSelect optgroup[label='Đơn hàng #${orderId}']`);
+            if (currentGroup) {
+                currentGroup.style.display = '';
+            }
+
+            modal.querySelector('#nhaVanChuyenSelect').value = '';
+        });
+    }
 });

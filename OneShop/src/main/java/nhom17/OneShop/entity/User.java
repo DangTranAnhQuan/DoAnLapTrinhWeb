@@ -49,6 +49,9 @@ public class User {
     @JoinColumn(name = "MaHangThanhVien")
     private MembershipTier hangThanhVien;
 
+    @Column(name = "DiemTichLuy", nullable = false)
+    private Integer diemTichLuy = 0;
+
     @PrePersist
     protected void onCreate() {
         this.ngayTao = LocalDateTime.now();

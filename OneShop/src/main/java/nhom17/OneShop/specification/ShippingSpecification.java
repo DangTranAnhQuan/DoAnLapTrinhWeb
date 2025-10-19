@@ -5,7 +5,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.StringUtils;
 
 public class ShippingSpecification {
-    public static Specification<Shipping> filterBy(String keyword, Integer carrierId, String status) {
+    public static Specification<Shipping> filterBy(String keyword, Integer carrierId, String status, String shippingMethod) {
         return (root, query, cb) -> {
             Specification<Shipping> spec = (r, q, builder) -> builder.conjunction();
 
@@ -32,6 +32,10 @@ public class ShippingSpecification {
 
             if (StringUtils.hasText(status)) {
                 spec = spec.and((r, q, builder) -> builder.equal(r.get("trangThai"), status));
+            }
+
+            if (StringUtils.hasText(shippingMethod)) {
+                spec = spec.and((r, q, builder) -> builder.equal(r.get("donHang").get("phuongThucVanChuyen"), shippingMethod));
             }
 
             return spec.toPredicate(root, query, cb);

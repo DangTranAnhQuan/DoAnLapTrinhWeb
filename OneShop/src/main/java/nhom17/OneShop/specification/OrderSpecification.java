@@ -5,7 +5,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.StringUtils;
 
 public class OrderSpecification {
-    public static Specification<Order> filterOrders(String keyword, String status, String paymentMethod, String paymentStatus) {
+    public static Specification<Order> filterOrders(String keyword, String status, String paymentMethod, String paymentStatus, String shippingMethod) {
         return (root, query, criteriaBuilder) -> {
             Specification<Order> spec = (r, q, cb) -> cb.conjunction();
 
@@ -33,6 +33,10 @@ public class OrderSpecification {
             // Lọc theo Trạng thái thanh toán
             if (StringUtils.hasText(paymentStatus)) {
                 spec = spec.and((r, q, cb) -> cb.equal(r.get("trangThaiThanhToan"), paymentStatus));
+            }
+
+            if (StringUtils.hasText(shippingMethod)) {
+                spec = spec.and((r, q, cb) -> cb.equal(r.get("phuongThucVanChuyen"), shippingMethod));
             }
 
             return spec.toPredicate(root, query, criteriaBuilder);

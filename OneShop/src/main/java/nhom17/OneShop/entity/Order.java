@@ -24,6 +24,7 @@ public class Order {
     private String tenNguoiNhan;
     private String soDienThoaiNhan;
     private String diaChiNhan;
+    private String phuongThucVanChuyen;
     @Lob
     private String ghiChu;
     private LocalDateTime ngayTao;

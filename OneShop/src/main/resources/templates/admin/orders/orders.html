@@ -30,6 +30,17 @@
                     </select>
                 </div>
                 <div class="col-md-2">
+                    <label class="form-label">Phương thức vận chuyển</label>
+                    <select class="form-select" name="shippingMethod" onchange="this.form.submit()">
+                        <option value="">Tất cả</option>
+                        <option th:each="m : ${shippingMethods}"
+                                th:value="${m}"
+                                th:text="${m}"
+                                th:selected="${shippingMethod == m}">
+                        </option>
+                    </select>
+                </div>
+                <div class="col-md-2">
                     <label class="form-label">Phương thức thanh toán</label>
                     <select class="form-select" name="paymentMethod" onchange="this.form.submit()">
                         <option value="">Tất cả</option>
@@ -100,13 +111,16 @@
                             <span th:if="${order.trangThaiThanhToan == 'Chưa thanh toán'}" class="badge bg-label-warning" th:text="${order.trangThaiThanhToan}"></span>
                         </td>
                         <td class="text-center">
-                            <a th:href="@{/admin/order/{id}(id=${order.maDonHang}, page=${orderPage.number + 1}, size=${orderPage.size}, keyword=${keyword}, status=${status}, paymentMethod=${paymentMethod}, paymentStatus=${paymentStatus})}"
+                            <a th:href="@{/admin/order/{id}(id=${order.maDonHang}, page=${orderPage.number + 1}, size=${orderPage.size}, keyword=${keyword}, status=${status}, paymentMethod=${paymentMethod}, paymentStatus=${paymentStatus}, shippingMethod=${shippingMethod})}"
                                class="btn btn-sm btn-outline-secondary" title="Xem chi tiết đơn hàng">
                                 <i class="bx bx-show"></i>
                             </a>
-                            <button th:if="${order.shipping == null}" type="button" class="btn btn-sm btn-outline-primary create-shipping-btn"
+                            <button th:if="${order.shipping == null}" type="button"
+                                    class="btn btn-sm btn-outline-primary create-shipping-btn"
                                     data-bs-toggle="modal" data-bs-target="#createShippingModal"
-                                    th:data-order-id="${order.maDonHang}" title="Tạo đơn vận chuyển">
+                                    th:data-order-id="${order.maDonHang}"
+                                    th:data-phuongthuc="${order.phuongThucVanChuyen}"
+                                    title="Tạo đơn vận chuyển">
                                 <i class="bx bxs-truck"></i>
                             </button>
                             <a th:if="${order.shipping != null}"
@@ -125,39 +139,69 @@
         </div>
     </div>
 
-    <div class="modal fade" id="createShippingModal" tabindex="-1">
+    <div class="modal fade" id="createShippingModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <form th:action="@{/admin/shipping/saveFromOrder}" th:object="${shippingRequest}" method="post" class="modal-content">
+                <input type="hidden" id="createShipping_maDonHang" name="maDonHang">
                 <input type="hidden" name="page" th:value="${orderPage.number + 1}">
                 <input type="hidden" name="size" th:value="${orderPage.size}">
                 <input type="hidden" name="keyword" th:value="${keyword}">
                 <input type="hidden" name="status" th:value="${status}">
                 <input type="hidden" name="paymentMethod" th:value="${paymentMethod}">
                 <input type="hidden" name="paymentStatus" th:value="${paymentStatus}">
-
-                <input type="hidden" id="createShipping_maDonHang" name="maDonHang">
+                <input type="hidden" name="shippingMethod" th:value="${shippingMethod}">
 
                 <div class="modal-header bg-primary">
-                    <h5 class="modal-title text-white">Tạo đơn vận chuyển cho đơn hàng #<span id="orderIdInModal"></span></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <h5 class="modal-title text-white">
+                        Tạo đơn vận chuyển cho đơn hàng #<span id="orderIdInModal"></span>
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
+
                 <div class="modal-body">
+
+                    <div class="mb-3">
+                        <label class="form-label">Phương thức vận chuyển</label>
+                        <input type="text" id="phuongThucVanChuyen" name="phuongThucVanChuyen"
+                               class="form-control bg-light" readonly>
+                        <small class="text-muted fst-italic">
+                            Phương thức được xác định từ đơn hàng, không thể thay đổi.
+                        </small>
+                    </div>
+
                     <div class="mb-3">
                         <label class="form-label">Nhà vận chuyển <span class="text-danger">*</span></label>
-                        <select th:field="*{maNVC}" class="form-select" required>
+                        <select th:field="*{maNVC}" id="nhaVanChuyenSelect" class="form-select" required>
                             <option value="">-- Chọn nhà vận chuyển --</option>
-                            <option th:each="c : ${carriers}" th:value="${c.maNVC}" th:text="${c.tenNVC}"></option>
+
+                            <optgroup th:each="entry : ${carriersWithFeesByOrder}"
+                                      th:label="'Đơn hàng #' + ${entry.key}">
+                                <option th:each="fee : ${entry.value}"
+                                        th:value="${fee.nhaVanChuyen.maNVC}"
+                                        th:text="${fee.nhaVanChuyen.tenNVC + ' - ' + #numbers.formatDecimal(fee.chiPhi, 0, 'COMMA', 0, 'POINT') + ' ₫'}">
+                                </option>
+                            </optgroup>
                         </select>
+
+                        <small class="text-muted fst-italic">
+                            Chỉ hiển thị các nhà vận chuyển có thể giao đến tỉnh của người nhận.
+                        </small>
                     </div>
-                    <p class="text-muted small">Mã vận đơn sẽ được tạo tự động và trạng thái ban đầu là "Đã khởi tạo".</p>
+
+
+                    <p class="text-muted small">
+                        Mã vận đơn sẽ được tạo tự động, trạng thái ban đầu là <b>“Đã khởi tạo”</b>.
+                    </p>
                 </div>
+
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Đóng</button>
-                    <button type="submit" class="btn btn-primary">Tạo</button>
+                    <button type="submit" class="btn btn-primary">Tạo đơn</button>
                 </div>
             </form>
         </div>
     </div>
+
 </main>
 
 </body>

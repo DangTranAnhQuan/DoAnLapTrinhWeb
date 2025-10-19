@@ -14,21 +14,32 @@
     <div class="card mb-4">
         <div class="card-body">
             <form th:action="@{/admin/shipping}" method="get" class="row g-3 align-items-end">
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label class="form-label">Tìm mã vận đơn / mã ĐH</label>
                     <input type="text" class="form-control" name="keyword" th:value="${keyword}" placeholder="Nhập mã...">
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">Nhà vận chuyển</label>
                     <select name="carrierId" class="form-select" onchange="this.form.submit()">
-                        <option value="">Tất cả</option>
+                        <option value="" th:selected="${carrierId == null}">Tất cả</option>
                         <option th:each="c : ${carriers}" th:value="${c.maNVC}" th:text="${c.tenNVC}" th:selected="${carrierId != null && carrierId == c.maNVC}"></option>
                     </select>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
+                    <label class="form-label">Phương thức</label>
+                    <select name="shippingMethod" class="form-select" onchange="this.form.submit()">
+                        <option value="" th:selected="${#strings.isEmpty(shippingMethod)}">Tất cả</option>
+                        <option th:each="m : ${shippingMethods}"
+                                th:value="${m}"
+                                th:text="${m}"
+                                th:selected="${shippingMethod == m}">
+                        </option>
+                    </select>
+                </div>
+                <div class="col-md-2">
                     <label class="form-label">Trạng thái</label>
                     <select name="status" class="form-select" onchange="this.form.submit()">
-                        <option value="">Tất cả</option>
+                        <option value="" th:selected="${#strings.isEmpty(status)}">Tất cả</option>
                         <option value="Đã khởi tạo" th:selected="${status == 'Đã khởi tạo'}">Đã khởi tạo</option>
                         <option value="Đang giao" th:selected="${status == 'Đang giao'}">Đang giao</option>
                         <option value="Đã giao" th:selected="${status == 'Đã giao'}">Đã giao</option>
@@ -44,12 +55,7 @@
     </div>
 
     <div class="card">
-        <div class="card-header d-flex justify-content-between">
-            <h5 class="mb-0">Danh sách Vận chuyển</h5>
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">
-                <i class="bx bx-plus me-1"></i> Tạo vận đơn
-            </button>
-        </div>
+        <div class="card-header"><h5 class="mb-0">Danh sách đơn vận chuyển</h5></div>
         <div class="card-body">
             <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
                 <span th:text="${successMessage}"></span><button type="button" class="btn-close" data-bs-dismiss="alert"></button>
@@ -62,10 +68,9 @@
                 <table class="table table-hover">
                     <thead>
                     <tr>
-                        <th>Mã VC</th>
                         <th>Mã ĐH</th>
                         <th>Nhà vận chuyển</th>
-                        <th>Mã vận đơn</th>
+                        <th>Phương thức</th> <th>Mã vận đơn</th>
                         <th>Gửi lúc</th>
                         <th>Giao lúc</th>
                         <th>Trạng thái</th>
@@ -74,10 +79,9 @@
                     </thead>
                     <tbody>
                     <tr th:each="s : ${shippingPage.content}">
-                        <td th:text="'#' + ${s.maVanChuyen}"></td>
                         <td th:text="${s.donHang.maDonHang}"></td>
                         <td th:text="${s.nhaVanChuyen.tenNVC}"></td>
-                        <td th:text="${s.maVanDon}"></td>
+                        <td th:text="${s.donHang.phuongThucVanChuyen}"></td> <td th:text="${s.maVanDon}"></td>
                         <td th:text="${#temporals.format(s.guiLuc, 'dd/MM/yyyy HH:mm')}"></td>
                         <td th:text="${s.giaoLuc != null ? #temporals.format(s.giaoLuc, 'dd/MM/yyyy HH:mm') : 'Chưa giao'}"></td>
                         <td><span class="badge" th:classappend="${s.trangThai == 'Đã giao'} ? 'bg-label-success' : 'bg-label-info'" th:text="${s.trangThai}"></span></td>
@@ -88,10 +92,16 @@
                                     th:data-order-id="${s.donHang.maDonHang}"
                                     th:data-carrier-id="${s.nhaVanChuyen.maNVC}"
                                     th:data-tracking-code="${s.maVanDon}"
-                                    th:data-status="${s.trangThai}">
-                                <i class="bx bx-edit"></i>
+                                    th:data-status="${s.trangThai}"
+                                    th:data-method="${s.donHang.phuongThucVanChuyen}"> <i class="bx bx-edit"></i>
                             </button>
-                            <a th:href="@{/admin/shipping/delete/{id}(id=${s.maVanChuyen})}"
+                            <a th:href="@{/admin/shipping/delete/{id}(id=${s.maVanChuyen},
+                                    keyword=${keyword},
+                                    carrierId=${carrierId},
+                                    status=${status},
+                                    shippingMethod=${shippingMethod},
+                                    page=${shippingPage.number + 1},
+                                    size=${shippingPage.size})}"
                                class="btn btn-sm btn-danger" onclick="return confirm('Bạn chắc chắn muốn xóa?')">
                                 <i class="bx bx-trash"></i>
                             </a>
@@ -106,35 +116,15 @@
         </div>
     </div>
 
-    <div class="modal fade" id="addModal" tabindex="-1">
-        <div class="modal-dialog">
-            <form th:action="@{/admin/shipping/save}" method="post" class="modal-content">
-                <div class="modal-header bg-primary text-white"><h5 class="modal-title text-white">Tạo đơn vận chuyển</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">Mã Đơn hàng <span class="text-danger">*</span></label>
-                        <input type="number" name="maDonHang" class="form-control" placeholder="Nhập mã đơn hàng..." required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Nhà vận chuyển <span class="text-danger">*</span></label>
-                        <select name="maNVC" class="form-select" required>
-                            <option value="">-- Chọn --</option>
-                            <option th:each="c : ${carriers}" th:value="${c.maNVC}" th:text="${c.tenNVC}"></option>
-                        </select>
-                    </div>
-                    <p class="text-muted small">Mã vận đơn sẽ được tạo tự động và trạng thái ban đầu là "Đã khởi tạo".</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Đóng</button>
-                    <button type="submit" class="btn btn-primary">Tạo</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
     <div class="modal fade" id="editModal" tabindex="-1">
         <div class="modal-dialog">
-            <form th:action="@{/admin/shipping/save}" method="post" class="modal-content">
+            <form th:action="@{/admin/shipping/save(
+                    keyword=${keyword},
+                    carrierId=${carrierId},
+                    status=${status},
+                    shippingMethod=${shippingMethod},
+                    page=${shippingPage.number + 1},
+                    size=${shippingPage.size})}" method="post" class="modal-content">
                 <input type="hidden" name="maVanChuyen" id="editMaVanChuyen">
                 <input type="hidden" name="maDonHang" id="editMaDonHang">
                 <div class="modal-header bg-warning"><h5 class="modal-title text-white">Cập nhật đơn vận chuyển</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
@@ -142,6 +132,10 @@
                     <div class="mb-3">
                         <label class="form-label">Mã vận đơn</label>
                         <p id="editMaVanDonText" class="form-control-plaintext"></p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Phương thức vận chuyển</label>
+                        <input type="text" id="editPhuongThuc" class="form-control bg-light" readonly>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Nhà vận chuyển <span class="text-danger">*</span></label>

@@ -1,4 +1,4 @@
-package nhom17.OneShop.request;
+package nhom17.OneShop.dto;
 
 import lombok.Data;
 

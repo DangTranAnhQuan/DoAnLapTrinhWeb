@@ -1,6 +1,6 @@
 package nhom17.OneShop.controller;
 
-import nhom17.OneShop.request.DashboardDataDTO;
+import nhom17.OneShop.dto.DashboardDataDTO;
 import nhom17.OneShop.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;

@@ -71,6 +71,27 @@ CREATE TABLE NhaVanChuyen (
 );
 GO
 
+CREATE TABLE PhiVanChuyen (
+    MaChiPhiVC INT IDENTITY(1,1) PRIMARY KEY,
+    TenGoiCuoc NVARCHAR(200) NOT NULL,    
+    MaNVC INT NOT NULL FOREIGN KEY REFERENCES NhaVanChuyen(MaNVC) ON DELETE CASCADE, 
+    PhuongThucVanChuyen NVARCHAR(50) NOT NULL,
+    ChiPhi DECIMAL(18, 2) NOT NULL CHECK (ChiPhi >= 0),
+    NgayGiaoSomNhat INT NOT NULL,
+    NgayGiaoMuonNhat INT NOT NULL,
+    DonViThoiGian NVARCHAR(20) NOT NULL DEFAULT N'Ngày',
+	CHECK (NgayGiaoMuonNhat >= NgayGiaoSomNhat)
+);
+GO
+
+CREATE TABLE PhiApDungTungTinh (
+    MaChiPhiVC INT NOT NULL
+    FOREIGN KEY REFERENCES PhiVanChuyen(MaChiPhiVC) ON DELETE CASCADE,
+    TenTinhThanh NVARCHAR(100) NOT NULL,
+    PRIMARY KEY (MaChiPhiVC, TenTinhThanh)
+);
+GO
+
 -- =============================================
 -- BẢNG CÓ KHÓA NGOẠI (CẤP 1)
 -- =============================================
@@ -87,6 +108,7 @@ CREATE TABLE NguoiDung (
     MaHangThanhVien INT,
     TrangThai TINYINT DEFAULT 1 CHECK (TrangThai IN (0, 1)),
     AnhDaiDien NVARCHAR(500),
+	DiemTichLuy INT NOT NULL DEFAULT 0,
     NgayTao DATETIME2 DEFAULT SYSUTCDATETIME(),
     NgayCapNhat DATETIME2,
     FOREIGN KEY (MaVaiTro) REFERENCES VaiTro(MaVaiTro),
@@ -229,6 +251,7 @@ CREATE TABLE DonHang (
     TrangThaiThanhToan NVARCHAR(20) CHECK (TrangThaiThanhToan IN (N'Chưa thanh toán', N'Đã thanh toán')),
     TienHang DECIMAL(18, 2) NOT NULL CHECK (TienHang >= 0),
     MaKhuyenMai NVARCHAR(30),
+	PhuongThucVanChuyen NVARCHAR(50) NOT NULL,
     PhiVanChuyen DECIMAL(18, 2) NOT NULL DEFAULT 0 CHECK (PhiVanChuyen >= 0),
     TongTien DECIMAL(18, 2) NOT NULL,
     TenNguoiNhan NVARCHAR(150) NOT NULL,

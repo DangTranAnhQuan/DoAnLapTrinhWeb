@@ -51,11 +51,21 @@
                         <td><a th:if="${c.website}" th:href="${c.website}" th:text="${c.website}" target="_blank"></a></td>
                         <td>
                             <button type="button" class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editCarrierModal"
-                                    th:data-id="${c.maNVC}" th:data-name="${c.tenNVC}" th:data-phone="${c.soDienThoai}" th:data-website="${c.website}">
+                                    th:data-id="${c.maNVC}" th:data-name="${c.tenNVC}" th:data-phone="${c.soDienThoai}" th:data-website="${c.website}"
+                                    title="Chỉnh sửa">
                                 <i class="bx bx-edit"></i>
                             </button>
+
+                            <a th:href="@{/admin/shipping-carrier/{id}/fees(id=${c.maNVC})}"
+                               class="btn btn-sm btn-info"
+                               title="Quản lý phí vận chuyển">
+                                <i class='bx bxs-dollar-circle'></i>
+                            </a>
                             <a th:href="@{/admin/shipping-carrier/delete/{id}(id=${c.maNVC}, page=${carrierPage.number + 1}, size=${carrierPage.size}, keyword=${keyword})}"
-                               class="btn btn-sm btn-danger" onclick="return confirm('Bạn có chắc muốn xóa nhà vận chuyển này?')"><i class="bx bx-trash"></i></a>
+                               class="btn btn-sm btn-danger" onclick="return confirm('Bạn có chắc muốn xóa nhà vận chuyển này?')"
+                               title="Xóa">
+                                <i class="bx bx-trash"></i>
+                            </a>
                         </td>
                     </tr>
                     <tr th:if="${carrierPage.empty}"><td colspan="5" class="text-center py-3">Không có nhà vận chuyển nào.</td></tr>
