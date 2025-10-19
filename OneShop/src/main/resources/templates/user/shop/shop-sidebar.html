@@ -179,10 +179,18 @@
                                                 </a>
                                             </li>
                                             <li class="select-option">
-                                                <a href="#" class="add-to-cart-btn-ajax"
-                                                   th:data-product-id="${product.maSanPham}">
-                                                    Thêm vào giỏ
-                                                </a>
+                                                <th:block th:if="${product.inventory != null && product.inventory.soLuongTon > 0}">
+                                                    <a href="#" class="add-to-cart-btn-ajax" th:data-product-id="${product.maSanPham}">
+                                                        Thêm vào giỏ
+                                                    </a>
+                                                </th:block>
+
+                                                <th:block th:unless="${product.inventory != null && product.inventory.soLuongTon > 0}">
+                                                    <a href="javascript:void(0)"
+                                                       style="cursor: not-allowed; background-color: #6c757d !important; border-color: #6c757d !important;">
+                                                        Hết hàng
+                                                    </a>
+                                                </th:block>
                                             </li>
                                             <li class="wishlist">
                                                 <a href="#" class="toggle-wishlist-btn"

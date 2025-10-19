@@ -13,15 +13,12 @@ import java.util.Optional;
 
 public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecificationExecutor<Order> {
 
-    // --- Các phương thức JPQL (Đã đúng) ---
     List<Order> findByNguoiDungOrderByNgayDatDesc(User nguoiDung);
 
     @Query("SELECT o FROM Order o LEFT JOIN FETCH o.orderDetails WHERE o.maDonHang = :orderId")
     Optional<Order> findByIdWithDetails(@Param("orderId") Long orderId);
 
     boolean existsByNguoiDung_MaNguoiDung(Integer userId);
-
-    // --- Các phương thức Native SQL cho Admin Dashboard (Đã sửa lại theo tên bảng tiếng Việt) ---
 
     @Query(value = "SELECT COALESCE(SUM(o.TongTien), 0), COUNT(o.MaDonHang) " +
             "FROM DonHang o " + // SỬA LẠI: orders -> DonHang
@@ -68,4 +65,13 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
             "GROUP BY c.TenDanhMuc ORDER BY CategoryRevenue DESC",
             nativeQuery = true)
     List<Object[]> findRevenueByCategoryBetween(@Param("startDate") Timestamp startDate, @Param("endDate") Timestamp endDate);
+
+
+    @Query(value = "SELECT CAST(CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END AS BIT) " +
+            "FROM DonHang o " +
+            "JOIN DonHang_ChiTiet od ON o.MaDonHang = od.MaDonHang " +
+            "WHERE o.MaNguoiDung = :userId AND od.MaSanPham = :productId AND o.TrangThai = N'Đã giao'",
+            nativeQuery = true)
+    boolean hasCompletedPurchase(@Param("userId") Integer userId, @Param("productId") Integer productId);
 }
+

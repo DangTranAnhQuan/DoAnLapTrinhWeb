@@ -448,7 +448,7 @@ DELETE FROM MaXacThuc
 WHERE MaNguoiDung IN (
     SELECT MaNguoiDung FROM NguoiDung 
     WHERE Email IN (
-        'dangquan1912@gmail.com',
+        'dangquan1912@gmail.com'
     )
 );
 
@@ -494,3 +494,16 @@ PRINT N'✅ Xóa xong!';
 GO
 
 
+USE OneShop;
+GO
+
+-- Kiểm tra mật khẩu của user
+SELECT 
+    MaNguoiDung,
+    Email, 
+    TenDangNhap,
+    MatKhau,
+    NgayCapNhat
+FROM NguoiDung 
+WHERE Email = '23110237@student.hcmute.edu.vn';
+GO

@@ -10,10 +10,11 @@ import org.springframework.data.repository.query.Param;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 public interface RatingRepository extends JpaRepository<Rating, RatingId> {
     List<Rating> findBySanPham_MaSanPhamOrderByNgayTaoDesc(Integer maSanPham);
-
+    boolean existsByNguoiDung_MaNguoiDungAndSanPham_MaSanPham(Integer userId, Integer productId);
     // Lấy tất cả đánh giá của 1 sản phẩm
     List<Rating> findBySanPham(Product sanPham);
 
@@ -46,4 +47,5 @@ public interface RatingRepository extends JpaRepository<Rating, RatingId> {
         }
         return null;
     }
+    Optional<Rating> findByNguoiDung_MaNguoiDungAndSanPham_MaSanPham(Integer userId, Integer productId);
 }

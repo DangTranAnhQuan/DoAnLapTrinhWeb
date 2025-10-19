@@ -99,4 +99,70 @@ public class ReviewController {
 
         return "redirect:/product/" + productId + "#reviews";
     }
+    @PostMapping("/update-review")
+    public String updateReview(@RequestParam("productId") Integer productId,
+                               @RequestParam("rating") Integer ratingScore,
+                               @RequestParam("comment") String comment,
+                               @RequestParam(value = "mediaFile", required = false) MultipartFile mediaFile,
+                               Authentication authentication,
+                               RedirectAttributes redirectAttributes) {
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            redirectAttributes.addFlashAttribute("error", "Vui lòng đăng nhập để thực hiện.");
+            return "redirect:/product/" + productId;
+        }
+
+        try {
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            User currentUser = nguoiDungRepository.findByEmail(userDetails.getUsername())
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng."));
+
+            // Tìm bài đánh giá CŨ
+            Rating existingRating = ratingRepository
+                    .findByNguoiDung_MaNguoiDungAndSanPham_MaSanPham(currentUser.getMaNguoiDung(), productId)
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy bài đánh giá để cập nhật."));
+
+            // Cập nhật thông tin mới
+            existingRating.setDiemDanhGia(ratingScore);
+            existingRating.setBinhLuan(comment);
+            existingRating.setNgayTao(LocalDateTime.now()); // Cập nhật ngày thành ngày sửa
+
+            // Xử lý file media nếu người dùng tải lên file mới
+            if (mediaFile != null && !mediaFile.isEmpty()) {
+                if (mediaFile.getSize() > MAX_SIZE) {
+                    redirectAttributes.addFlashAttribute("error", "File vượt quá 20MB.");
+                    return "redirect:/product/" + productId + "#reviews";
+                }
+
+                // Xóa file cũ trước khi lưu file mới
+                String oldFile = existingRating.getImageUrl() != null ? existingRating.getImageUrl() : existingRating.getVideoUrl();
+                if (oldFile != null && !oldFile.isEmpty()) {
+                    storageService.deleteFile("reviews/" + oldFile);
+                }
+
+                // Lưu file mới
+                String storedName = storageService.storeFile(mediaFile, "reviews");
+                String contentType = mediaFile.getContentType() != null ? mediaFile.getContentType().toLowerCase(Locale.ROOT) : "";
+
+                if (contentType.startsWith("image/")) {
+                    existingRating.setImageUrl(storedName);
+                    existingRating.setVideoUrl(null);
+                } else if (contentType.startsWith("video/")) {
+                    existingRating.setVideoUrl(storedName);
+                    existingRating.setImageUrl(null);
+                } else {
+                    redirectAttributes.addFlashAttribute("error", "Định dạng file không hợp lệ.");
+                    return "redirect:/product/" + productId + "#reviews";
+                }
+            }
+
+            ratingRepository.save(existingRating); // Lưu lại các thay đổi
+            redirectAttributes.addFlashAttribute("success", "Cập nhật đánh giá thành công!");
+
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Lỗi khi cập nhật đánh giá: " + e.getMessage());
+        }
+
+        return "redirect:/product/" + productId + "#reviews";
+    }
 }

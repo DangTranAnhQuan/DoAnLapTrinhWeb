@@ -1,186 +1,3 @@
-<!--<!DOCTYPE html>-->
-<!--<html lang="vi"-->
-<!--      xmlns:th="http://www.thymeleaf.org"-->
-<!--      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"-->
-<!--      layout:decorate="~{layouts/user}">-->
-
-<!--<head>-->
-<!--    <meta charset="utf-8"/>-->
-<!--    <title>Trang chủ</title>-->
-<!--    <style>-->
-<!--        /* Overlay link phủ toàn vùng slide/thumbnail để click đi chi tiết */-->
-<!--        .slide-link, .card-link {-->
-<!--          position: absolute; inset: 0; display: block;-->
-<!--          text-indent: -9999px; background: transparent;-->
-<!--        }-->
-<!--        .axil-product.product-style-one { position: relative; }-->
-<!--        .axil-product.product-style-one .card-link { z-index: 2; }-->
-
-<!--        /* KHÔNG gạch chân tiêu đề ở slider, cả hover/focus */-->
-<!--        .main-slider-content .title a { color: inherit; text-decoration: none !important; }-->
-<!--        .main-slider-content .title a:hover,-->
-<!--        .main-slider-content .title a:focus,-->
-<!--        .main-slider-content .title a:active { text-decoration: none !important; }-->
-<!--    </style>-->
-<!--</head>-->
-
-<!--<body>-->
-<!--<main layout:fragment="content">-->
-
-<!--    &lt;!&ndash; ============ SLIDER CHÍNH ============ &ndash;&gt;-->
-<!--    <div class="axil-main-slider-area main-slider-style-1">-->
-<!--        <div class="container">-->
-<!--            <div class="row align-items-center">-->
-<!--                &lt;!&ndash; Trái: nội dung &ndash;&gt;-->
-<!--                <div class="col-lg-5 col-sm-6">-->
-<!--                    <div class="main-slider-content">-->
-<!--                        <div class="slider-content-activation-one">-->
-
-<!--                            <div th:each="product : ${sliderProducts}"-->
-<!--                                 class="single-slide slick-slide"-->
-<!--                                 data-sal="slide-up" data-sal-delay="400" data-sal-duration="800">-->
-<!--                                <span class="subtitle"><i class="fas fa-fire"></i> Ưu đãi hấp dẫn trong tuần</span>-->
-
-<!--                                &lt;!&ndash; Tiêu đề có thể click, KHÔNG gạch chân &ndash;&gt;-->
-<!--                                <h1 class="title">-->
-<!--                                    <a th:href="@{/product/{id}(id=${product.maSanPham})}"-->
-<!--                                       th:text="${product.tenSanPham}">Tên sản phẩm</a>-->
-<!--                                </h1>-->
-
-<!--                                <div class="slide-action">-->
-<!--                                    <div class="shop-btn">-->
-<!--                                        &lt;!&ndash; Nút đi thẳng sang chi tiết sản phẩm &ndash;&gt;-->
-<!--                                        <a th:href="@{/product/{id}(id=${product.maSanPham})}"-->
-<!--                                           class="axil-btn btn-bg-white">-->
-<!--                                            <i class="fal fa-shopping-cart"></i> Xem chi tiết-->
-<!--                                        </a>-->
-<!--                                    </div>-->
-<!--                                </div>-->
-<!--                            </div>&lt;!&ndash; /single-slide &ndash;&gt;-->
-
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                </div>-->
-
-<!--                &lt;!&ndash; Phải: ảnh lớn &ndash;&gt;-->
-<!--                <div class="col-lg-7 col-sm-6">-->
-<!--                    <div class="main-slider-large-thumb">-->
-<!--                        <div class="slider-thumb-activation-one axil-slick-dots">-->
-
-<!--                            <div th:each="product : ${sliderProducts}"-->
-<!--                                 class="single-slide slick-slide"-->
-<!--                                 data-sal="slide-up" data-sal-delay="600" data-sal-duration="1500"-->
-<!--                                 style="position:relative;">-->
-<!--                                <img th:src="@{'/uploads/' + ${product.hinhAnh}}" alt="Product">-->
-<!--                                <div class="product-price">-->
-<!--                                    <span class="text">Chỉ từ</span>-->
-<!--                                    <span class="price-amount"-->
-<!--                                          th:text="${#numbers.formatDecimal(product.giaBan, 0, 'COMMA', 0, 'POINT')} + ' ₫'">-->
-<!--                        $49.00</span>-->
-<!--                                </div>-->
-<!--                                &lt;!&ndash; Overlay link phủ toàn khung ảnh &ndash;&gt;-->
-<!--                                <a class="slide-link"-->
-<!--                                   th:href="@{/product/{id}(id=${product.maSanPham})}"-->
-<!--                                   th:aria-label="'Xem chi tiết ' + ${product.tenSanPham}">Xem chi tiết</a>-->
-<!--                            </div>&lt;!&ndash; /single-slide &ndash;&gt;-->
-
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                </div>-->
-
-<!--            </div>-->
-<!--        </div>-->
-<!--        <ul class="shape-group">-->
-<!--            <li class="shape-1"><img th:src="@{/web/assets/images/others/shape-1.png}" alt="Shape"></li>-->
-<!--            <li class="shape-2"><img th:src="@{/web/assets/images/others/shape-2.png}" alt="Shape"></li>-->
-<!--        </ul>-->
-<!--    </div>-->
-<!--    &lt;!&ndash; ============ /SLIDER CHÍNH ============ &ndash;&gt;-->
-
-<!--    &lt;!&ndash; ============ DANH MỤC ============ &ndash;&gt;-->
-<!--    <div class="axil-categorie-area bg-color-white axil-section-gapcommon">-->
-<!--        <div class="container">-->
-<!--            <div class="section-title-wrapper">-->
-<!--                <span class="title-highlighter highlighter-secondary"><i class="far fa-tags"></i> Danh mục</span>-->
-<!--                <h2 class="title">Duyệt theo danh mục</h2>-->
-<!--            </div>-->
-
-<!--            <div class="categrie-product-activation slick-layout-wrapper&#45;&#45;15 axil-slick-arrow arrow-top-slide">-->
-<!--                <div th:each="category : ${categories}" class="slick-single-layout">-->
-<!--                    <div class="categrie-product" data-sal="zoom-out" data-sal-delay="200" data-sal-duration="500">-->
-<!--                        <a th:href="@{/shop(categoryId=${category.maDanhMuc})}">-->
-<!--                            <img class="img-fluid" th:src="@{'/uploads/' + ${category.hinhAnh}}" alt="product categorie">-->
-<!--                            <h6 class="cat-title" th:text="${category.tenDanhMuc}">Tên danh mục</h6>-->
-<!--                        </a>-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--            </div>-->
-
-<!--        </div>-->
-<!--    </div>-->
-<!--    &lt;!&ndash; ============ /DANH MỤC ============ &ndash;&gt;-->
-
-<!--    &lt;!&ndash; ============ SẢN PHẨM ============ &ndash;&gt;-->
-<!--    <div class="axil-product-area bg-color-white axil-section-gap">-->
-<!--        <div class="container">-->
-<!--            <div class="section-title-wrapper">-->
-<!--        <span class="title-highlighter highlighter-primary">-->
-<!--          <i class="far fa-shopping-basket"></i> Sản phẩm của chúng tôi-->
-<!--        </span>-->
-<!--                <h2 class="title">Khám phá sản phẩm</h2>-->
-<!--            </div>-->
-
-<!--            <div class="explore-product-activation slick-layout-wrapper slick-layout-wrapper&#45;&#45;15 axil-slick-arrow arrow-top-slide">-->
-<!--                <div th:each="productGroup : ${groupedProducts}" class="slick-single-layout">-->
-<!--                    <div class="row row&#45;&#45;15">-->
-<!--                        <div th:each="product : ${productGroup}" class="col-xl-3 col-lg-4 col-sm-6 col-12 mb&#45;&#45;30">-->
-<!--                            <div class="axil-product product-style-one">-->
-<!--                                <div class="thumbnail" style="position:relative;">-->
-<!--                                    <a th:href="@{/product/{id}(id=${product.maSanPham})}">-->
-<!--                                        <img data-sal="zoom-out" class="main-img"-->
-<!--                                             th:src="@{'/uploads/' + ${product.hinhAnh}}" alt="Product Images">-->
-<!--                                    </a>-->
-
-<!--                                    <div class="product-hover-action">-->
-<!--                                        <ul class="cart-action">-->
-<!--                                            <li class="quickview">-->
-<!--                                                <a href="#" class="quick-view-btn" data-bs-toggle="modal"-->
-<!--                                                   data-bs-target="#quick-view-modal"-->
-<!--                                                   th:data-product-id="${product.maSanPham}">-->
-<!--                                                    <i class="far fa-eye"></i>-->
-<!--                                                </a>-->
-<!--                                            </li>-->
-<!--                                            <li class="select-option">-->
-<!--                                                <a href="#" class="add-to-cart-btn-ajax" th:data-product-id="${product.maSanPham}">-->
-<!--                                                    Thêm vào giỏ-->
-<!--                                                </a>-->
-<!--                                            </li>-->
-<!--                                            <li class="wishlist">-->
-<!--                                                <a href="#" class="toggle-wishlist-btn" th:data-product-id="${product.maSanPham}">-->
-<!--                                                    <i class="far fa-heart"></i>-->
-<!--                                                </a>-->
-<!--                                            </li>-->
-<!--                                        </ul>-->
-<!--                                    </div>-->
-
-<!--                                    &lt;!&ndash; Link phủ toàn card &ndash;&gt;-->
-<!--                                    <a class="card-link"-->
-<!--                                       th:href="@{/product/{id}(id=${product.maSanPham})}"-->
-<!--                                       th:aria-label="'Xem chi tiết ' + ${product.tenSanPham}">Xem chi tiết</a>-->
-<!--                                </div>-->
-<!--                            </div>-->
-<!--                        </div>&lt;!&ndash; /each product &ndash;&gt;-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--            </div>-->
-
-<!--        </div>-->
-<!--    </div>-->
-<!--    &lt;!&ndash; ============ /SẢN PHẨM ============ &ndash;&gt;-->
-
-<!--</main>-->
-<!--</body>-->
-<!--</html>-->
 <!DOCTYPE html>
 <html lang="vi"
       xmlns:th="http://www.thymeleaf.org"
@@ -191,92 +8,49 @@
     <meta charset="utf-8"/>
     <title>Trang chủ</title>
     <style>
-        /* Overlay link phủ toàn vùng slide/thumbnail để click đi chi tiết */
-        .slide-link, .card-link {
-          position: absolute; inset: 0; display: block;
-          text-indent: -9999px; background: transparent;
-        }
+        .slide-link, .card-link { position: absolute; inset: 0; display: block; text-indent: -9999px; background: transparent; }
         .axil-product.product-style-one { position: relative; }
         .axil-product.product-style-one .card-link { z-index: 2; }
-
-        /* KHÔNG gạch chân tiêu đề ở slider, cả hover/focus */
         .main-slider-content .title a { color: inherit; text-decoration: none !important; }
-        .main-slider-content .title a:hover,
-        .main-slider-content .title a:focus,
-        .main-slider-content .title a:active { text-decoration: none !important; }
-
-        /* Không gạch chân khi hover vào các link trong danh sách sản phẩm */
+        .main-slider-content .title a:hover, .main-slider-content .title a:focus, .main-slider-content .title a:active { text-decoration: none !important; }
         .axil-product a { text-decoration: none; }
-        .axil-product a:hover,
-        .axil-product a:focus,
-        .axil-product a:active { text-decoration: none; }
+        .axil-product a:hover, .axil-product a:focus, .axil-product a:active { text-decoration: none; }
     </style>
 </head>
 
 <body>
 <main layout:fragment="content">
 
-    <!-- ============ SLIDER CHÍNH ============ -->
     <div class="axil-main-slider-area main-slider-style-1">
         <div class="container">
             <div class="row align-items-center">
-                <!-- Trái: nội dung -->
                 <div class="col-lg-5 col-sm-6">
                     <div class="main-slider-content">
                         <div class="slider-content-activation-one">
-
-                            <div th:each="product : ${sliderProducts}"
-                                 class="single-slide slick-slide"
-                                 data-sal="slide-up" data-sal-delay="400" data-sal-duration="800">
+                            <div th:each="product : ${sliderProducts}" class="single-slide slick-slide" data-sal="slide-up" data-sal-delay="400" data-sal-duration="800">
                                 <span class="subtitle"><i class="fas fa-fire"></i> Ưu đãi hấp dẫn trong tuần</span>
-
-                                <!-- Tiêu đề có thể click, KHÔNG gạch chân -->
-                                <h1 class="title">
-                                    <a th:href="@{/product/{id}(id=${product.maSanPham})}"
-                                       th:text="${product.tenSanPham}">Tên sản phẩm</a>
-                                </h1>
-
+                                <h1 class="title"><a th:href="@{/product/{id}(id=${product.maSanPham})}" th:text="${product.tenSanPham}"></a></h1>
                                 <div class="slide-action">
-                                    <div class="shop-btn">
-                                        <!-- Nút đi thẳng sang chi tiết sản phẩm -->
-                                        <a th:href="@{/product/{id}(id=${product.maSanPham})}"
-                                           class="axil-btn btn-bg-white">
-                                            <i class="fal fa-shopping-cart"></i> Xem chi tiết
-                                        </a>
-                                    </div>
+                                    <div class="shop-btn"><a th:href="@{/product/{id}(id=${product.maSanPham})}" class="axil-btn btn-bg-white"><i class="fal fa-shopping-cart"></i> Xem chi tiết</a></div>
                                 </div>
-                            </div><!-- /single-slide -->
-
+                            </div>
                         </div>
                     </div>
                 </div>
-
-                <!-- Phải: ảnh lớn -->
                 <div class="col-lg-7 col-sm-6">
                     <div class="main-slider-large-thumb">
                         <div class="slider-thumb-activation-one axil-slick-dots">
-
-                            <div th:each="product : ${sliderProducts}"
-                                 class="single-slide slick-slide"
-                                 data-sal="slide-up" data-sal-delay="600" data-sal-duration="1500"
-                                 style="position:relative;">
+                            <div th:each="product : ${sliderProducts}" class="single-slide slick-slide" data-sal="slide-up" data-sal-delay="600" data-sal-duration="1500" style="position:relative;">
                                 <img th:src="@{'/uploads/' + ${product.hinhAnh}}" alt="Product">
                                 <div class="product-price">
                                     <span class="text">Chỉ từ</span>
-                                    <span class="price-amount"
-                                          th:text="${#numbers.formatDecimal(product.giaBan, 0, 'COMMA', 0, 'POINT')} + ' ₫'">
-                        $49.00</span>
+                                    <span class="price-amount" th:text="${#numbers.formatDecimal(product.giaBan, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></span>
                                 </div>
-                                <!-- Overlay link phủ toàn khung ảnh -->
-                                <a class="slide-link"
-                                   th:href="@{/product/{id}(id=${product.maSanPham})}"
-                                   th:aria-label="'Xem chi tiết ' + ${product.tenSanPham}">Xem chi tiết</a>
-                            </div><!-- /single-slide -->
-
+                                <a class="slide-link" th:href="@{/product/{id}(id=${product.maSanPham})}" th:aria-label="'Xem chi tiết ' + ${product.tenSanPham}"></a>
+                            </div>
                         </div>
                     </div>
                 </div>
-
             </div>
         </div>
         <ul class="shape-group">
@@ -284,128 +58,150 @@
             <li class="shape-2"><img th:src="@{/web/assets/images/others/shape-2.png}" alt="Shape"></li>
         </ul>
     </div>
-    <!-- ============ /SLIDER CHÍNH ============ -->
-
-    <!-- ============ DANH MỤC ============ -->
     <div class="axil-categorie-area bg-color-white axil-section-gapcommon">
         <div class="container">
             <div class="section-title-wrapper">
                 <span class="title-highlighter highlighter-secondary"><i class="far fa-tags"></i> Danh mục</span>
                 <h2 class="title">Duyệt theo danh mục</h2>
             </div>
-
             <div class="categrie-product-activation slick-layout-wrapper--15 axil-slick-arrow arrow-top-slide">
                 <div th:each="category : ${categories}" class="slick-single-layout">
                     <div class="categrie-product" data-sal="zoom-out" data-sal-delay="200" data-sal-duration="500">
                         <a th:href="@{/shop(categoryId=${category.maDanhMuc})}">
                             <img class="img-fluid" th:src="@{'/uploads/' + ${category.hinhAnh}}" alt="product categorie">
-                            <h6 class="cat-title" th:text="${category.tenDanhMuc}">Tên danh mục</h6>
+                            <h6 class="cat-title" th:text="${category.tenDanhMuc}"></h6>
                         </a>
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
-    <!-- ============ /DANH MỤC ============ -->
-
-    <!-- ============ SẢN PHẨM ============ -->
     <div class="axil-product-area bg-color-white axil-section-gap">
         <div class="container">
             <div class="section-title-wrapper">
-        <span class="title-highlighter highlighter-primary">
-          <i class="far fa-shopping-basket"></i> Sản phẩm của chúng tôi
-        </span>
+                <span class="title-highlighter highlighter-primary"><i class="far fa-shopping-basket"></i> Sản phẩm của chúng tôi</span>
                 <h2 class="title">Khám phá sản phẩm</h2>
             </div>
-
             <div class="explore-product-activation slick-layout-wrapper slick-layout-wrapper--15 axil-slick-arrow arrow-top-slide">
                 <div th:each="productGroup : ${groupedProducts}" class="slick-single-layout">
                     <div class="row row--15">
                         <div th:each="product : ${productGroup}" class="col-xl-3 col-lg-4 col-sm-6 col-12 mb--30">
                             <div class="axil-product product-style-one">
-                                <div class="thumbnail" style="position:relative;">
-                                    <a th:href="@{/product/{id}(id=${product.maSanPham})}">
-                                        <img data-sal="zoom-out" class="main-img"
-                                             th:src="@{'/uploads/' + ${product.hinhAnh}}" alt="Product Images">
-                                    </a>
-
+                                <div class="thumbnail">
+                                    <a th:href="@{/product/{id}(id=${product.maSanPham})}"><img data-sal="zoom-out" class="main-img" th:src="@{'/uploads/' + ${product.hinhAnh}}" alt="Product Images"></a>
                                     <div class="product-hover-action">
                                         <ul class="cart-action">
-                                            <li class="quickview">
-                                                <a href="#" class="quick-view-btn" data-bs-toggle="modal"
-                                                   data-bs-target="#quick-view-modal"
-                                                   th:data-product-id="${product.maSanPham}">
-                                                    <i class="far fa-eye"></i>
-                                                </a>
-                                            </li>
-                                            <li class="select-option">
-                                                <a href="#" class="add-to-cart-btn-ajax" th:data-product-id="${product.maSanPham}">
-                                                    Thêm vào giỏ
-                                                </a>
-                                            </li>
-                                            <li class="wishlist">
-                                                <a href="#" class="toggle-wishlist-btn" th:data-product-id="${product.maSanPham}">
-                                                    <i class="far fa-heart"></i>
-                                                </a>
-                                            </li>
+                                            <li class="quickview"><a href="#" class="quick-view-btn" data-bs-toggle="modal" data-bs-target="#quick-view-modal" th:data-product-id="${product.maSanPham}"><i class="far fa-eye"></i></a></li>
+                                            <li class="select-option"><th:block th:if="${product.inventory != null && product.inventory.soLuongTon > 0}"><a href="#" class="add-to-cart-btn-ajax" th:data-product-id="${product.maSanPham}">Thêm vào giỏ</a></th:block><th:block th:unless="${product.inventory != null && product.inventory.soLuongTon > 0}"><a href="javascript:void(0)" style="cursor: not-allowed; background-color: #6c757d !important; border-color: #6c757d !important;">Hết hàng</a></th:block></li>
+                                            <li class="wishlist"><a href="#" class="toggle-wishlist-btn" th:data-product-id="${product.maSanPham}"><i class="far fa-heart"></i></a></li>
                                         </ul>
                                     </div>
-
-                                    <!-- Link phủ toàn card -->
-                                    <a class="card-link"
-                                       th:href="@{/product/{id}(id=${product.maSanPham})}"
-                                       th:aria-label="'Xem chi tiết ' + ${product.tenSanPham}">Xem chi tiết</a>
                                 </div>
                             </div>
-                        </div><!-- /each product -->
+                        </div>
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
-    <!-- ============ /SẢN PHẨM ============ -->
+    <div class="axil-product-area bg-color-white axil-section-gap">
+        <div class="container">
+            <div class="section-title-wrapper">
+                <span class="title-highlighter highlighter-primary"><i class="far fa-lightbulb-on"></i> Hàng Mới Về</span>
+                <h2 class="title">Sản Phẩm Mới Nhất</h2>
+            </div>
+            <div class="explore-product-activation slick-layout-wrapper slick-layout-wrapper--15 axil-slick-arrow arrow-top-slide">
+                <div th:each="productGroup : ${newestProductsGrouped}" class="slick-single-layout">
+                    <div class="row row--15">
+                        <div th:each="product : ${productGroup}" class="col-xl-3 col-lg-4 col-sm-6 col-12 mb--30">
+                            <div class="axil-product product-style-one">
+                                <div class="thumbnail">
+                                    <a th:href="@{/product/{id}(id=${product.maSanPham})}"><img th:src="@{'/uploads/' + ${product.hinhAnh}}" alt="Product Images"></a>
+                                    <div class="product-hover-action">
+                                        <ul class="cart-action">
+                                            <li class="quickview"><a href="#" class="quick-view-btn" data-bs-toggle="modal" data-bs-target="#quick-view-modal" th:data-product-id="${product.maSanPham}"><i class="far fa-eye"></i></a></li>
+                                            <li class="select-option"><th:block th:if="${product.inventory != null && product.inventory.soLuongTon > 0}"><a href="#" class="add-to-cart-btn-ajax" th:data-product-id="${product.maSanPham}">Thêm vào giỏ</a></th:block><th:block th:unless="${product.inventory != null && product.inventory.soLuongTon > 0}"><a href="javascript:void(0)" style="cursor: not-allowed; background-color: #6c757d !important; border-color: #6c757d !important;">Hết hàng</a></th:block></li>
+                                            <li class="wishlist"><a href="#" class="toggle-wishlist-btn" th:data-product-id="${product.maSanPham}"><i class="far fa-heart"></i></a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <!-- ============ QUICK VIEW MODAL ============ -->
-    <!-- Đặt cuối fragment, vẫn nằm trong <body>, ngay trước khi đóng </main> -->
+    <div class="axil-product-area bg-color-white axil-section-gap">
+        <div class="container">
+            <div class="section-title-wrapper">
+                <span class="title-highlighter highlighter-secondary"><i class="fas fa-fire"></i> Hot Nhất Tuần</span>
+                <h2 class="title">Sản Phẩm Bán Chạy</h2>
+            </div>
+            <div class="explore-product-activation slick-layout-wrapper slick-layout-wrapper--15 axil-slick-arrow arrow-top-slide">
+                <div th:each="productGroup : ${topSellingProductsGrouped}" class="slick-single-layout">
+                    <div class="row row--15">
+                        <div th:each="product : ${productGroup}" class="col-xl-3 col-lg-4 col-sm-6 col-12 mb--30">
+                            <div class="axil-product product-style-one">
+                                <div class="thumbnail">
+                                    <a th:href="@{/product/{id}(id=${product.maSanPham})}"><img th:src="@{'/uploads/' + ${product.hinhAnh}}" alt="Product Images"></a>
+                                    <div class="product-hover-action">
+                                        <ul class="cart-action">
+                                            <li class="quickview"><a href="#" class="quick-view-btn" data-bs-toggle="modal" data-bs-target="#quick-view-modal" th:data-product-id="${product.maSanPham}"><i class="far fa-eye"></i></a></li>
+                                            <li class="select-option"><th:block th:if="${product.inventory != null && product.inventory.soLuongTon > 0}"><a href="#" class="add-to-cart-btn-ajax" th:data-product-id="${product.maSanPham}">Thêm vào giỏ</a></th:block><th:block th:unless="${product.inventory != null && product.inventory.soLuongTon > 0}"><a href="javascript:void(0)" style="cursor: not-allowed; background-color: #6c757d !important; border-color: #6c757d !important;">Hết hàng</a></th:block></li>
+                                            <li class="wishlist"><a href="#" class="toggle-wishlist-btn" th:data-product-id="${product.maSanPham}"><i class="far fa-heart"></i></a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="axil-product-area bg-color-white axil-section-gap">
+        <div class="container">
+            <div class="section-title-wrapper">
+                <span class="title-highlighter highlighter-primary"><i class="fas fa-tags"></i> Deal Sốc</span>
+                <h2 class="title">Giảm Giá Nhiều Nhất</h2>
+            </div>
+            <div class="explore-product-activation slick-layout-wrapper slick-layout-wrapper--15 axil-slick-arrow arrow-top-slide">
+                <div th:each="productGroup : ${mostDiscountedProductsGrouped}" class="slick-single-layout">
+                    <div class="row row--15">
+                        <div th:each="product : ${productGroup}" class="col-xl-3 col-lg-4 col-sm-6 col-12 mb--30">
+                            <div class="axil-product product-style-one">
+                                <div class="thumbnail">
+                                    <a th:href="@{/product/{id}(id=${product.maSanPham})}"><img th:src="@{'/uploads/' + ${product.hinhAnh}}" alt="Product Images"></a>
+                                    <div class="product-badget" th:if="${product.giaNiemYet > product.giaBan and product.giaNiemYet > 0}">
+                                        <span class="percentage" th:text="'-' + ${#numbers.formatDecimal(((product.giaNiemYet - product.giaBan) / product.giaNiemYet) * 100, 0, 0)} + '%'"></span>
+                                    </div>
+                                    <div class="product-hover-action">
+                                        <ul class="cart-action">
+                                            <li class="quickview"><a href="#" class="quick-view-btn" data-bs-toggle="modal" data-bs-target="#quick-view-modal" th:data-product-id="${product.maSanPham}"><i class="far fa-eye"></i></a></li>
+                                            <li class="select-option"><th:block th:if="${product.inventory != null && product.inventory.soLuongTon > 0}"><a href="#" class="add-to-cart-btn-ajax" th:data-product-id="${product.maSanPham}">Thêm vào giỏ</a></th:block><th:block th:unless="${product.inventory != null && product.inventory.soLuongTon > 0}"><a href="javascript:void(0)" style="cursor: not-allowed; background-color: #6c757d !important; border-color: #6c757d !important;">Hết hàng</a></th:block></li>
+                                            <li class="wishlist"><a href="#" class="toggle-wishlist-btn" th:data-product-id="${product.maSanPham}"><i class="far fa-heart"></i></a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="modal fade" id="quick-view-modal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
             <div class="modal-content">
-                <button type="button" class="btn-close position-absolute end-0 m-3" data-bs-dismiss="modal" aria-label="Close"></button>
-                <div class="modal-body p-4">
-                    <div class="row g-4">
-                        <div class="col-lg-6">
-                            <img id="qv-image" class="img-fluid w-100" src="" alt="Product">
-                        </div>
-                        <div class="col-lg-6">
-                            <h3 id="qv-title" class="mb-2"></h3>
-                            <div class="d-flex align-items-center gap-3 mb-3">
-                                <span id="qv-price" class="h4 text-primary mb-0"></span>
-                                <del id="qv-oldprice" class="text-muted"></del>
-                            </div>
-                            <div class="mb-2">
-                                <span id="qv-stock" class="badge text-bg-success">In stock</span>
-                            </div>
-                            <div class="mb-3">
-                                <span id="qv-rating">★ ★ ★ ★ ★</span>
-                                <small id="qv-review-count" class="text-muted"></small>
-                            </div>
-                            <p id="qv-desc" class="mb-4"></p>
-
-                            <div class="d-flex gap-3">
-                                <a id="qv-detail-link" href="#" class="btn btn-primary">Xem chi tiết</a>
-                                <button id="qv-add-cart" type="button" class="btn btn-outline-primary">Thêm vào giỏ</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="position: absolute; top: 15px; right: 15px; z-index: 10;"></button>
+                <div class="modal-body"></div>
             </div>
         </div>
     </div>
-    <!-- ============ /QUICK VIEW MODAL ============ -->
-
-    <!-- Nhúng script Quick View (đặt sau cùng để đảm bảo DOM đã sẵn sàng) -->
     <script th:src="@{/web/assets/js/quick-view.js}"></script>
 
 </main>

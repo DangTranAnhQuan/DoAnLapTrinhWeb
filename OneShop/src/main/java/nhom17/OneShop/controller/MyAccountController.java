@@ -26,7 +26,7 @@ public class MyAccountController {
     @Autowired private AddressRepository diaChiRepository;
     @Autowired private PasswordEncoder passwordEncoder;
     @Autowired private StorageService storageService;
-    @Autowired private OrderService orderService; // ✅ Thêm OrderService
+    @Autowired private OrderService orderService;
 
     // My Account (tab-panel)
     @GetMapping("/my-account")
@@ -129,7 +129,7 @@ public class MyAccountController {
         return "redirect:/my-account?tab=account";
     }
 
-    // ✅ ================== CÁC PHƯƠNG THỨC ĐƠN HÀNG CỦA USER ==================
+    //  ================== CÁC PHƯƠNG THỨC ĐƠN HÀNG CỦA USER ==================
     @GetMapping("/my-orders")
     public String myOrders(Model model) {
         User currentUser = getCurrentUser();
@@ -154,5 +154,16 @@ public class MyAccountController {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String username = ((UserDetails) principal).getUsername();
         return nguoiDungRepository.findByEmail(username).orElseThrow();
+    }
+    @PostMapping("/my-orders/cancel/{id}")
+    public String cancelOrder(@PathVariable("id") Long orderId, RedirectAttributes redirectAttributes) {
+        try {
+            User currentUser = getCurrentUser();
+            orderService.cancelOrder(orderId, currentUser);
+            redirectAttributes.addFlashAttribute("success", "Đã hủy đơn hàng #" + orderId + " thành công.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
+        }
+        return "redirect:/my-orders";
     }
 }

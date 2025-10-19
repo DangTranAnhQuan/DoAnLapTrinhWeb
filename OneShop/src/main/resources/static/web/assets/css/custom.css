@@ -33,9 +33,6 @@
     color: #ff497c;   /* Tô màu hồng nhạt */
 }
 
-/* * --- BỔ SUNG/SỬA ĐỔI CHO ĐỊA CHỈ GIAO HÀNG (ĐÃ SỬA LỖI BỐ CỤC) ---
- * Sử dụng cấu trúc HTML mới: radio - address-wrapper(label + btn Sửa)
- */
 
 /* Khung chứa toàn bộ option địa chỉ */
 .custom-address-option {
@@ -134,4 +131,102 @@
     word-wrap: break-word;
     overflow-wrap: break-word;
     word-break: break-word;
+}
+#quick-view-modal .product-details-rating .rating-list span i {
+    color: #FFB300 !important;
+}
+#quick-view-modal .price.old-price {
+    text-decoration: line-through;
+    color: #888;
+    font-size: 0.9em;
+    margin-left: 10px;
+}
+
+/* 1. Container chính cho các ngôi sao */
+.rating-stars {
+  display: inline-flex;        /* Sắp xếp các label (sao) trên một hàng */
+  flex-direction: row-reverse; /* Đảo ngược thứ tự để có hiệu ứng hover đúng */
+  justify-content: flex-end;
+  border: 1px solid transparent; /* Thêm viền trong suốt để tránh giật layout khi hover */
+}
+
+/* 2. Ẩn hoàn toàn nút radio mặc định (rất quan trọng) */
+.rating-stars input[type="radio"] {
+  display: none !important;
+}
+
+/* 3. Style cho các ngôi sao (chính là các thẻ <label>) */
+.rating-stars label {
+  font-size: 28px;        /* Kích thước sao */
+  color: #e0e0e0;         /* Màu sao mặc định (xám nhạt) */
+  cursor: pointer;
+  padding: 0 3px;
+  transition: color 0.2s ease, transform 0.2s ease; /* Hiệu ứng chuyển động mượt */
+}
+
+/* 4. Hiệu ứng phóng to đẹp mắt khi di chuột qua một ngôi sao */
+.rating-stars label:hover {
+  transform: scale(1.25); /* Phóng to nhẹ ngôi sao */
+}
+
+/* 5. Tô màu vàng cho sao được hover và các sao "phía trước" nó */
+.rating-stars label:hover,
+.rating-stars label:hover ~ label {
+  color: #ffc107; /* Màu vàng đậm */
+}
+
+/* 6. Giữ màu vàng cho các sao đã được chọn (khi không hover) */
+.rating-stars input[type="radio"]:checked ~ label {
+  color: #ffc107;
+}
+
+/* 1. Tạo nút tròn, có viền cho icon trái tim */
+.qv-wishlist-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 45px;       /* Kích thước chiều rộng */
+    height: 45px;      /* Kích thước chiều cao */
+    border: 1px solid #dcdcdc; /* Viền màu xám nhạt */
+    border-radius: 50%; /* Bo tròn thành hình tròn */
+    font-size: 20px;   /* Làm icon to hơn một chút */
+    color: #6c757d;    /* Màu icon mặc định */
+    transition: all 0.3s ease; /* Hiệu ứng chuyển động mượt mà */
+    text-decoration: none !important;
+}
+
+/* 2. Trạng thái "đã thích" (khi có class 'active') */
+.qv-wishlist-btn.active {
+    border-color: #ff5a7a; /* Viền màu hồng */
+    background-color: #ff5a7a; /* Nền màu hồng */
+    color: #fff;           /* Icon màu trắng */
+}
+.qv-wishlist-btn:hover {
+    color: #ff5a7a;
+    border-color: #ff5a7a;
+}
+.qv-wishlist-btn.active:hover {
+    color: #fff;
+    opacity: 0.9;
+}
+
+/* 3. Tắt hiệu ứng phóng to của các nút trong Quick View */
+#quick-view-modal .axil-btn {
+    transform: none !important;
+    transition: background-color 0.3s ease, color 0.3s ease !important;
+}
+#quick-view-modal .axil-btn:hover,
+#quick-view-modal .axil-btn:focus,
+#quick-view-modal .axil-btn:active {
+    transform: none !important;
+}
+.review-media img,
+.review-media video {
+    max-width: 120px;       /* Chiều rộng tối đa là 120px */
+    max-height: 120px;      /* Chiều cao tối đa là 120px */
+    width: 100%;            /* Đảm bảo nó co dãn nếu container nhỏ hơn */
+    height: 100%;           /* Đảm bảo nó co dãn */
+    object-fit: cover;      /* Cắt và phóng to để lấp đầy khung, giữ nguyên tỷ lệ */
+    border-radius: 8px;     /* Bo góc cho đẹp */
+    background-color: #eee; /* Thêm màu nền nhạt khi video đang tải */
 }

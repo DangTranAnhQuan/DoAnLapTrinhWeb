@@ -15,7 +15,7 @@ import java.util.UUID;
 public class StorageServiceImpl implements StorageService {
 
     // Gốc lưu trữ tĩnh: map /uploads/** -> file:uploads/ (WebMvcConfigurer)
-    private final Path rootStorageFolder = Paths.get("uploads");
+    private final Path rootStorageFolder = Paths.get("OneShop", "uploads");
 
     public StorageServiceImpl() {
         try {

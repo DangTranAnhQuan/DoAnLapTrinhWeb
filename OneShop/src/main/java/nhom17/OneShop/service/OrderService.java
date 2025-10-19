@@ -19,5 +19,9 @@ public interface OrderService {
 
     Order findById(long id);
     void update(Long orderId, OrderUpdateRequest request, User adminUser);
+    void cancelOrder(Long orderId, User currentUser);
+
     DashboardDataDTO getDashboardData(int year, int month);
+    boolean hasCompletedPurchase(Integer userId, Integer productId);
+    boolean canUserReviewProduct(Integer userId, Integer productId);
 }
