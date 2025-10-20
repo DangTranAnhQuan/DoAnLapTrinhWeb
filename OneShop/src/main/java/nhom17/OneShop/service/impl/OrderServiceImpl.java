@@ -167,7 +167,7 @@ public class OrderServiceImpl implements OrderService {
 
         // 5. Cập nhật trạng thái đơn hàng và lưu lại
         order.setTrangThai("Đã hủy");
-        order.setNgayCapNhat(LocalDateTime.now());
+
         orderRepository.save(order);
     }
 

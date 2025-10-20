@@ -109,6 +109,7 @@ CREATE TABLE NguoiDung (
     TrangThai TINYINT DEFAULT 1 CHECK (TrangThai IN (0, 1)),
     AnhDaiDien NVARCHAR(500),
 	DiemTichLuy INT NOT NULL DEFAULT 0,
+	XacThucEmail BIT DEFAULT 0,
     NgayTao DATETIME2 DEFAULT SYSUTCDATETIME(),
     NgayCapNhat DATETIME2,
     FOREIGN KEY (MaVaiTro) REFERENCES VaiTro(MaVaiTro),
@@ -406,20 +407,6 @@ GO
 EXEC sp_columns 'TinNhanChat';
 GO
 
--------------------------------
--------------------------------
--- CHỨC NĂNG GỬI MÃ OTP -------
--------------------------------
--------------------------------
-
-USE OneShop;
-GO
-
-
--- Xóa nếu đã tồn tại
-DROP TABLE IF EXISTS DangKyTamThoi;
-GO
-
 -- Tạo bảng lưu thông tin đăng ký tạm
 CREATE TABLE DangKyTamThoi (
     MaDangKy INT IDENTITY(1,1) PRIMARY KEY,
@@ -430,103 +417,4 @@ CREATE TABLE DangKyTamThoi (
     NgayTao DATETIME2 DEFAULT SYSUTCDATETIME(),
     HetHanLuc DATETIME2 NOT NULL
 );
-GO
-
-
--- Kiểm tra nếu cột chưa tồn tại thì mới thêm
-IF NOT EXISTS (
-    SELECT * FROM INFORMATION_SCHEMA.COLUMNS 
-    WHERE TABLE_NAME = 'NguoiDung' 
-    AND COLUMN_NAME = 'XacThucEmail'
-)
-BEGIN
-    ALTER TABLE NguoiDung 
-    ADD XacThucEmail BIT DEFAULT 0;
-    PRINT N'✅ Đã thêm cột XacThucEmail vào bảng NguoiDung!';
-END
-ELSE
-BEGIN
-    PRINT N'ℹ️ Cột XacThucEmail đã tồn tại, bỏ qua!';
-END
-GO
-
-
--- Đặt XacThucEmail = 1 cho các tài khoản đã tồn tại
-UPDATE NguoiDung 
-SET XacThucEmail = 1 
-WHERE XacThucEmail IS NULL OR XacThucEmail = 0;
-
-
-
-
----------------------------
----------------------------
----- test nhanh, xóa ------
----------------------------
----------------------------
-
-SELECT * FROM NguoiDung
-
-DELETE FROM MaXacThuc 
-WHERE MaNguoiDung IN (
-    SELECT MaNguoiDung FROM NguoiDung 
-    WHERE Email IN (
-        'dangquan1912@gmail.com'
-    )
-);
-
-DELETE FROM NguoiDung 
-WHERE Email IN (
-   'dangquan1912@gmail.com'
-);  
-
-
-SELECT * FROM NguoiDung 
-WHERE Email IN ('dangquan1912@gmail.com');
-
-DELETE FROM DangKyTamThoi;
-DELETE FROM MaXacThuc;
--- 1. Kiểm tra bảng DangKyTamThoi
-SELECT * FROM DangKyTamThoi;
-
--- 2. Kiểm tra bảng MaXacThuc
-SELECT * FROM MaXacThuc ORDER BY NgayTao DESC;
-
--- 3. Kiểm tra bảng NguoiDung
-SELECT * FROM NguoiDung ORDER BY NgayTao DESC;
-
-
-
--- Xóa nhanh cho test
-DELETE FROM MaXacThuc WHERE Email IN ('dangquan1912@gmail.com');
-DELETE FROM DangKyTamThoi WHERE Email IN ('dangquan1912@gmail.com');
-
-DELETE FROM TinNhanChat WHERE MaPhienChat IN (
-    SELECT MaPhienChat FROM PhienChat WHERE MaNguoiDung IN (
-        SELECT MaNguoiDung FROM NguoiDung WHERE Email IN ('dangquan1912@gmail.com')
-    )
-);
-
-DELETE FROM PhienChat WHERE MaNguoiDung IN (
-    SELECT MaNguoiDung FROM NguoiDung WHERE Email IN ('dangquan1912@gmail.com')
-);
-
-DELETE FROM NguoiDung WHERE Email IN ('dangquan1912@gmail.com');
-
-PRINT N'✅ Xóa xong!';
-GO
-
-
-USE OneShop;
-GO
-
--- Kiểm tra mật khẩu của user
-SELECT 
-    MaNguoiDung,
-    Email, 
-    TenDangNhap,
-    MatKhau,
-    NgayCapNhat
-FROM NguoiDung 
-WHERE Email = '23110237@student.hcmute.edu.vn';
 GO

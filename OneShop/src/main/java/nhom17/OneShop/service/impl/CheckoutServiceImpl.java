@@ -63,7 +63,6 @@ public class CheckoutServiceImpl implements CheckoutService {
         order.setTrangThai("Đang xử lý");
         order.setPhuongThucThanhToan(paymentMethod);
         order.setTrangThaiThanhToan("Chưa thanh toán");
-        order.setNgayTao(LocalDateTime.now());
 
 
         BigDecimal subtotal = cartItems.stream().map(Cart::getThanhTien).reduce(BigDecimal.ZERO, BigDecimal::add);
