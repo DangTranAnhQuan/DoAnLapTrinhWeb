@@ -24,7 +24,6 @@
                         <th>Từ trạng thái</th>
                         <th>Đến trạng thái</th>
                         <th>Người thực hiện</th>
-                        <th>Ghi chú</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -33,7 +32,6 @@
                         <td><span class="badge bg-label-secondary" th:text="${history.tuTrangThai}"></span></td>
                         <td><span class="badge bg-label-primary" th:text="${history.denTrangThai}"></span></td>
                         <td th:text="${history.nguoiThucHien?.hoTen}"></td>
-                        <td th:text="${history.ghiChu}"></td>
                     </tr>
                     <tr th:if="${#lists.isEmpty(historyList)}">
                         <td colspan="5" class="text-center py-4">Chưa có lịch sử thay đổi nào.</td>

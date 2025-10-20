@@ -50,6 +50,8 @@
                         <div class="col-md-6">
                             <p><strong>Tiền hàng:</strong> <span th:text="${#numbers.formatDecimal(order.tienHang, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></span></p>
                             <p><strong>Phí vận chuyển:</strong> <span th:text="${#numbers.formatDecimal(order.phiVanChuyen, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></span></p>
+                            <p><strong>Giảm giá:</strong> <span th:text="${#numbers.formatDecimal(order.tienHang + order.phiVanChuyen - order.tongTien, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></span></p>
+
                             <h5 class="fw-bold">Tổng tiền: <span class="text-primary" th:text="${#numbers.formatDecimal(order.tongTien, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></span></h5>
                         </div>
                     </div>
@@ -64,6 +66,17 @@
                     <p class="mb-1"><strong>Tên:</strong> <span th:text="${order.tenNguoiNhan}"></span></p>
                     <p class="mb-1"><strong>SĐT:</strong> <span th:text="${order.soDienThoaiNhan}"></span></p>
                     <p class="mb-0"><strong>Địa chỉ:</strong> <span th:text="${order.diaChiNhan}"></span></p>
+
+                    <hr class="my-2">
+                    <p class="mb-0">
+                        <strong>Ghi chú:</strong>
+                        <th:block th:if="${order.ghiChu != null && !order.ghiChu.isEmpty()}">
+                            <span th:text="${order.ghiChu}"></span>
+                        </th:block>
+                        <th:block th:unless="${order.ghiChu != null && !order.ghiChu.isEmpty()}">
+                            <span class="text-muted fst-italic">Không có ghi chú.</span>
+                        </th:block>
+                    </p>
                 </div>
             </div>
             <div class="card">

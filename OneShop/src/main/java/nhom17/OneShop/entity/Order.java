@@ -25,10 +25,7 @@ public class Order {
     private String soDienThoaiNhan;
     private String diaChiNhan;
     private String phuongThucVanChuyen;
-    @Lob
     private String ghiChu;
-    private LocalDateTime ngayTao;
-    private LocalDateTime ngayCapNhat;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MaNguoiDung")

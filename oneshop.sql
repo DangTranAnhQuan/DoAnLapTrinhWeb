@@ -168,8 +168,9 @@ GO
 
 -- 4. Mã xác thực (OTP Codes)
 CREATE TABLE MaXacThuc (
-    MaXacThucId BIGINT IDENTITY(1,1) PRIMARY KEY,
-    MaNguoiDung INT NOT NULL,
+    MaOtp UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    MaNguoiDung INT NULL,                   
+    Email NVARCHAR(255),                     
     MaSo NVARCHAR(10) NOT NULL,
     MucDich NVARCHAR(30) CHECK (MucDich IN (N'Đăng ký', N'Quên mật khẩu', N'Đăng nhập')),
     HetHanLuc DATETIME2 NOT NULL,
@@ -259,8 +260,6 @@ CREATE TABLE DonHang (
     DiaChiNhan NVARCHAR(500) NOT NULL,
     MaDiaChiNhan INT,
     GhiChu NVARCHAR(500),
-    NgayTao DATETIME2 DEFAULT SYSUTCDATETIME(),
-    NgayCapNhat DATETIME2,
     FOREIGN KEY (MaNguoiDung) REFERENCES NguoiDung(MaNguoiDung),
     FOREIGN KEY (MaKhuyenMai) REFERENCES KhuyenMai(MaKhuyenMai),
     FOREIGN KEY (MaDiaChiNhan) REFERENCES DiaChi(MaDiaChi)
@@ -296,16 +295,6 @@ CREATE TABLE LienHe (
 );
 GO
 
--- 21. Nhật ký hệ thống (System Logs)
-CREATE TABLE NhatKyHeThong (
-    MaNhatKy BIGINT IDENTITY(1,1) PRIMARY KEY,
-    MaNguoiDungThucHien INT,
-    HanhDong NVARCHAR(100) NOT NULL,
-    NgayTao DATETIME2 DEFAULT SYSUTCDATETIME(),
-    FOREIGN KEY (MaNguoiDungThucHien) REFERENCES NguoiDung(MaNguoiDung)
-);
-GO
-
 -- =============================================
 -- BẢNG CÓ KHÓA NGOẠI (CẤP 3 - LIÊN QUAN ĐẾN ĐƠN HÀNG)
 -- =============================================
@@ -330,7 +319,6 @@ CREATE TABLE LichSuTrangThaiDon (
     MaDonHang BIGINT NOT NULL,
     TuTrangThai NVARCHAR(30) NOT NULL,
     DenTrangThai NVARCHAR(30) NOT NULL,
-    GhiChu NVARCHAR(500),
     MaQuanTriVien INT,
     ThoiDiemThayDoi DATETIME2 DEFAULT SYSUTCDATETIME(),
     FOREIGN KEY (MaDonHang) REFERENCES DonHang(MaDonHang),
@@ -395,6 +383,19 @@ CREATE TABLE TinNhanChat (
     FOREIGN KEY (MaPhienChat) REFERENCES PhienChat(MaPhienChat),
     FOREIGN KEY (MaNguoiDung) REFERENCES NguoiDung(MaNguoiDung),  
     INDEX idx_phien_chat (MaPhienChat, ThoiGian)
+);
+GO
+
+
+CREATE TABLE DangKyTamThoi (
+    MaDangKy INT IDENTITY(1,1) PRIMARY KEY,
+    Email NVARCHAR(255) NOT NULL UNIQUE,
+    TenDangNhap NVARCHAR(100) NOT NULL,
+    MatKhau NVARCHAR(255) NOT NULL,
+    HoTen NVARCHAR(150) NOT NULL,
+    NgayTao DATETIME2 DEFAULT SYSUTCDATETIME(),
+    HetHanLuc DATETIME2 NOT NULL
+
 );
 GO
 

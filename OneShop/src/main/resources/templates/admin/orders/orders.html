@@ -136,6 +136,25 @@
                     </tbody>
                 </table>
             </div>
+
+            <nav th:if="${orderPage.totalPages > 0}" aria-label="Page navigation" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item" th:classappend="${orderPage.first} ? 'disabled'">
+                        <a class="page-link"
+                           th:href="@{/admin/order(page=${orderPage.number}, size=${orderPage.size}, keyword=${keyword}, status=${status}, paymentMethod=${paymentMethod}, paymentStatus=${paymentStatus}, shippingMethod=${shippingMethod})}">&laquo;</a>
+                    </li>
+                    <li class="page-item" th:each="i : ${#numbers.sequence(1, orderPage.totalPages)}"
+                        th:classappend="${i == orderPage.number + 1} ? 'active'">
+                        <a class="page-link"
+                           th:href="@{/admin/order(page=${i}, size=${orderPage.size}, keyword=${keyword}, status=${status}, paymentMethod=${paymentMethod}, paymentStatus=${paymentStatus}, shippingMethod=${shippingMethod})}"
+                           th:text="${i}"></a>
+                    </li>
+                    <li class="page-item" th:classappend="${orderPage.last} ? 'disabled'">
+                        <a class="page-link"
+                           th:href="@{/admin/order(page=${orderPage.number + 2}, size=${orderPage.size}, keyword=${keyword}, status=${status}, paymentMethod=${paymentMethod}, paymentStatus=${paymentStatus}, shippingMethod=${shippingMethod})}">&raquo;</a>
+                    </li>
+                </ul>
+            </nav>
         </div>
     </div>
 

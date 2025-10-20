@@ -44,7 +44,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Page<Order> findAll(String keyword, String status, String paymentMethod, String paymentStatus, String shippingMethod, int page, int size) {
-        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("ngayTao").descending());
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("ngayDat").descending());
 
         return orderRepository.findAll(
                 OrderSpecification.filterOrders(keyword, status, paymentMethod, paymentStatus, shippingMethod),
@@ -114,7 +114,6 @@ public class OrderServiceImpl implements OrderService {
         order.setTrangThai(newStatus);
         order.setPhuongThucThanhToan(request.getPhuongThucThanhToan());
         order.setTrangThaiThanhToan(request.getTrangThaiThanhToan());
-        order.setNgayCapNhat(LocalDateTime.now());
 
         orderRepository.save(order);
     }

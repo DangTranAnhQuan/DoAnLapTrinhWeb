@@ -49,8 +49,6 @@ public class CheckoutServiceImpl implements CheckoutService {
         order.setPhuongThucThanhToan(paymentMethod);
         order.setTrangThaiThanhToan("Chưa thanh toán");
 
-        order.setNgayTao(LocalDateTime.now());
-
         BigDecimal subtotal = cartItems.stream().map(Cart::getThanhTien).reduce(BigDecimal.ZERO, BigDecimal::add);
         order.setTienHang(subtotal);
         order.setPhiVanChuyen(BigDecimal.ZERO); // Tạm thời phí ship là 0

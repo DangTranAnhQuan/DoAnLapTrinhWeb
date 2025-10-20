@@ -113,6 +113,25 @@
                     </tbody>
                 </table>
             </div>
+
+            <nav th:if="${shippingPage.totalPages > 0}" aria-label="Page navigation" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item" th:classappend="${shippingPage.first} ? 'disabled'">
+                        <a class="page-link"
+                           th:href="@{/admin/shipping(page=${shippingPage.number}, size=${shippingPage.size}, keyword=${keyword}, carrierId=${carrierId}, status=${status}, shippingMethod=${shippingMethod})}">&laquo;</a>
+                    </li>
+                    <li class="page-item" th:each="i : ${#numbers.sequence(1, shippingPage.totalPages)}"
+                        th:classappend="${i == shippingPage.number + 1} ? 'active'">
+                        <a class="page-link"
+                           th:href="@{/admin/shipping(page=${i}, size=${shippingPage.size}, keyword=${keyword}, carrierId=${carrierId}, status=${status}, shippingMethod=${shippingMethod})}"
+                           th:text="${i}"></a>
+                    </li>
+                    <li class="page-item" th:classappend="${shippingPage.last} ? 'disabled'">
+                        <a class="page-link"
+                           th:href="@{/admin/shipping(page=${shippingPage.number + 2}, size=${shippingPage.size}, keyword=${keyword}, carrierId=${carrierId}, status=${status}, shippingMethod=${shippingMethod})}">&raquo;</a>
+                    </li>
+                </ul>
+            </nav>
         </div>
     </div>
 

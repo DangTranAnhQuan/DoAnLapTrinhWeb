@@ -14,8 +14,7 @@ public class OrderStatusHistory {
     private Long maLichSu;
     private String tuTrangThai;
     private String denTrangThai;
-    @Lob
-    private String ghiChu;
+
     private LocalDateTime thoiDiemThayDoi;
 
     @ManyToOne(fetch = FetchType.LAZY)
