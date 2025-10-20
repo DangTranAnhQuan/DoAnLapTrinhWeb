@@ -2,6 +2,7 @@ package nhom17.OneShop.service.impl;
 
 import jakarta.servlet.http.HttpSession;
 import nhom17.OneShop.entity.*;
+import nhom17.OneShop.exception.NotFoundException; // Thêm import
 import nhom17.OneShop.repository.*;
 import nhom17.OneShop.service.CartService;
 import nhom17.OneShop.service.CheckoutService;
@@ -26,8 +27,8 @@ public class CheckoutServiceImpl implements CheckoutService {
     @Autowired private OrderDetailRepository donHangChiTietRepository;
     @Autowired private CartRepository gioHangRepository;
     @Autowired private InventoryRepository inventoryRepository;
-    @Autowired private VoucherRepository khuyenMaiRepository; // Thêm repo khuyến mãi
-    @Autowired private HttpSession session; // Thêm HttpSession để đọc dữ liệu session
+    @Autowired private VoucherRepository khuyenMaiRepository;
+    @Autowired private HttpSession session;
 
     @Override
     @Transactional
@@ -38,35 +39,45 @@ public class CheckoutServiceImpl implements CheckoutService {
             throw new IllegalStateException("Giỏ hàng trống.");
         }
 
+        for (Cart cartItem : cartItems) {
+            Inventory inventory = inventoryRepository.findById(cartItem.getSanPham().getMaSanPham())
+                    .orElseThrow(() -> new NotFoundException("Hệ thống không tìm thấy tồn kho cho sản phẩm: " + cartItem.getSanPham().getTenSanPham()));
+
+            if (inventory.getSoLuongTon() < cartItem.getSoLuong()) {
+                // Ném ra lỗi với thông báo rõ ràng, lỗi này sẽ được Controller bắt và hiển thị cho người dùng
+                throw new IllegalStateException(
+                        String.format("Sản phẩm '%s' không đủ số lượng. Bạn muốn mua %d, nhưng chỉ còn %d sản phẩm.",
+                                cartItem.getSanPham().getTenSanPham(),
+                                cartItem.getSoLuong(),
+                                inventory.getSoLuongTon())
+                );
+            }
+        }
+
         Address shippingAddress = diaChiRepository.findById(diaChiId)
                 .orElseThrow(() -> new RuntimeException("Địa chỉ không hợp lệ."));
 
-        // Bắt đầu tạo đơn hàng
         Order order = new Order();
         order.setNguoiDung(currentUser);
         order.setNgayDat(LocalDateTime.now());
         order.setTrangThai("Đang xử lý");
         order.setPhuongThucThanhToan(paymentMethod);
         order.setTrangThaiThanhToan("Chưa thanh toán");
+        order.setNgayTao(LocalDateTime.now());
+
 
         BigDecimal subtotal = cartItems.stream().map(Cart::getThanhTien).reduce(BigDecimal.ZERO, BigDecimal::add);
         order.setTienHang(subtotal);
-        order.setPhiVanChuyen(BigDecimal.ZERO); // Tạm thời phí ship là 0
+        order.setPhiVanChuyen(BigDecimal.ZERO);
 
-        // Lấy giảm giá từ coupon trong session
         BigDecimal couponDiscount = (BigDecimal) session.getAttribute("cartDiscount");
-        if (couponDiscount == null) {
-            couponDiscount = BigDecimal.ZERO;
-        }
+        if (couponDiscount == null) couponDiscount = BigDecimal.ZERO;
 
-        // Lấy mã coupon và gán vào đơn hàng
         String appliedCouponCode = (String) session.getAttribute("appliedCouponCode");
         if (appliedCouponCode != null) {
-            Voucher km = khuyenMaiRepository.findById(appliedCouponCode).orElse(null);
-            order.setKhuyenMai(km);
+            khuyenMaiRepository.findById(appliedCouponCode).ifPresent(order::setKhuyenMai);
         }
 
-        // Lấy giảm giá từ hạng thành viên
         BigDecimal membershipDiscount = BigDecimal.ZERO;
         if (currentUser.getHangThanhVien() != null) {
             BigDecimal discountPercent = currentUser.getHangThanhVien().getPhanTramGiamGia();
@@ -75,14 +86,10 @@ public class CheckoutServiceImpl implements CheckoutService {
             }
         }
 
-        // Tính tổng tiền cuối cùng
         BigDecimal total = subtotal.subtract(couponDiscount).subtract(membershipDiscount);
-        if (total.compareTo(BigDecimal.ZERO) < 0) {
-            total = BigDecimal.ZERO;
-        }
+        if (total.compareTo(BigDecimal.ZERO) < 0) total = BigDecimal.ZERO;
         order.setTongTien(total);
 
-        // Sao chép thông tin giao hàng
         order.setTenNguoiNhan(shippingAddress.getTenNguoiNhan());
         order.setSoDienThoaiNhan(shippingAddress.getSoDienThoai());
         String fullAddress = String.join(", ", shippingAddress.getSoNhaDuong(), shippingAddress.getPhuongXa(), shippingAddress.getQuanHuyen(), shippingAddress.getTinhThanh());
@@ -90,7 +97,6 @@ public class CheckoutServiceImpl implements CheckoutService {
 
         Order savedOrder = donHangRepository.save(order);
 
-        // 2. Chuyển sản phẩm từ giỏ hàng sang chi tiết đơn hàng
         for (Cart cartItem : cartItems) {
             OrderDetail orderDetail = new OrderDetail();
             orderDetail.setDonHang(savedOrder);
@@ -100,15 +106,16 @@ public class CheckoutServiceImpl implements CheckoutService {
             orderDetail.setTenSanPham(cartItem.getSanPham().getTenSanPham());
             donHangChiTietRepository.save(orderDetail);
 
-            // 3. Cập nhật tồn kho
-            Inventory inventory = inventoryRepository.findById(cartItem.getSanPham().getMaSanPham())
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm trong kho."));
+            Inventory inventory = inventoryRepository.findById(cartItem.getSanPham().getMaSanPham()).get();
             inventory.setSoLuongTon(inventory.getSoLuongTon() - cartItem.getSoLuong());
             inventoryRepository.save(inventory);
         }
 
-        // 4. Xóa giỏ hàng
         gioHangRepository.deleteAll(cartItems);
+
+        // Xóa coupon khỏi session sau khi đặt hàng thành công
+        session.removeAttribute("cartDiscount");
+        session.removeAttribute("appliedCouponCode");
     }
 
     private User getCurrentUser() {

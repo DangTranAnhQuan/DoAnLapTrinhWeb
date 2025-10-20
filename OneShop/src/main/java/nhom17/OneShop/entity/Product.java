@@ -20,7 +20,6 @@ public class Product {
     private String moTa;
     private BigDecimal giaBan;
     private BigDecimal giaNiemYet;
-//    private int hanSuDung;
     private Integer hanSuDung;
     private String hinhAnh;
     private boolean kichHoat;
@@ -44,4 +43,8 @@ public class Product {
     protected void onCreate() {
         this.ngayTao = LocalDateTime.now();
     }
+
+    @OneToOne(mappedBy = "sanPham", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
+    private Inventory inventory;
 }

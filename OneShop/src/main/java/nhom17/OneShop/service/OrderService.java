@@ -4,6 +4,7 @@ import nhom17.OneShop.entity.Order;
 import nhom17.OneShop.dto.DashboardDataDTO;
 import nhom17.OneShop.entity.ShippingCarrier;
 import nhom17.OneShop.entity.ShippingFee;
+import nhom17.OneShop.entity.User;
 import nhom17.OneShop.request.OrderUpdateRequest;
 import org.springframework.data.domain.Page;
 
@@ -19,7 +20,11 @@ public interface OrderService {
 
     Order findById(long id);
     public Map<Long, List<ShippingFee>> getCarriersWithFeesByOrder(List<Order> danhSachDonHang);
-    void update(Long orderId, OrderUpdateRequest request);
     void updateLoyaltyPoints(Order order, String oldStatus, String newStatus);
+    void update(Long orderId, OrderUpdateRequest request);
+    void cancelOrder(Long orderId, User currentUser);
+
     DashboardDataDTO getDashboardData(int year, int month);
+    boolean hasCompletedPurchase(Integer userId, Integer productId);
+    boolean canUserReviewProduct(Integer userId, Integer productId);
 }

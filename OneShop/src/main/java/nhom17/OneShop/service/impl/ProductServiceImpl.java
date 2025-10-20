@@ -198,4 +198,21 @@ public class ProductServiceImpl implements ProductService {
         Pageable pageable = PageRequest.of(page - 1, size, Sort.by("ngayTao").descending());
         return productRepository.searchForUser(keyword, pageable);
     }
+    @Override
+    public List<Product> findNewestProducts(int limit) {
+        // Phương thức này đã được định nghĩa sẵn trong Repository, chỉ cần gọi
+        return productRepository.findTop8ByKichHoatIsTrueOrderByNgayTaoDesc();
+    }
+
+    @Override
+    public List<Product> findMostDiscountedProducts(int limit) {
+        // Sử dụng Pageable để giới hạn số lượng kết quả trả về
+        Pageable pageable = PageRequest.of(0, limit);
+        return productRepository.findTopDiscountedProducts(pageable);
+    }
+
+    @Override
+    public List<Product> findTopSellingProducts(int limit) {
+        return productRepository.findTopSellingProducts(limit);
+    }
 }

@@ -1,10 +1,44 @@
-<!DOCTYPE html>
+    <!DOCTYPE html>
 <html lang="vi"
       xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layouts/user}">
 <head>
     <title>Giỏ hàng</title>
+
+    <style>
+        /* ============ Căn thẳng cột tiền trong bảng TỔNG CỘNG GIỎ HÀNG ============ */
+        .axil-order-summery .summery-table th:nth-child(2),
+        .axil-order-summery .summery-table td:nth-child(2) {
+            text-align: right;
+            white-space: nowrap;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* Một số theme gán style riêng cho hàng giảm giá -> ép lại về ô bảng chuẩn */
+        .axil-order-summery .summery-table .order-shipping td:nth-child(2) {
+            display: table-cell !important;
+            text-align: right !important;
+            padding-left: 0 !important;
+        }
+
+        /* Đưa ký hiệu ₫/đ về baseline, không superscript */
+        .axil-order-summery .summery-table td:nth-child(2) sup,
+        .axil-order-summery .summery-table td:nth-child(2) .currency,
+        .axil-order-summery .summery-table td:nth-child(2) .woocommerce-Price-currencySymbol {
+            position: static !important;
+            top: 0 !important;
+            vertical-align: baseline !important;
+            font-size: 1em !important;
+            line-height: 1 !important;
+        }
+
+        /* Khóa bề rộng cột tiền trong bảng tổng kết để số không "nhảy" */
+        .axil-order-summery .summery-table col.money-col { width: 170px; }
+
+        /* Tuỳ chọn: kéo rộng card tổng kết tối đa trong cột của nó */
+        .axil-order-summery { width: 100%; }
+    </style>
 </head>
 <body>
 <main layout:fragment="content">
@@ -14,10 +48,12 @@
                 <h4>Giỏ hàng của bạn đang trống.</h4>
                 <a th:href="@{/shop}" class="axil-btn btn-bg-primary mt-4">Tiếp tục mua sắm</a>
             </div>
+
             <div th:unless="${cartItems == null or cartItems.isEmpty()}" class="axil-product-cart-wrap">
                 <div class="product-table-heading">
                     <h4 class="title">Giỏ hàng của bạn</h4>
                 </div>
+
                 <div class="table-responsive">
                     <table class="table axil-product-table axil-cart-table mb--40">
                         <thead>
@@ -35,7 +71,9 @@
                             <td class="product-remove">
                                 <form th:action="@{/cart/remove}" method="post" class="d-inline">
                                     <input type="hidden" name="productId" th:value="${item.sanPham.maSanPham}"/>
-                                    <button type="submit" class="remove-wishlist" style="border: none; background: none; cursor: pointer; padding: 0;"><i class="fal fa-times"></i></button>
+                                    <button type="submit" class="remove-wishlist" style="border: none; background: none; cursor: pointer; padding: 0;">
+                                        <i class="fal fa-times"></i>
+                                    </button>
                                 </form>
                             </td>
                             <td class="product-thumbnail">
@@ -46,7 +84,8 @@
                             <td class="product-title">
                                 <a th:href="@{/product/{id}(id=${item.sanPham.maSanPham})}" th:text="${item.sanPham.tenSanPham}"></a>
                             </td>
-                            <td class="product-price" data-title="Price" th:text="${item.donGia != null ? #numbers.formatDecimal(item.donGia, 0, 'COMMA', 0, 'POINT') + ' ₫' : '0 ₫'}"></td>
+                            <td class="product-price" data-title="Price"
+                                th:text="${item.donGia != null ? #numbers.formatDecimal(item.donGia, 0, 'COMMA', 0, 'POINT') + ' ₫' : '0 ₫'}"></td>
                             <td class="product-quantity" data-title="Qty">
                                 <form th:action="@{/cart/update}" method="post" class="quantity-form">
                                     <input type="hidden" name="productId" th:value="${item.sanPham.maSanPham}"/>
@@ -55,18 +94,24 @@
                                     </div>
                                 </form>
                             </td>
-                            <td class="product-subtotal" data-title="Subtotal" th:text="${item.thanhTien != null ? #numbers.formatDecimal(item.thanhTien, 0, 'COMMA', 0, 'POINT') + ' ₫' : '0 ₫'}"></td>
+                            <td class="product-subtotal" data-title="Subtotal"
+                                th:text="${item.thanhTien != null ? #numbers.formatDecimal(item.thanhTien, 0, 'COMMA', 0, 'POINT') + ' ₫' : '0 ₫'}"></td>
                         </tr>
                         </tbody>
                     </table>
                 </div>
 
                 <div class="row">
-                    <div class="col-xl-5 col-lg-7 offset-xl-7 offset-lg-5">
+                    <!-- MỞ RỘNG KHỐI TỔNG CỘNG SANG TRÁI: bỏ offset, tăng độ rộng cột -->
+                    <div class="col-xl-7 col-lg-8">
                         <div class="axil-order-summery mt--80">
                             <h5 class="title mb--20">Tổng cộng giỏ hàng</h5>
                             <div class="summery-table-wrap">
                                 <table class="table summery-table mb--30">
+                                    <colgroup>
+                                        <col>
+                                        <col class="money-col">
+                                    </colgroup>
                                     <tbody>
                                     <tr class="order-subtotal">
                                         <td>Tạm tính</td>
@@ -74,15 +119,18 @@
                                     </tr>
                                     <tr class="order-shipping">
                                         <td>Giảm giá</td>
+                                        <!-- Nếu không có giảm giá, vẫn hiển thị 0 ₫, canh phải thẳng hàng -->
                                         <td th:text="'-' + ${#numbers.formatDecimal(discount, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></td>
                                     </tr>
                                     <tr class="order-total">
                                         <td>Tổng cộng</td>
-                                        <td class="order-total-amount" th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></td>
+                                        <td class="order-total-amount"
+                                            th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></td>
                                     </tr>
                                     </tbody>
                                 </table>
                             </div>
+
                             <form th:action="@{/cart/apply-coupon}" method="post" class="coupon-code-form">
                                 <div class="input-group product-cupon">
                                     <input placeholder="Nhập mã giảm giá" type="text" name="coupon_code" th:value="${appliedCouponCode}">
@@ -93,10 +141,12 @@
                                 <div th:if="${success}" class="alert alert-success mt-2" th:text="${success}"></div>
                                 <div th:if="${error}" class="alert alert-danger mt-2" th:text="${error}"></div>
                             </form>
+
                             <a th:href="@{/checkout}" class="axil-btn btn-bg-primary checkout-btn mt-4">Tiến hành thanh toán</a>
                         </div>
                     </div>
                 </div>
+
             </div>
         </div>
     </div>

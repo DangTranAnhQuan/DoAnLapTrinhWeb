@@ -21,11 +21,13 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(
                                 "/", "/shop/**", "/product/**", "/sign-in", "/sign-up", "/forgot-password/**",
+                                "/verify-otp", "/resend-otp",
+                                "/verify-reset-password", "/resend-reset-otp",
                                 "/reset-password/**",
                                 "/contact", "/about-us",
                                 "/web/**", "/uploads/**",
                                 "/admin/assets/**",
-                                "/api/**",
+                                "/api/**", "/api/quick-view/**",
                                 "/api/chat/**"
                         ).permitAll()
                         .requestMatchers("/my-orders/**").authenticated()

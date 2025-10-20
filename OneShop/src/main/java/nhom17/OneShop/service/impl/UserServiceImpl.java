@@ -1,18 +1,17 @@
 package nhom17.OneShop.service.impl;
 
+import nhom17.OneShop.entity.TemporaryRegister;
 import nhom17.OneShop.entity.MembershipTier;
 import nhom17.OneShop.entity.Role;
 import nhom17.OneShop.entity.User;
 import nhom17.OneShop.exception.DuplicateRecordException;
 import nhom17.OneShop.exception.NotFoundException;
-import nhom17.OneShop.repository.MembershipTierRepository;
-import nhom17.OneShop.repository.OrderRepository;
-import nhom17.OneShop.repository.RoleRepository;
-import nhom17.OneShop.entity.Role;
-import nhom17.OneShop.repository.UserRepository;
-import nhom17.OneShop.request.UserRequest;
-import nhom17.OneShop.service.StorageService;
+import nhom17.OneShop.repository.*;
+import nhom17.OneShop.repository.TemporaryRegositerRepository;
 import nhom17.OneShop.request.SignUpRequest;
+import nhom17.OneShop.request.UserRequest;
+import nhom17.OneShop.service.OtpService;
+import nhom17.OneShop.service.StorageService;
 import nhom17.OneShop.service.UserService;
 import nhom17.OneShop.specification.UserSpecification;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 
@@ -43,6 +43,14 @@ public class UserServiceImpl implements UserService {
     private StorageService storageService;
     @Autowired
     private OrderRepository orderRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private TemporaryRegositerRepository dangKyTamThoiRepository;
+
+    @Autowired
+    private OtpService otpService;
 
     @Override
     public Page<User> findAll(String keyword, Integer roleId, Integer tierId, Integer status, int page, int size) {
@@ -76,25 +84,24 @@ public class UserServiceImpl implements UserService {
     public void save(UserRequest userRequest) {
         validateUniqueFields(userRequest);
         User user = prepareUserEntity(userRequest);
-        String oldAvatar = user.getAnhDaiDien(); // Lấy ảnh cũ trước khi map ảnh mới
+        String oldAvatar = user.getAnhDaiDien();
         mapRequestToEntity(userRequest, user);
         userRepository.save(user);
 
-        // Xóa ảnh cũ nếu có ảnh mới được upload
         if (StringUtils.hasText(userRequest.getAnhDaiDien()) && StringUtils.hasText(oldAvatar) && !oldAvatar.equals(userRequest.getAnhDaiDien())) {
             storageService.deleteFile(oldAvatar);
         }
     }
 
     private void validateUniqueFields(UserRequest request) {
-        if (request.getMaNguoiDung() == null) { // Tạo mới
+        if (request.getMaNguoiDung() == null) {
             if (userRepository.existsByEmailIgnoreCase(request.getEmail())) {
                 throw new DuplicateRecordException("Email '" + request.getEmail() + "' đã được sử dụng.");
             }
             if (userRepository.existsByTenDangNhapIgnoreCase(request.getTenDangNhap())) {
                 throw new DuplicateRecordException("Tên đăng nhập '" + request.getTenDangNhap() + "' đã tồn tại.");
             }
-        } else { // Cập nhật
+        } else {
             if (userRepository.existsByEmailIgnoreCaseAndMaNguoiDungNot(request.getEmail(), request.getMaNguoiDung())) {
                 throw new DuplicateRecordException("Email '" + request.getEmail() + "' đã được người dùng khác sử dụng.");
             }
@@ -152,35 +159,139 @@ public class UserServiceImpl implements UserService {
         userRepository.delete(userToDelete);
     }
 
-
-//    User
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    @Override
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy người dùng với email: " + email));
+    }
 
     @Override
+    @Transactional
     public User registerNewUser(SignUpRequest signUpRequest) {
-        // Kiểm tra xem email đã tồn tại chưa
         if (userRepository.findByEmail(signUpRequest.getEmail()).isPresent()) {
-            throw new RuntimeException("Email đã tồn tại: " + signUpRequest.getEmail());
+            throw new RuntimeException("Email đã được đăng ký: " + signUpRequest.getEmail());
         }
 
         if (userRepository.findByTenDangNhap(signUpRequest.getTenDangNhap()).isPresent()) {
             throw new RuntimeException("Tên đăng nhập đã tồn tại: " + signUpRequest.getTenDangNhap());
         }
 
+        dangKyTamThoiRepository.deleteByEmail(signUpRequest.getEmail());
+
+        TemporaryRegister dangKyTam = new TemporaryRegister();
+        dangKyTam.setEmail(signUpRequest.getEmail());
+        dangKyTam.setTenDangNhap(signUpRequest.getTenDangNhap());
+        dangKyTam.setMatKhau(passwordEncoder.encode(signUpRequest.getPassword()));
+        dangKyTam.setHoTen(signUpRequest.getHoTen());
+        dangKyTam.setHetHanLuc(LocalDateTime.now().plusMinutes(30));
+
+        dangKyTamThoiRepository.save(dangKyTam);
+
+        otpService.generateOtpForEmail(signUpRequest.getEmail(), "Đăng ký");
+
+        return null;
+    }
+
+    @Override
+    @Transactional
+    public boolean verifyEmailOtp(String email, String otp) {
+        boolean isValid = otpService.validateOtp(email, otp, "Đăng ký");
+
+        if (!isValid) {
+            return false;
+        }
+
+        TemporaryRegister dangKyTam = dangKyTamThoiRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy thông tin đăng ký cho email này."));
+
+        if (dangKyTam.getHetHanLuc().isBefore(LocalDateTime.now())) {
+            dangKyTamThoiRepository.delete(dangKyTam);
+            throw new RuntimeException("Phiên đăng ký đã hết hạn. Vui lòng đăng ký lại.");
+        }
+
         User newUser = new User();
-        newUser.setHoTen(signUpRequest.getHoTen());
-        newUser.setEmail(signUpRequest.getEmail());
-        newUser.setTenDangNhap(signUpRequest.getTenDangNhap());
-        // ✅ MÃ HÓA MẬT KHẨU TRƯỚC KHI LƯU
-        newUser.setMatKhau(passwordEncoder.encode(signUpRequest.getPassword()));
+        newUser.setHoTen(dangKyTam.getHoTen());
+        newUser.setEmail(dangKyTam.getEmail());
+        newUser.setTenDangNhap(dangKyTam.getTenDangNhap());
+        newUser.setMatKhau(dangKyTam.getMatKhau());
 
-        // Thiết lập vai trò mặc định cho người dùng mới là "USER"
         Role userRole = new Role();
-        userRole.setMaVaiTro(2); // Giả sử ID của vai trò "User" là 2
+        userRole.setMaVaiTro(2);
         newUser.setVaiTro(userRole);
-        newUser.setTrangThai(1); // Kích hoạt tài khoản
 
-        return userRepository.save(newUser);
+        newUser.setTrangThai(1);
+        newUser.setXacThucEmail(true);
+
+        userRepository.save(newUser);
+
+        dangKyTamThoiRepository.delete(dangKyTam);
+
+        return true;
+    }
+
+    @Override
+    @Transactional
+    public void sendResetPasswordOtp(String email) {
+        userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Email không tồn tại trong hệ thống!"));
+
+        otpService.generateOtpForEmail(email, "Quên mật khẩu");
+    }
+
+    @Override
+    @Transactional
+    public boolean verifyResetPasswordOtp(String email, String otp) {
+        return otpService.validateOtp(email, otp, "Quên mật khẩu");
+    }
+
+    // ✅ PHƯƠNG THỨC QUAN TRỌNG NHẤT - ĐÃ SỬA
+    @Override
+    @Transactional
+    public void resetPassword(String email, String newPassword) {
+        System.out.println("========== BẮT ĐẦU RESET PASSWORD ==========");
+        System.out.println("📧 Email: " + email);
+        System.out.println("🔑 Mật khẩu mới (raw): " + newPassword);
+        
+        try {
+            User user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng!"));
+
+            System.out.println("✅ Tìm thấy user ID: " + user.getMaNguoiDung());
+            System.out.println("👤 Username: " + user.getTenDangNhap());
+            System.out.println("🔐 Mật khẩu CŨ (30 ký tự đầu): " + user.getMatKhau().substring(0, 30) + "...");
+            
+            // Mã hóa mật khẩu mới
+            String encodedPassword = passwordEncoder.encode(newPassword);
+            System.out.println("🔐 Mật khẩu MỚI đã mã hóa (30 ký tự đầu): " + encodedPassword.substring(0, 30) + "...");
+            
+            // ✅ SET MẬT KHẨU MỚI
+            user.setMatKhau(encodedPassword);
+            
+            // ✅ SET NGÀY CẬP NHẬT THỦ CÔNG (QUAN TRỌNG!)
+            user.setNgayCapNhat(LocalDateTime.now());
+            
+            System.out.println("📝 Đã set: MatKhau + NgayCapNhat");
+            
+            // Lưu và flush
+            User savedUser = userRepository.save(user);
+            System.out.println("💾 Đã gọi userRepository.save()");
+            
+            userRepository.flush();
+            System.out.println("✅ Đã flush vào database");
+            
+            // Kiểm tra lại từ database
+            User reloadedUser = userRepository.findById(user.getMaNguoiDung()).orElse(null);
+            if (reloadedUser != null) {
+                System.out.println("🔄 Reload user từ DB - Mật khẩu (30 ký tự đầu): " + reloadedUser.getMatKhau().substring(0, 30) + "...");
+                System.out.println("📅 NgayCapNhat: " + reloadedUser.getNgayCapNhat());
+            }
+            
+            System.out.println("========== KẾT THÚC RESET PASSWORD ==========");
+            
+        } catch (Exception e) {
+            System.err.println("❌ LỖI KHI RESET PASSWORD: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
     }
 }

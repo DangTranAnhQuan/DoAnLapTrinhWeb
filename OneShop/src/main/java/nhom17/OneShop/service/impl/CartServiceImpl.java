@@ -32,6 +32,11 @@ public class CartServiceImpl implements CartService {
         User currentUser = getCurrentUser();
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm."));
+
+        if (product.getInventory() == null || product.getInventory().getSoLuongTon() <= 0) {
+            throw new RuntimeException("Sản phẩm đã hết hàng.");
+        }
+
         Optional<Cart> existingCartItem = gioHangRepository.findByNguoiDungAndSanPham(currentUser, product);
 
         if (existingCartItem.isPresent()) {
