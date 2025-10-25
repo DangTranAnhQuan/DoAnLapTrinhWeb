@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -89,5 +90,11 @@ public class VoucherServiceImpl implements VoucherService {
             throw new NotFoundException("Không tìm thấy khuyến mãi để xóa với mã: " + voucherCode);
         }
         voucherRepository.deleteById(voucherCode);
+    }
+
+    @Override
+    public List<Voucher> findActivePromotions() {
+        LocalDateTime now = LocalDateTime.now();
+        return voucherRepository.findByTrangThaiAndBatDauLucBeforeAndKetThucLucAfter(1, now, now);
     }
 }

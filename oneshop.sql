@@ -406,15 +406,3 @@ GO
 -- Kiểm tra cấu trúc bảng
 EXEC sp_columns 'TinNhanChat';
 GO
-
--- Tạo bảng lưu thông tin đăng ký tạm
-CREATE TABLE DangKyTamThoi (
-    MaDangKy INT IDENTITY(1,1) PRIMARY KEY,
-    Email NVARCHAR(255) NOT NULL UNIQUE,
-    TenDangNhap NVARCHAR(100) NOT NULL,
-    MatKhau NVARCHAR(255) NOT NULL,
-    HoTen NVARCHAR(150) NOT NULL,
-    NgayTao DATETIME2 DEFAULT SYSUTCDATETIME(),
-    HetHanLuc DATETIME2 NOT NULL
-);
-GO

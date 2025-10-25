@@ -37,6 +37,19 @@ public class ChatServiceImpl implements ChatService {
         if (maNguoiDung != null) {
             Optional<SessionChat> existingSession = sessionChatRepository.findByNguoiDung_MaNguoiDung(maNguoiDung);
             if (existingSession.isPresent()) {
+                if ("Đã đóng".equals(existingSession.get().getTrangThai())) {
+                    existingSession.get().setTrangThai("Đang mở");
+                    sessionChatRepository.save(existingSession.get());
+                }
+                return existingSession.get().getMaPhienChat();
+            }
+        } else if (tenKhach != null && !tenKhach.isBlank()) {
+            Optional<SessionChat> existingSession = sessionChatRepository.findByTenKhach(tenKhach);
+            if (existingSession.isPresent()) {
+                if ("Đã đóng".equals(existingSession.get().getTrangThai())) {
+                    existingSession.get().setTrangThai("Đang mở");
+                    sessionChatRepository.save(existingSession.get());
+                }
                 return existingSession.get().getMaPhienChat();
             }
         }

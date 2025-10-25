@@ -107,29 +107,35 @@
 	}
 
 	async function createSession() {
-		try {
-			const response = await fetch(CONFIG.API_BASE + '/init', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify({
-					tenKhach: 'Khách',  // Có thể hỏi user sau
-					emailKhach: ''
-				})
-			});
+           try {
+              // Lấy ID ẩn danh duy nhất
+              const anonId = getOrCreateAnonymousId();
+              const response = await fetch(CONFIG.API_BASE + '/init', {
+                 method: 'POST',
+                 headers: {
+                    'Content-Type': 'application/json'
+                 },
+                 body: JSON.stringify({
+                    tenKhach: anonId,
+                    emailKhach: ''
+                 })
+              });
 
-			const data = await response.json();
-			state.sessionId = data.sessionId;
-			saveSession();
+              if (!response.ok) {
+                  throw new Error('Failed to init session from server');
+              }
 
-			console.log('✅ Session created:', state.sessionId);
-			return true;
-		} catch (error) {
-			console.error('❌ Failed to create session:', error);
-			return false;
-		}
-	}
+              const data = await response.json();
+              state.sessionId = data.sessionId;
+              saveSession();
+
+              console.log('✅ Session created:', state.sessionId, 'for anonId:', anonId);
+              return true;
+           } catch (error) {
+              console.error('❌ Failed to create session:', error);
+              return false;
+           }
+        }
 
 	// ========================================
 	// RENDER HTML
@@ -265,89 +271,119 @@
 	// ========================================
 	// MESSAGE HANDLING
 	// ========================================
-	async function sendMessage() {
-		const input = document.getElementById('chatInput');
-		const message = input.value.trim();
+	let isRetryingMessage = false;
 
-		if (!message) return;
+        async function sendMessage() {
+           const input = document.getElementById('chatInput');
+           const message = input.value.trim();
 
-		// ===== SỬA PHẦN NÀY =====
-		// Nếu chưa có session, tạo trước VÀ ĐỢI hoàn thành
-		if (!state.sessionId) {
-			console.log('⏳ Creating session first...');
-			const created = await createSession();
-			if (!created) {
-				alert('Không thể kết nối. Vui lòng thử lại!');
-				return;
-			}
-			console.log('✅ Session created:', state.sessionId);
-		}
-		// ========================
+           if (!message) return;
 
-		// Clear input
-		input.value = '';
+           // Nếu đang retry, không làm gì cả
+           if (isRetryingMessage) return;
 
-		// Hiển thị tin nhắn ngay (optimistic UI)
-		const tempMessage = {
-			noiDung: message,
-			loaiNguoiGui: 'CUSTOMER',
-			thoiGian: new Date().toISOString(),
-			tenNguoiGui: 'Bạn'
-		};
-		displayMessage(tempMessage);
+           if (!state.sessionId) {
+              console.log('⏳ Creating session first...');
+              const created = await createSession();
+              if (!created) {
+                 alert('Không thể kết nối. Vui lòng thử lại!');
+                 return;
+              }
+              console.log('✅ Session created:', state.sessionId);
+           }
 
-		// Gửi lên server
-		try {
-			const response = await fetch(CONFIG.API_BASE + '/send', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify({
-					sessionId: state.sessionId,
-					noiDung: message
-				})
-			});
+           // Clear input
+           input.value = '';
 
-			if (!response.ok) {
-				throw new Error('Failed to send message');
-			}
+           // Hiển thị tin nhắn ngay
+           const tempMessage = {
+              noiDung: message,
+              loaiNguoiGui: 'CUSTOMER',
+              thoiGian: new Date().toISOString(),
+              tenNguoiGui: 'Bạn'
+           };
+           displayMessage(tempMessage);
 
-			const data = await response.json();
-			console.log('✅ Message sent:', data);
+           // Gửi lên server
+           try {
+              const response = await fetch(CONFIG.API_BASE + '/send', {
+                 method: 'POST',
+                 headers: {
+                    'Content-Type': 'application/json'
+                 },
+                 body: JSON.stringify({
+                    sessionId: state.sessionId,
+                    noiDung: message
+                 })
+              });
 
-			// Update state
-			state.messages.push(data);
+              if (!response.ok) {
+                 throw new Error('Failed to send message');
+              }
 
-		} catch (error) {
-			console.error('❌ Failed to send message:', error);
-			alert('Không thể gửi tin nhắn. Vui lòng thử lại!');
-		}
-	}
+              const data = await response.json();
+              console.log('✅ Message sent:', data);
+              state.messages.push(data);
+
+           } catch (error) {
+              console.error('❌ Failed to send message (session might be invalid):', error);
+
+              console.warn('🔃 Session invalid. Clearing and retrying...');
+
+              // 1. Xóa session hỏng
+              state.sessionId = null;
+              localStorage.removeItem(getStorageKey());
+
+              // 2. Tạo session mới
+              const created = await createSession();
+
+              if (created) {
+                 // 3. Gửi lại tin nhắn
+                 console.log('✅ New session created. Retrying message...');
+                 isRetryingMessage = true; // Đặt cờ
+
+                 // Đặt lại input để gửi lại
+                 input.value = message;
+                 await sendMessage(); // Gọi lại hàm
+
+                 isRetryingMessage = false; // Bỏ cờ
+              } else {
+                 // Nếu tạo session mới cũng thất bại, mới báo lỗi
+                 alert('Không thể gửi tin nhắn. Lỗi kết nối máy chủ!');
+                 input.value = message; // Trả lại tin nhắn cho người dùng
+              }
+           }
+        }
 
 	async function loadChatHistory() {
-		if (!state.sessionId) return;
+           if (!state.sessionId) return;
 
-		try {
-			const response = await fetch(
-				`${CONFIG.API_BASE}/history?sessionId=${state.sessionId}`
-			);
-			const messages = await response.json();
+           try {
+              const response = await fetch(
+                 `${CONFIG.API_BASE}/history?sessionId=${state.sessionId}`
+              );
 
-			console.log('📜 Loaded history:', messages.length, 'messages');
+              if (!response.ok) { // Thêm kiểm tra lỗi
+                  throw new Error('Failed to load history, session might be invalid');
+              }
 
-			state.messages = messages;
+              const messages = await response.json();
+              console.log('📜 Loaded history:', messages.length, 'messages');
+              state.messages = messages;
 
-			// Hiển thị tất cả tin nhắn
-			messages.forEach(msg => displayMessage(msg, false));
+              // Hiển thị tất cả tin nhắn
+              messages.forEach(msg => displayMessage(msg, false));
 
-			// Scroll to bottom
-			scrollToBottom();
+              // Scroll to bottom
+              scrollToBottom();
 
-		} catch (error) {
-			console.error('❌ Failed to load history:', error);
-		}
-	}
+           } catch (error) {
+              console.error('❌ Failed to load history:', error);
+              state.sessionId = null;
+              localStorage.removeItem(getStorageKey());
+              console.warn('🚮 Cleared invalid session from storage.');
+           }
+        }
 
 	function displayMessage(message, shouldScroll = true) {
 		const chatBody = document.getElementById('chatBody');

@@ -6,6 +6,7 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="_is_logged_in" th:content="${#authentication.principal != 'anonymousUser'}"/>
     <meta name="user-id" th:content="${#authentication.principal != 'anonymousUser' ? #authentication.principal.username : 'anonymous'}">
     <title>OneShop - Mỹ phẩm chính hãng</title>
     <meta name="robots" content="noindex, follow" />
@@ -64,23 +65,15 @@
     </div>
 </div>
 
-<div class="modal fade quick-view-modal" id="quick-view-modal" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
+<div class="modal fade" id="quick-view-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
         <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="position: absolute; top: 15px; right: 15px; z-index: 10;"></button>
             <div class="modal-body">
-                <div class="text-center p-5">
-                    <div class="spinner-border" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
 </div>
-
 <div class="header-search-modal" id="header-search-modal">
     <button class="card-close sidebar-close"><i class="fas fa-times"></i></button>
     <div class="header-search-wrap">
@@ -128,8 +121,7 @@
 
 <script th:src="@{/web/assets/js/main.js}"></script>
 <script th:src="@{/web/assets/js/custom-functions.js}"></script>
-<script th:src="@{/web/assets/js/quick-view.js}"></script>
-<script th:src="@{/web/assets/js/chat-widget.js}"></script>
+<script th:src="@{/web/assets/js/quick-view.js}"></script> <script th:src="@{/web/assets/js/chat-widget.js}"></script>
 
 <script th:inline="javascript">
     /*<![CDATA[*/

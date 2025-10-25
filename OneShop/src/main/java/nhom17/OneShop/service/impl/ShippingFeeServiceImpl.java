@@ -1,5 +1,6 @@
 package nhom17.OneShop.service.impl;
 
+import nhom17.OneShop.dto.ShippingOptionDTO;
 import nhom17.OneShop.entity.AppliedProvince;
 import nhom17.OneShop.entity.AppliedProvinceId;
 import nhom17.OneShop.entity.ShippingCarrier;
@@ -9,6 +10,7 @@ import nhom17.OneShop.exception.NotFoundException;
 import nhom17.OneShop.repository.ShippingCarrierRepository;
 import nhom17.OneShop.repository.ShippingFeeRepository;
 import nhom17.OneShop.request.ShippingFeeRequest;
+import nhom17.OneShop.service.CartService;
 import nhom17.OneShop.service.ShippingFeeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,14 +18,17 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
 import java.util.List;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class ShippingFeeServiceImpl implements ShippingFeeService {
 
-    @Autowired
-    private ShippingFeeRepository shippingFeeRepository;
-    @Autowired
-    private ShippingCarrierRepository shippingCarrierRepository;
+    @Autowired private ShippingFeeRepository shippingFeeRepository;
+    @Autowired private ShippingCarrierRepository shippingCarrierRepository;
+    @Autowired private CartService cartService;
 
     @Override
     public List<ShippingFee> findAllByProvider(int providerId) {
@@ -131,5 +136,42 @@ public class ShippingFeeServiceImpl implements ShippingFeeService {
             throw new NotFoundException("Không tìm thấy gói phí vận chuyển để xóa.");
         }
         shippingFeeRepository.deleteById(id);
+    }
+
+    @Override
+    public Optional<ShippingOptionDTO> findCheapestShippingOption(String province, BigDecimal subtotal) {
+        List<ShippingFee> applicableFees = shippingFeeRepository.findApplicableFeesByProvinceOrderedByCost(province);
+
+        if (applicableFees.isEmpty()) {
+            return Optional.empty();
+        }
+
+        ShippingFee cheapestFeeEntity = applicableFees.get(0);
+
+        BigDecimal finalCost;
+        BigDecimal oneMillion = new BigDecimal("1000000");
+        BigDecimal fiveHundredThousand = new BigDecimal("500000");
+        BigDecimal originalCost = cheapestFeeEntity.getChiPhi();
+
+        if (subtotal.compareTo(oneMillion) > 0) {
+            finalCost = BigDecimal.ZERO;
+        } else if (subtotal.compareTo(fiveHundredThousand) > 0) {
+            finalCost = originalCost.multiply(new BigDecimal("0.5")).setScale(0, RoundingMode.HALF_UP);
+        } else {
+            finalCost = originalCost;
+        }
+
+        ShippingOptionDTO dto = new ShippingOptionDTO();
+        dto.setMaChiPhiVC(cheapestFeeEntity.getMaChiPhiVC());
+        dto.setTenGoiCuoc(cheapestFeeEntity.getTenGoiCuoc());
+        dto.setChiPhi(finalCost);
+        dto.setNgayGiaoSomNhat(cheapestFeeEntity.getNgayGiaoSomNhat());
+        dto.setNgayGiaoMuonNhat(cheapestFeeEntity.getNgayGiaoMuonNhat());
+        dto.setDonViThoiGian(cheapestFeeEntity.getDonViThoiGian());
+
+        ShippingCarrier carrier = cheapestFeeEntity.getNhaVanChuyen();
+        dto.setTenNVC(carrier != null ? carrier.getTenNVC() : "Không xác định");
+
+        return Optional.of(dto);
     }
 }
