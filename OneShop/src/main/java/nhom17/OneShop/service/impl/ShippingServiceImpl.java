@@ -121,6 +121,7 @@ public class ShippingServiceImpl implements ShippingService {
 
     private String mapShippingStatusToOrderStatus(String shippingStatus) {
         switch (shippingStatus) {
+            case "Đã khởi tạo": return  "Đã xác nhận";
             case "Đang giao": return "Đang giao";
             case "Đã giao": return "Đã giao";
             case "Trả hàng": return "Trả hàng-Hoàn tiền";

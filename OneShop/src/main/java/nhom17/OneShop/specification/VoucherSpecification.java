@@ -10,7 +10,7 @@ public class VoucherSpecification {
         return (root, query, criteriaBuilder) -> {
             Specification<Voucher> spec = (root1, query1, cb) -> cb.conjunction();
             if (StringUtils.hasText(keyword)) {
-                spec = spec.and((r, q, cb) -> cb.like(r.get("tenChienDich"), "%" + keyword + "%"));
+                spec = spec.and((r, q, cb) -> cb.like(r.get("maKhuyenMai"), "%" + keyword + "%"));
             }
             if (status != null) {
                 spec = spec.and((r, q, cb) -> cb.equal(r.get("trangThai"), status));

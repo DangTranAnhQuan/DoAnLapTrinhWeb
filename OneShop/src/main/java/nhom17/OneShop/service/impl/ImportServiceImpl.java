@@ -156,4 +156,9 @@ public class ImportServiceImpl implements ImportService {
         }
         importRepository.delete(phieuNhap);
     }
+
+    @Override
+    public List<ImportDetail> getHistoryForProduct(Integer productId) {
+        return importDetailRepository.findHistoryByProductId(productId);
+    }
 }

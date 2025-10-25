@@ -9211,7 +9211,7 @@ button.list-group-item-gray.active {
 }
 
 .h-auto {
-  height: auto !important;
+  height: 40px !important;
 }
 
 .h-25 {
@@ -10180,6 +10180,7 @@ button.list-group-item-gray.active {
 
 .rounded-circle {
   border-radius: 50% !important;
+  object-fit: cover;
 }
 
 .rounded-pill {

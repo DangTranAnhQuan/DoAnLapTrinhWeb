@@ -3,6 +3,8 @@ package nhom17.OneShop.controller;
 import jakarta.validation.Valid;
 import nhom17.OneShop.entity.ImportDetail;
 import nhom17.OneShop.entity.Import;
+import nhom17.OneShop.entity.Product;
+import nhom17.OneShop.exception.NotFoundException;
 import nhom17.OneShop.repository.ProductRepository;
 import nhom17.OneShop.repository.SupplierRepository;
 import nhom17.OneShop.request.ImportDetailRequest;
@@ -106,6 +108,17 @@ public class ImportController {
         model.addAttribute("page", page);
         model.addAttribute("size", size);
         return "admin/warehouse/importForm"; // Dùng chung form
+    }
+
+    @GetMapping("/history/{productId}")
+    public String showImportHistory(@PathVariable Integer productId, Model model) {
+        // Lấy thông tin sản phẩm để hiển thị tên
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy sản phẩm"));
+        List<ImportDetail> historyList = importService.getHistoryForProduct(productId);
+        model.addAttribute("product", product);
+        model.addAttribute("historyList", historyList);
+        return "admin/warehouse/importHistory";
     }
 
     @PostMapping("/save")
