@@ -7,6 +7,7 @@ import lombok.Data;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import org.hibernate.annotations.Formula;
 
 @Data
 @Entity
@@ -47,4 +48,15 @@ public class Product {
     @OneToOne(mappedBy = "sanPham", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnore
     private Inventory inventory;
+    @Formula("(SELECT SUM(od.SoLuong) " +
+            " FROM DonHang_ChiTiet od JOIN DonHang o ON od.MaDonHang = o.MaDonHang " +
+            " WHERE od.MaSanPham = MaSanPham AND o.TrangThai = N'Đã giao')")
+    private Long totalSold;
+
+    @Formula("(SELECT COUNT(*) FROM DanhGia dg WHERE dg.MaSanPham = MaSanPham)")
+    private int reviewCount;
+
+    @Formula("(SELECT AVG(CAST(dg.DiemDanhGia AS DECIMAL(10,2))) " +
+            " FROM DanhGia dg WHERE dg.MaSanPham = MaSanPham)")
+    private Double averageRating;
 }

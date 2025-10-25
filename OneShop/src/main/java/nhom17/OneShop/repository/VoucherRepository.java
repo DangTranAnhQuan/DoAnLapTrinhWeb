@@ -5,6 +5,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -12,4 +14,6 @@ public interface VoucherRepository extends JpaRepository<Voucher, String>, JpaSp
     boolean existsByTenChienDichIgnoreCase(String tenChienDich);
 
     Optional<Voucher> findByMaKhuyenMaiAndTrangThai(String maKhuyenMai, Integer trangThai);
+
+    List<Voucher> findByTrangThaiAndBatDauLucBeforeAndKetThucLucAfter(Integer trangThai, LocalDateTime currentTime1, LocalDateTime currentTime2);
 }

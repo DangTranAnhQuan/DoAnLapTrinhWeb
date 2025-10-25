@@ -16,6 +16,6 @@ public interface SessionChatRepository extends JpaRepository<SessionChat, String
 
     // Sửa lại: Dùng thuộc tính lồng nhau cho đúng
     Optional<SessionChat> findByNguoiDung_MaNguoiDung(Integer maNguoiDung);
-
+    Optional<SessionChat> findByTenKhach(String tenKhach);
     long countByTrangThai(String trangThai);
 }

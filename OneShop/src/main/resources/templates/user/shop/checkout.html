@@ -185,17 +185,10 @@
                             </div>
                             <div class="single-payment">
                                 <div class="input-group">
-                                    <input type="radio" id="pmMOMO" name="payment_method" value="MOMO">
-                                    <label for="pmMOMO">Ví MoMo</label>
+                                    <input type="radio" id="pmVietQR" name="payment_method" value="ONLINE">
+                                    <label for="pmVietQR">Chuyển khoản VietQR</label>
                                 </div>
-                                <p th:if="${info == 'momo'}">Chức năng đang được phát triển.</p>
-                            </div>
-                            <div class="single-payment">
-                                <div class="input-group">
-                                    <input type="radio" id="pmVNPAY" name="payment_method" value="VNPAY">
-                                    <label for="pmVNPAY">VNPAY</label>
-                                </div>
-                                <p th:if="${info == 'vnpay'}">Chức năng đang được phát triển.</p>
+                                <p>Tự động tạo mã QR cho đơn hàng của bạn.</p>
                             </div>
                         </div>
 

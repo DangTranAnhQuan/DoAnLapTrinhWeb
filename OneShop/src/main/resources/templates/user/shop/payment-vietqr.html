@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/user}">
+<head>
+    <title>Thanh toán VietQR</title>
+    <style>
+        .qr-payment-container {
+            max-width: 500px;
+            margin: 0 auto;
+            border: 1px solid #e1e1e1;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .qr-payment-container img {
+            max-width: 300px;
+            height: auto;
+            margin-bottom: 20px;
+        }
+        .payment-info {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+        .payment-info p {
+            font-size: 16px;
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+        .payment-info strong {
+            color: #000;
+        }
+        .payment-memo {
+            background-color: #f4f4f4;
+            padding: 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 18px;
+            color: var(--color-primary); /* Màu đỏ hoặc màu nổi bật */
+            border: 1px dashed var(--color-primary);
+        }
+        .confirm-form {
+            margin-top: 25px;
+        }
+    </style>
+</head>
+
+<body>
+<main layout:fragment="content">
+    <div class="axil-checkout-area axil-section-gap">
+        <div class="container">
+            <div class="qr-payment-container">
+                <h4 class="title mb--20">Quét mã QR để thanh toán</h4>
+                <p>Mã QR đã bao gồm số tiền và nội dung chuyển khoản. Bạn chỉ cần quét và xác nhận.</p>
+
+                <img th:src="@{https://api.vietqr.io/image/{bankBin}-{accountNo}-print.png(
+                    bankBin=${shopBankBin},
+                    accountNo=${shopAccountNo},
+                    amount=${order.tongTien.longValue()},
+                    addInfo=${paymentMemo},
+                    accountName=${shopAccountName}
+                )}" alt="QR Code Thanh toán" />
+
+                <div class="payment-info">
+                    <p><strong>Ngân hàng:</strong> <span th:text="${shopBankBin == '970422'} ? 'MB Bank' : (${shopBankBin == '970407'} ? 'Techcombank' : (${shopBankBin == '970436'} ? 'Vietcombank' : 'Ngân hàng nhận'))"></span></p>
+                    <p><strong>Chủ tài khoản:</strong> <span th:text="${shopAccountName}"></span></p>
+                    <p><strong>Số tài khoản:</strong> <span th:text="${shopAccountNo}"></span></p>
+                    <p><strong>Số tiền:</strong> <strong style="font-size: 20px;" th:text="${#numbers.formatDecimal(order.tongTien, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></strong></p>
+
+                    <p><strong>Nội dung chuyển khoản (Bắt buộc):</strong></p>
+                    <div class="payment-memo">
+                        <span th:text="${paymentMemo}"></span>
+                    </div>
+                </div>
+
+                <div class="alert alert-warning">
+                    Vui lòng **giữ nguyên nội dung chuyển khoản** để chúng tôi có thể xác nhận đơn hàng của bạn nhanh nhất.
+                </div>
+
+                <form th:action="@{/payment/confirm-transfer}" method="post" class="confirm-form">
+                    <input type="hidden" name="orderId" th:value="${order.maDonHang}" />
+                    <button type="submit" class="axil-btn btn-bg-primary checkout-btn">
+                        Tôi đã hoàn tất thanh toán
+                    </button>
+                </form>
+
+                <a th:href="@{/checkout}" class="axil-btn btn-outline" style="margin-top: 15px;">
+                    Quay lại trang thanh toán
+                </a>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>
