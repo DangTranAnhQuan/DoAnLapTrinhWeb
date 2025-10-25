@@ -8,6 +8,7 @@ import nhom17.OneShop.repository.ProductRepository;
 import nhom17.OneShop.repository.RatingRepository;
 import nhom17.OneShop.repository.UserRepository;
 import nhom17.OneShop.service.CategoryService;
+import nhom17.OneShop.service.EmailService;
 import nhom17.OneShop.service.OrderService;
 import nhom17.OneShop.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +37,7 @@ public class HomeController {
     @Autowired private OrderService orderService;
     @Autowired private UserRepository userRepository;
     @Autowired private ContactRepository contactRepository;
+    @Autowired private EmailService emailService;
 
     private Collection<List<Product>> groupProducts(List<Product> products, int chunkSize) {
         if (products == null || products.isEmpty()) {
@@ -49,23 +51,19 @@ public class HomeController {
 
     @GetMapping("/")
     public String homePage(Model model) {
-        // --- Phần code cũ (giữ nguyên) ---
         model.addAttribute("categories", categoryService.findAll());
         List<Product> sliderProducts = productService.findNewestProducts(4);
         model.addAttribute("sliderProducts", sliderProducts);
 
-        int productLimit = 16; // Lấy 16 sản phẩm để có thể chia thành 2 slide
-        int chunkSize = 8;     // Mỗi slide hiển thị 8 sản phẩm
+        int productLimit = 16;
+        int chunkSize = 8;
 
-        // Lấy và chia nhóm cho "Khám phá sản phẩm"
         List<Product> allProducts = productService.searchUserProducts(null, null, null, "newest", null, 1, productLimit).getContent();
         model.addAttribute("groupedProducts", groupProducts(allProducts, chunkSize));
 
-        // Lấy và chia nhóm cho 3 mục mới
         model.addAttribute("newestProductsGrouped", groupProducts(productService.findNewestProducts(productLimit), chunkSize));
         model.addAttribute("topSellingProductsGrouped", groupProducts(productService.findTopSellingProducts(productLimit), chunkSize));
         model.addAttribute("mostDiscountedProductsGrouped", groupProducts(productService.findMostDiscountedProducts(productLimit), chunkSize));
-        // =======================================================================
 
         return "user/index";
     }
@@ -174,55 +172,56 @@ public class HomeController {
 
     @GetMapping("/contact")
     public String contactPage(Model model, Principal principal) {
-        // Kiểm tra nếu người dùng đã đăng nhập
         if (principal != null) {
-            // Lấy email của người dùng từ principal
             String email = principal.getName();
-            // Tìm người dùng trong CSDL
             Optional<User> userOpt = userRepository.findByEmail(email);
             if (userOpt.isPresent()) {
-                // Thêm người dùng vào model để HTML có thể dùng
                 model.addAttribute("currentUser", userOpt.get());
             }
         }
-        // Chúng ta không cần add "contact" rỗng nữa vì form không dùng th:object
         return "user/general/contact";
     }
 
-    @PostMapping("/contact")
-    public String handleContactForm(
-            // Lấy dữ liệu bằng @RequestParam, khớp với 'name' trong form
-            @RequestParam("contact-subject") String subject,
-            @RequestParam("contact-message") String message,
-            Principal principal,
-            RedirectAttributes redirectAttributes) {
+@PostMapping("/contact")
+public String handleContactForm(
+        @RequestParam("contact-subject") String subject,
+        @RequestParam("contact-message") String message,
+        Principal principal,
+        RedirectAttributes redirectAttributes) {
 
-        // Yêu cầu: Chỉ người dùng đã đăng nhập mới được gửi
-        if (principal == null) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Vui lòng đăng nhập để gửi liên hệ.");
-            return "redirect:/sign-in";
-        }
-
-        Optional<User> userOpt = userRepository.findByEmail(principal.getName());
-        if (userOpt.isEmpty()) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi: Không tìm thấy thông tin người dùng.");
-            return "redirect:/sign-in";
-        }
-
-        // Tạo đối tượng Contact mới bằng tay
-        Contact contact = new Contact();
-        contact.setChuDe(subject);
-        contact.setNoiDung(message);
-        contact.setNguoiDung(userOpt.get());
-        contact.setNgayGui(LocalDateTime.now());
-        contact.setTrangThai("Mới");
-
-        // Lưu vào CSDL
-        contactRepository.save(contact);
-
-        redirectAttributes.addFlashAttribute("successMessage", "Tin nhắn của bạn đã được gửi. Chúng tôi sẽ sớm phản hồi!");
-        return "redirect:/contact";
+    // Yêu cầu: Chỉ người dùng đã đăng nhập mới được gửi
+    if (principal == null) {
+        redirectAttributes.addFlashAttribute("errorMessage", "Vui lòng đăng nhập để gửi liên hệ.");
+        return "redirect:/sign-in";
     }
+
+    Optional<User> userOpt = userRepository.findByEmail(principal.getName());
+    if (userOpt.isEmpty()) {
+        redirectAttributes.addFlashAttribute("errorMessage", "Lỗi: Không tìm thấy thông tin người dùng.");
+        return "redirect:/sign-in";
+    }
+
+    User currentUser = userOpt.get();
+
+    Contact contact = new Contact();
+    contact.setChuDe(subject);
+    contact.setNoiDung(message);
+    contact.setNguoiDung(currentUser);
+    contact.setNgayGui(LocalDateTime.now());
+    contact.setTrangThai("Mới");
+
+    try {
+        contactRepository.save(contact);
+        emailService.sendContactEmail(currentUser, subject, message);
+        redirectAttributes.addFlashAttribute("successMessage", "Tin nhắn của bạn đã được gửi. Chúng tôi sẽ sớm phản hồi!");
+
+    } catch (Exception e) {
+        System.err.println("Lỗi khi xử lý form liên hệ: " + e.getMessage());
+        redirectAttributes.addFlashAttribute("errorMessage", "Đã xảy ra lỗi khi gửi tin nhắn. Vui lòng thử lại.");
+    }
+
+    return "redirect:/contact";
+}
 
     @GetMapping("/about-us")
     public String aboutUsPage() { return "user/general/about-us"; }

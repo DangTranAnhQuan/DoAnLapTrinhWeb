@@ -28,7 +28,8 @@ public class SecurityConfig {
                                 "/web/**", "/uploads/**",
                                 "/admin/assets/**",
                                 "/api/**", "/api/quick-view/**",
-                                "/api/chat/**"
+                                "/api/chat/**",
+                                "/ws/**"
                         ).permitAll()
                         .requestMatchers("/my-orders/**").authenticated()
                         .requestMatchers("/admin/**").hasRole("ADMIN")

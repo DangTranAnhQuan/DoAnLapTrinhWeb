@@ -1,11 +1,11 @@
 package nhom17.OneShop.controller;
 
 import jakarta.servlet.http.HttpSession;
-import nhom17.OneShop.dto.ShippingOptionDTO; // **Import DTO**
+import nhom17.OneShop.dto.ShippingOptionDTO;
 import nhom17.OneShop.entity.Address;
 import nhom17.OneShop.entity.Cart;
-// Remove ShippingFee import if not used directly
-// import nhom17.OneShop.entity.ShippingFee;
+import jakarta.servlet.http.HttpServletRequest;
+import nhom17.OneShop.entity.Order;
 import nhom17.OneShop.entity.User;
 import nhom17.OneShop.repository.AddressRepository;
 import nhom17.OneShop.repository.UserRepository;
@@ -25,8 +25,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.net.URI; // Import if missing
-import java.security.Principal; // Import if missing
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -113,42 +111,38 @@ public class CheckoutController {
     @PostMapping("/place-order")
     public String placeOrder(@RequestParam("shipping_address") Integer diaChiId,
                              @RequestParam("payment_method") String paymentMethod,
-                             // **Accept hidden input values from the form**
                              @RequestParam("calculated_shipping_fee") BigDecimal shippingFee,
                              @RequestParam("shipping_method_name") String shippingMethodName,
-                             RedirectAttributes redirectAttributes) {
+                             RedirectAttributes redirectAttributes,
+                             HttpServletRequest request) { // Bỏ HttpServletRequest nếu MOMO ko cần
         try {
-            // **Input Validation (Important!)**
             if (shippingMethodName == null || shippingMethodName.isBlank()) {
-                // This might happen if JS failed to set the value before submit
                 throw new IllegalArgumentException("Chưa chọn được phương thức vận chuyển hợp lệ. Vui lòng chọn lại địa chỉ.");
             }
             if (shippingFee == null || shippingFee.compareTo(BigDecimal.ZERO) < 0) {
                 throw new IllegalArgumentException("Phí vận chuyển không hợp lệ.");
             }
 
-            // Payment method routing
+            // 1. TẠO ĐƠN HÀNG TRƯỚC
+            Order order = checkoutService.placeOrder(diaChiId, paymentMethod, shippingFee, shippingMethodName);
+
+            // 2. PHÂN LUỒNG THANH TOÁN
             if ("COD".equalsIgnoreCase(paymentMethod)) {
-                // **Pass shipping details to the service**
-                // **MAKE SURE your checkoutService.placeOrder method accepts these parameters**
-                checkoutService.placeOrder(diaChiId, "COD", shippingFee, shippingMethodName);
+                // Đơn hàng đã được tạo, chỉ cần chuyển đến trang thành công
                 return "redirect:/order-success?method=COD";
-            } else if ("MOMO".equalsIgnoreCase(paymentMethod)) {
-                // TODO: Implement MoMo logic (needs order info, shipping details)
-                redirectAttributes.addFlashAttribute("info", "Chức năng thanh toán MoMo đang được phát triển.");
-                return "redirect:/checkout/momo";
-            } else if ("VNPAY".equalsIgnoreCase(paymentMethod)) {
-                // TODO: Implement VNPAY logic (needs order info, shipping details)
-                redirectAttributes.addFlashAttribute("info", "Chức năng thanh toán VNPAY đang được phát triển.");
-                return "redirect:/checkout/vnpay";
+
+            } else if ("ONLINE".equalsIgnoreCase(paymentMethod)) {
+
+                return "redirect:/thanh-toan/qr?orderId=" + order.getMaDonHang();
+
             } else {
                 redirectAttributes.addFlashAttribute("error", "Phương thức thanh toán không hợp lệ.");
                 return "redirect:/checkout";
             }
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Đã xảy ra lỗi khi đặt hàng: " + e.getMessage());
-            e.printStackTrace(); // Print stack trace for debugging
-            return "redirect:/checkout"; // Redirect back to checkout on error
+            e.printStackTrace();
+            return "redirect:/checkout";
         }
     }
     // ===== END: MODIFIED placeOrder =====

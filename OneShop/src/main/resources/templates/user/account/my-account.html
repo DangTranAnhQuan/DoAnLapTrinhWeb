@@ -22,7 +22,7 @@
                 <div class="axil-dashboard-author">
                     <div class="media">
                         <div class="thumbnail">
-                            <img th:src="${user.anhDaiDien != null and !#strings.isEmpty(user.anhDaiDien) ? '/uploads/avatars/' + user.anhDaiDien : '/web/assets/images/product/author1.png'}" alt="Avatar">
+                            <img th:src="${user.anhDaiDien != null and !#strings.isEmpty(user.anhDaiDien) ? '/uploads/' + user.anhDaiDien : '/web/assets/images/product/author1.png'}" alt="Avatar">
                         </div>
                         <div class="media-body">
                             <h5 class="title mb-0" th:text="'Xin chào, ' + ${user.hoTen}"></h5>

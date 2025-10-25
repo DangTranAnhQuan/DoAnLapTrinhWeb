@@ -18,7 +18,6 @@ DELETE FROM PhieuNhap;
 DELETE FROM KhoHang;
 DELETE FROM DanhGia;
 DELETE FROM SanPham;
-DELETE FROM MaXacThuc;
 DELETE FROM DiaChi;
 DELETE FROM LienHe;
 DELETE FROM PhiApDungTungTinh;
@@ -42,7 +41,6 @@ DBCC CHECKIDENT ('VanChuyen', RESEED, 0);
 DBCC CHECKIDENT ('DonHang', RESEED, 0);
 DBCC CHECKIDENT ('PhieuNhap', RESEED, 0);
 DBCC CHECKIDENT ('SanPham', RESEED, 0);
-DBCC CHECKIDENT ('MaXacThuc', RESEED, 0);
 DBCC CHECKIDENT ('DiaChi', RESEED, 0);
 DBCC CHECKIDENT ('LienHe', RESEED, 0);
 DBCC CHECKIDENT ('NguoiDung', RESEED, 0);
@@ -117,142 +115,142 @@ GO
 -- ===== J&T Express (MaNVC = 1) =====
 -- Cung cấp: Tiết Kiệm, Nhanh
 -- Gói 1: Tiết Kiệm - Nội thành HCM
-INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Gói Tiết Kiệm - Nội thành HCM (J&T)', 1, N'Tiết Kiệm', 16000, 2, 3, N'Ngày');
+INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Nội thành HCM (J&T)', 1, N'Tiết Kiệm', 16000, 2, 3, N'Ngày');
 INSERT INTO PhiApDungTungTinh(MaChiPhiVC, TenTinhThanh) VALUES (1, N'TP. Hồ Chí Minh');
 -- Gói 2: Tiết Kiệm - Miền Nam (J&T)
-INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Gói Tiết Kiệm - Miền Nam (J&T)', 1, N'Tiết Kiệm', 22000, 2, 4, N'Ngày');
+INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Miền Nam (J&T)', 1, N'Tiết Kiệm', 22000, 2, 4, N'Ngày');
 INSERT INTO PhiApDungTungTinh(MaChiPhiVC, TenTinhThanh) VALUES (2, N'TP. Cần Thơ'), (2, N'An Giang'), (2, N'Cà Mau'), (2, N'Đồng Nai'), (2, N'Đồng Tháp'), (2, N'Tây Ninh'), (2, N'Vĩnh Long');
 -- Gói 3: Tiết Kiệm - Miền Trung (J&T)
-INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Gói Tiết Kiệm - Miền Trung (J&T)', 1, N'Tiết Kiệm', 30000, 3, 5, N'Ngày');
+INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Miền Trung (J&T)', 1, N'Tiết Kiệm', 30000, 3, 5, N'Ngày');
 INSERT INTO PhiApDungTungTinh(MaChiPhiVC, TenTinhThanh) VALUES (3, N'TP. Đà Nẵng'), (3, N'TP. Huế'), (3, N'Đắk Lắk'), (3, N'Gia Lai'), (3, N'Hà Tĩnh'), (3, N'Khánh Hòa'), (3, N'Lâm Đồng'), (3, N'Nghệ An'), (3, N'Quảng Ngãi'), (3, N'Quảng Trị'), (3, N'Thanh Hóa');
 -- Gói 4: Tiết Kiệm - Miền Bắc (J&T)
-INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Gói Tiết Kiệm - Miền Bắc (J&T)', 1, N'Tiết Kiệm', 35000, 4, 6, N'Ngày');
+INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Miền Bắc (J&T)', 1, N'Tiết Kiệm', 35000, 4, 6, N'Ngày');
 INSERT INTO PhiApDungTungTinh(MaChiPhiVC, TenTinhThanh) VALUES (4, N'TP. Hà Nội'), (4, N'TP. Hải Phòng'), (4, N'Bắc Ninh'), (4, N'Cao Bằng'), (4, N'Điện Biên'), (4, N'Hưng Yên'), (4, N'Lai Châu'), (4, N'Lạng Sơn'), (4, N'Lào Cai'), (4, N'Ninh Bình'), (4, N'Phú Thọ'), (4, N'Quảng Ninh'), (4, N'Sơn La'), (4, N'Thái Nguyên'), (4, N'Tuyên Quang');
 
 -- Gói 5: Nhanh - Nội thành HCM (J&T)
-INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Gói Nhanh - Nội thành HCM (J&T)', 1, N'Nhanh', 25000, 1, 1, N'Ngày');
+INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Nội thành HCM (J&T)', 1, N'Nhanh', 25000, 1, 1, N'Ngày');
 INSERT INTO PhiApDungTungTinh(MaChiPhiVC, TenTinhThanh) VALUES (5, N'TP. Hồ Chí Minh');
 -- Gói 6: Nhanh - Miền Nam (J&T)
-INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Gói Nhanh - Miền Nam (J&T)', 1, N'Nhanh', 35000, 1, 2, N'Ngày');
+INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Miền Nam (J&T)', 1, N'Nhanh', 35000, 1, 2, N'Ngày');
 INSERT INTO PhiApDungTungTinh(MaChiPhiVC, TenTinhThanh) VALUES (6, N'TP. Cần Thơ'), (6, N'An Giang'), (6, N'Cà Mau'), (6, N'Đồng Nai'), (6, N'Đồng Tháp'), (6, N'Tây Ninh'), (6, N'Vĩnh Long');
 -- Gói 7: Nhanh - Miền Trung (J&T)
-INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Gói Nhanh - Miền Trung (J&T)', 1, N'Nhanh', 45000, 2, 3, N'Ngày');
+INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Miền Trung (J&T)', 1, N'Nhanh', 45000, 2, 3, N'Ngày');
 INSERT INTO PhiApDungTungTinh(MaChiPhiVC, TenTinhThanh) VALUES (7, N'TP. Đà Nẵng'), (7, N'TP. Huế'), (7, N'Đắk Lắk'), (7, N'Gia Lai'), (7, N'Hà Tĩnh'), (7, N'Khánh Hòa'), (7, N'Lâm Đồng'), (7, N'Nghệ An'), (7, N'Quảng Ngãi'), (7, N'Quảng Trị'), (7, N'Thanh Hóa');
 -- Gói 8: Nhanh - Miền Bắc (J&T)
-INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Gói Nhanh - Miền Bắc (J&T)', 1, N'Nhanh', 55000, 2, 4, N'Ngày');
+INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Miền Bắc (J&T)', 1, N'Nhanh', 55000, 2, 4, N'Ngày');
 INSERT INTO PhiApDungTungTinh(MaChiPhiVC, TenTinhThanh) VALUES (8, N'TP. Hà Nội'), (8, N'TP. Hải Phòng'), (8, N'Bắc Ninh'), (8, N'Cao Bằng'), (8, N'Điện Biên'), (8, N'Hưng Yên'), (8, N'Lai Châu'), (8, N'Lạng Sơn'), (8, N'Lào Cai'), (8, N'Ninh Bình'), (8, N'Phú Thọ'), (8, N'Quảng Ninh'), (8, N'Sơn La'), (8, N'Thái Nguyên'), (8, N'Tuyên Quang');
 GO
 
 -- ===== Ninja Van (MaNVC = 2) =====
 -- Cung cấp: Tiêu Chuẩn
 -- Gói 9: Tiêu Chuẩn - Nội thành HCM (Ninja)
-INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Gói Tiêu Chuẩn - Nội thành HCM (Ninja)', 2, N'Tiêu Chuẩn', 18000, 1, 2, N'Ngày');
+INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Nội thành HCM (Ninja)', 2, N'Tiêu Chuẩn', 18000, 1, 2, N'Ngày');
 INSERT INTO PhiApDungTungTinh(MaChiPhiVC, TenTinhThanh) VALUES (9, N'TP. Hồ Chí Minh');
 -- Gói 10: Tiêu Chuẩn - Miền Nam (Ninja)
-INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Gói Tiêu Chuẩn - Miền Nam (Ninja)', 2, N'Tiêu Chuẩn', 24000, 2, 3, N'Ngày');
+INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Miền Nam (Ninja)', 2, N'Tiêu Chuẩn', 24000, 2, 3, N'Ngày');
 INSERT INTO PhiApDungTungTinh(MaChiPhiVC, TenTinhThanh) VALUES (10, N'TP. Cần Thơ'), (10, N'An Giang'), (10, N'Cà Mau'), (10, N'Đồng Nai'), (10, N'Đồng Tháp'), (10, N'Tây Ninh'), (10, N'Vĩnh Long');
 -- Gói 11: Tiêu Chuẩn - Miền Trung (Ninja)
-INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Gói Tiêu Chuẩn - Miền Trung (Ninja)', 2, N'Tiêu Chuẩn', 32000, 3, 5, N'Ngày');
+INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Miền Trung (Ninja)', 2, N'Tiêu Chuẩn', 32000, 3, 5, N'Ngày');
 INSERT INTO PhiApDungTungTinh(MaChiPhiVC, TenTinhThanh) VALUES (11, N'TP. Đà Nẵng'), (11, N'TP. Huế'), (11, N'Đắk Lắk'), (11, N'Gia Lai'), (11, N'Hà Tĩnh'), (11, N'Khánh Hòa'), (11, N'Lâm Đồng'), (11, N'Nghệ An'), (11, N'Quảng Ngãi'), (11, N'Quảng Trị'), (11, N'Thanh Hóa');
 -- Gói 12: Tiêu Chuẩn - Miền Bắc (Ninja)
-INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Gói Tiêu Chuẩn - Miền Bắc (Ninja)', 2, N'Tiêu Chuẩn', 38000, 4, 6, N'Ngày');
+INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Miền Bắc (Ninja)', 2, N'Tiêu Chuẩn', 38000, 4, 6, N'Ngày');
 INSERT INTO PhiApDungTungTinh(MaChiPhiVC, TenTinhThanh) VALUES (12, N'TP. Hà Nội'), (12, N'TP. Hải Phòng'), (12, N'Bắc Ninh'), (12, N'Cao Bằng'), (12, N'Điện Biên'), (12, N'Hưng Yên'), (12, N'Lai Châu'), (12, N'Lạng Sơn'), (12, N'Lào Cai'), (12, N'Ninh Bình'), (12, N'Phú Thọ'), (12, N'Quảng Ninh'), (12, N'Sơn La'), (12, N'Thái Nguyên'), (12, N'Tuyên Quang');
 GO
 
 -- ===== Best Express (MaNVC = 3) =====
 -- Cung cấp: Tiết Kiệm, Tiêu Chuẩn
 -- Gói 13: Tiết Kiệm - Nội thành HCM (Best)
-INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Gói Tiết Kiệm - Nội thành HCM (Best)', 3, N'Tiết Kiệm', 15000, 2, 3, N'Ngày');
+INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Nội thành HCM (Best)', 3, N'Tiết Kiệm', 15000, 2, 3, N'Ngày');
 INSERT INTO PhiApDungTungTinh(MaChiPhiVC, TenTinhThanh) VALUES (13, N'TP. Hồ Chí Minh');
 -- Gói 14: Tiết Kiệm - Miền Nam (Best)
-INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Gói Tiết Kiệm - Miền Nam (Best)', 3, N'Tiết Kiệm', 20000, 3, 5, N'Ngày');
+INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Miền Nam (Best)', 3, N'Tiết Kiệm', 20000, 3, 5, N'Ngày');
 INSERT INTO PhiApDungTungTinh(MaChiPhiVC, TenTinhThanh) VALUES (14, N'TP. Cần Thơ'), (14, N'An Giang'), (14, N'Cà Mau'), (14, N'Đồng Nai'), (14, N'Đồng Tháp'), (14, N'Tây Ninh'), (14, N'Vĩnh Long');
 -- Gói 15: Tiết Kiệm - Miền Trung (Best)
-INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Gói Tiết Kiệm - Miền Trung (Best)', 3, N'Tiết Kiệm', 28000, 4, 6, N'Ngày');
+INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Miền Trung (Best)', 3, N'Tiết Kiệm', 28000, 4, 6, N'Ngày');
 INSERT INTO PhiApDungTungTinh(MaChiPhiVC, TenTinhThanh) VALUES (15, N'TP. Đà Nẵng'), (15, N'TP. Huế'), (15, N'Đắk Lắk'), (15, N'Gia Lai'), (15, N'Hà Tĩnh'), (15, N'Khánh Hòa'), (15, N'Lâm Đồng'), (15, N'Nghệ An'), (15, N'Quảng Ngãi'), (15, N'Quảng Trị'), (15, N'Thanh Hóa');
 -- Gói 16: Tiết Kiệm - Miền Bắc (Best)
-INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Gói Tiết Kiệm - Miền Bắc (Best)', 3, N'Tiết Kiệm', 33000, 5, 7, N'Ngày');
+INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Miền Bắc (Best)', 3, N'Tiết Kiệm', 33000, 5, 7, N'Ngày');
 INSERT INTO PhiApDungTungTinh(MaChiPhiVC, TenTinhThanh) VALUES (16, N'TP. Hà Nội'), (16, N'TP. Hải Phòng'), (16, N'Bắc Ninh'), (16, N'Cao Bằng'), (16, N'Điện Biên'), (16, N'Hưng Yên'), (16, N'Lai Châu'), (16, N'Lạng Sơn'), (16, N'Lào Cai'), (16, N'Ninh Bình'), (16, N'Phú Thọ'), (16, N'Quảng Ninh'), (16, N'Sơn La'), (16, N'Thái Nguyên'), (16, N'Tuyên Quang');
 
 -- Gói 17: Tiêu Chuẩn - Nội thành HCM (Best)
-INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Gói Tiêu Chuẩn - Nội thành HCM (Best)', 3, N'Tiêu Chuẩn', 20000, 1, 2, N'Ngày');
+INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Nội thành HCM (Best)', 3, N'Tiêu Chuẩn', 20000, 1, 2, N'Ngày');
 INSERT INTO PhiApDungTungTinh(MaChiPhiVC, TenTinhThanh) VALUES (17, N'TP. Hồ Chí Minh');
 -- Gói 18: Tiêu Chuẩn - Miền Nam (Best)
-INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Gói Tiêu Chuẩn - Miền Nam (Best)', 3, N'Tiêu Chuẩn', 25000, 2, 4, N'Ngày');
+INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Miền Nam (Best)', 3, N'Tiêu Chuẩn', 25000, 2, 4, N'Ngày');
 INSERT INTO PhiApDungTungTinh(MaChiPhiVC, TenTinhThanh) VALUES (18, N'TP. Cần Thơ'), (18, N'An Giang'), (18, N'Cà Mau'), (18, N'Đồng Nai'), (18, N'Đồng Tháp'), (18, N'Tây Ninh'), (18, N'Vĩnh Long');
 -- Gói 19: Tiêu Chuẩn - Miền Trung (Best)
-INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Gói Tiêu Chuẩn - Miền Trung (Best)', 3, N'Tiêu Chuẩn', 33000, 3, 5, N'Ngày');
+INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Miền Trung (Best)', 3, N'Tiêu Chuẩn', 33000, 3, 5, N'Ngày');
 INSERT INTO PhiApDungTungTinh(MaChiPhiVC, TenTinhThanh) VALUES (19, N'TP. Đà Nẵng'), (19, N'TP. Huế'), (19, N'Đắk Lắk'), (19, N'Gia Lai'), (19, N'Hà Tĩnh'), (19, N'Khánh Hòa'), (19, N'Lâm Đồng'), (19, N'Nghệ An'), (19, N'Quảng Ngãi'), (19, N'Quảng Trị'), (19, N'Thanh Hóa');
 -- Gói 20: Tiêu Chuẩn - Miền Bắc (Best)
-INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Gói Tiêu Chuẩn - Miền Bắc (Best)', 3, N'Tiêu Chuẩn', 39000, 4, 6, N'Ngày');
+INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Miền Bắc (Best)', 3, N'Tiêu Chuẩn', 39000, 4, 6, N'Ngày');
 INSERT INTO PhiApDungTungTinh(MaChiPhiVC, TenTinhThanh) VALUES (20, N'TP. Hà Nội'), (20, N'TP. Hải Phòng'), (20, N'Bắc Ninh'), (20, N'Cao Bằng'), (20, N'Điện Biên'), (20, N'Hưng Yên'), (20, N'Lai Châu'), (20, N'Lạng Sơn'), (20, N'Lào Cai'), (20, N'Ninh Bình'), (20, N'Phú Thọ'), (20, N'Quảng Ninh'), (20, N'Sơn La'), (20, N'Thái Nguyên'), (20, N'Tuyên Quang');
 GO
 
 -- ===== Viettel Post (MaNVC = 4) =====
 -- Cung cấp: Tiết Kiệm, Nhanh
 -- Gói 21: Tiết Kiệm - Nội thành HCM (VTP)
-INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Gói Tiết Kiệm - Nội thành HCM (VTP)', 4, N'Tiết Kiệm', 17000, 2, 3, N'Ngày');
+INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Nội thành HCM (VTP)', 4, N'Tiết Kiệm', 17000, 2, 3, N'Ngày');
 INSERT INTO PhiApDungTungTinh(MaChiPhiVC, TenTinhThanh) VALUES (21, N'TP. Hồ Chí Minh');
 -- Gói 22: Tiết Kiệm - Miền Nam (VTP)
-INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Gói Tiết Kiệm - Miền Nam (VTP)', 4, N'Tiết Kiệm', 23000, 2, 4, N'Ngày');
+INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Miền Nam (VTP)', 4, N'Tiết Kiệm', 23000, 2, 4, N'Ngày');
 INSERT INTO PhiApDungTungTinh(MaChiPhiVC, TenTinhThanh) VALUES (22, N'TP. Cần Thơ'), (22, N'An Giang'), (22, N'Cà Mau'), (22, N'Đồng Nai'), (22, N'Đồng Tháp'), (22, N'Tây Ninh'), (22, N'Vĩnh Long');
 -- Gói 23: Tiết Kiệm - Miền Trung (VTP)
-INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Gói Tiết Kiệm - Miền Trung (VTP)', 4, N'Tiết Kiệm', 30000, 3, 5, N'Ngày');
+INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Miền Trung (VTP)', 4, N'Tiết Kiệm', 30000, 3, 5, N'Ngày');
 INSERT INTO PhiApDungTungTinh(MaChiPhiVC, TenTinhThanh) VALUES (23, N'TP. Đà Nẵng'), (23, N'TP. Huế'), (23, N'Đắk Lắk'), (23, N'Gia Lai'), (23, N'Hà Tĩnh'), (23, N'Khánh Hòa'), (23, N'Lâm Đồng'), (23, N'Nghệ An'), (23, N'Quảng Ngãi'), (23, N'Quảng Trị'), (23, N'Thanh Hóa');
 -- Gói 24: Tiết Kiệm - Miền Bắc (VTP)
-INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Gói Tiết Kiệm - Miền Bắc (VTP)', 4, N'Tiết Kiệm', 36000, 4, 6, N'Ngày');
+INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Miền Bắc (VTP)', 4, N'Tiết Kiệm', 36000, 4, 6, N'Ngày');
 INSERT INTO PhiApDungTungTinh(MaChiPhiVC, TenTinhThanh) VALUES (24, N'TP. Hà Nội'), (24, N'TP. Hải Phòng'), (24, N'Bắc Ninh'), (24, N'Cao Bằng'), (24, N'Điện Biên'), (24, N'Hưng Yên'), (24, N'Lai Châu'), (24, N'Lạng Sơn'), (24, N'Lào Cai'), (24, N'Ninh Bình'), (24, N'Phú Thọ'), (24, N'Quảng Ninh'), (24, N'Sơn La'), (24, N'Thái Nguyên'), (24, N'Tuyên Quang');
 
 -- Gói 25: Nhanh - Nội thành HCM (VTP)
-INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Gói Nhanh - Nội thành HCM (VTP)', 4, N'Nhanh', 28000, 1, 1, N'Ngày');
+INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Nội thành HCM (VTP)', 4, N'Nhanh', 28000, 1, 1, N'Ngày');
 INSERT INTO PhiApDungTungTinh(MaChiPhiVC, TenTinhThanh) VALUES (25, N'TP. Hồ Chí Minh');
 -- Gói 26: Nhanh - Miền Nam (VTP)
-INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Gói Nhanh - Miền Nam (VTP)', 4, N'Nhanh', 38000, 1, 2, N'Ngày');
+INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Miền Nam (VTP)', 4, N'Nhanh', 38000, 1, 2, N'Ngày');
 INSERT INTO PhiApDungTungTinh(MaChiPhiVC, TenTinhThanh) VALUES (26, N'TP. Cần Thơ'), (26, N'An Giang'), (26, N'Cà Mau'), (26, N'Đồng Nai'), (26, N'Đồng Tháp'), (26, N'Tây Ninh'), (26, N'Vĩnh Long');
 -- Gói 27: Nhanh - Miền Trung (VTP)
-INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Gói Nhanh - Miền Trung (VTP)', 4, N'Nhanh', 48000, 2, 3, N'Ngày');
+INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Miền Trung (VTP)', 4, N'Nhanh', 48000, 2, 3, N'Ngày');
 INSERT INTO PhiApDungTungTinh(MaChiPhiVC, TenTinhThanh) VALUES (27, N'TP. Đà Nẵng'), (27, N'TP. Huế'), (27, N'Đắk Lắk'), (27, N'Gia Lai'), (27, N'Hà Tĩnh'), (27, N'Khánh Hòa'), (27, N'Lâm Đồng'), (27, N'Nghệ An'), (27, N'Quảng Ngãi'), (27, N'Quảng Trị'), (27, N'Thanh Hóa');
 -- Gói 28: Nhanh - Miền Bắc (VTP)
-INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Gói Nhanh - Miền Bắc (VTP)', 4, N'Nhanh', 58000, 2, 4, N'Ngày');
+INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Miền Bắc (VTP)', 4, N'Nhanh', 58000, 2, 4, N'Ngày');
 INSERT INTO PhiApDungTungTinh(MaChiPhiVC, TenTinhThanh) VALUES (28, N'TP. Hà Nội'), (28, N'TP. Hải Phòng'), (28, N'Bắc Ninh'), (28, N'Cao Bằng'), (28, N'Điện Biên'), (28, N'Hưng Yên'), (28, N'Lai Châu'), (28, N'Lạng Sơn'), (28, N'Lào Cai'), (28, N'Ninh Bình'), (28, N'Phú Thọ'), (28, N'Quảng Ninh'), (28, N'Sơn La'), (28, N'Thái Nguyên'), (28, N'Tuyên Quang');
 GO
 
 -- ===== Giao Hàng Tiết Kiệm (MaNVC = 5) =====
 -- Cung cấp: Tiết Kiệm, Nhanh
 -- Gói 29: Tiết Kiệm - Nội thành HCM (GHTK)
-INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Gói Tiết Kiệm - Nội thành HCM (GHTK)', 5, N'Tiết Kiệm', 17000, 2, 3, N'Ngày');
+INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Nội thành HCM (GHTK)', 5, N'Tiết Kiệm', 17000, 2, 3, N'Ngày');
 INSERT INTO PhiApDungTungTinh(MaChiPhiVC, TenTinhThanh) VALUES (29, N'TP. Hồ Chí Minh');
 -- Gói 30: Tiết Kiệm - Miền Nam (GHTK)
-INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Gói Tiết Kiệm - Miền Nam (GHTK)', 5, N'Tiết Kiệm', 21000, 2, 4, N'Ngày');
+INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Miền Nam (GHTK)', 5, N'Tiết Kiệm', 21000, 2, 4, N'Ngày');
 INSERT INTO PhiApDungTungTinh(MaChiPhiVC, TenTinhThanh) VALUES (30, N'TP. Cần Thơ'), (30, N'An Giang'), (30, N'Cà Mau'), (30, N'Đồng Nai'), (30, N'Đồng Tháp'), (30, N'Tây Ninh'), (30, N'Vĩnh Long');
 -- Gói 31: Tiết Kiệm - Miền Trung (GHTK)
-INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Gói Tiết Kiệm - Miền Trung (GHTK)', 5, N'Tiết Kiệm', 29000, 3, 5, N'Ngày');
+INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Miền Trung (GHTK)', 5, N'Tiết Kiệm', 29000, 3, 5, N'Ngày');
 INSERT INTO PhiApDungTungTinh(MaChiPhiVC, TenTinhThanh) VALUES (31, N'TP. Đà Nẵng'), (31, N'TP. Huế'), (31, N'Đắk Lắk'), (31, N'Gia Lai'), (31, N'Hà Tĩnh'), (31, N'Khánh Hòa'), (31, N'Lâm Đồng'), (31, N'Nghệ An'), (31, N'Quảng Ngãi'), (31, N'Quảng Trị'), (31, N'Thanh Hóa');
 -- Gói 32: Tiết Kiệm - Miền Bắc (GHTK)
-INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Gói Tiết Kiệm - Miền Bắc (GHTK)', 5, N'Tiết Kiệm', 34000, 4, 6, N'Ngày');
+INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Miền Bắc (GHTK)', 5, N'Tiết Kiệm', 34000, 4, 6, N'Ngày');
 INSERT INTO PhiApDungTungTinh(MaChiPhiVC, TenTinhThanh) VALUES (32, N'TP. Hà Nội'), (32, N'TP. Hải Phòng'), (32, N'Bắc Ninh'), (32, N'Cao Bằng'), (32, N'Điện Biên'), (32, N'Hưng Yên'), (32, N'Lai Châu'), (32, N'Lạng Sơn'), (32, N'Lào Cai'), (32, N'Ninh Bình'), (32, N'Phú Thọ'), (32, N'Quảng Ninh'), (32, N'Sơn La'), (32, N'Thái Nguyên'), (32, N'Tuyên Quang');
 
 -- Gói 33: Nhanh - Nội thành HCM (GHTK)
-INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Gói Nhanh - Nội thành HCM (GHTK)', 5, N'Nhanh', 27000, 1, 1, N'Ngày');
+INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Nội thành HCM (GHTK)', 5, N'Nhanh', 27000, 1, 1, N'Ngày');
 INSERT INTO PhiApDungTungTinh(MaChiPhiVC, TenTinhThanh) VALUES (33, N'TP. Hồ Chí Minh');
 -- Gói 34: Nhanh - Miền Nam (GHTK)
-INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Gói Nhanh - Miền Nam (GHTK)', 5, N'Nhanh', 36000, 1, 2, N'Ngày');
+INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Miền Nam (GHTK)', 5, N'Nhanh', 36000, 1, 2, N'Ngày');
 INSERT INTO PhiApDungTungTinh(MaChiPhiVC, TenTinhThanh) VALUES (34, N'TP. Cần Thơ'), (34, N'An Giang'), (34, N'Cà Mau'), (34, N'Đồng Nai'), (34, N'Đồng Tháp'), (34, N'Tây Ninh'), (34, N'Vĩnh Long');
 -- Gói 35: Nhanh - Miền Trung (GHTK)
-INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Gói Nhanh - Miền Trung (GHTK)', 5, N'Nhanh', 46000, 2, 3, N'Ngày');
+INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Miền Trung (GHTK)', 5, N'Nhanh', 46000, 2, 3, N'Ngày');
 INSERT INTO PhiApDungTungTinh(MaChiPhiVC, TenTinhThanh) VALUES (35, N'TP. Đà Nẵng'), (35, N'TP. Huế'), (35, N'Đắk Lắk'), (35, N'Gia Lai'), (35, N'Hà Tĩnh'), (35, N'Khánh Hòa'), (35, N'Lâm Đồng'), (35, N'Nghệ An'), (35, N'Quảng Ngãi'), (35, N'Quảng Trị'), (35, N'Thanh Hóa');
 -- Gói 36: Nhanh - Miền Bắc (GHTK)
-INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Gói Nhanh - Miền Bắc (GHTK)', 5, N'Nhanh', 57000, 2, 4, N'Ngày');
+INSERT INTO PhiVanChuyen(TenGoiCuoc, MaNVC, PhuongThucVanChuyen, ChiPhi, NgayGiaoSomNhat, NgayGiaoMuonNhat, DonViThoiGian) VALUES (N'Miền Bắc (GHTK)', 5, N'Nhanh', 57000, 2, 4, N'Ngày');
 INSERT INTO PhiApDungTungTinh(MaChiPhiVC, TenTinhThanh) VALUES (36, N'TP. Hà Nội'), (36, N'TP. Hải Phòng'), (36, N'Bắc Ninh'), (36, N'Cao Bằng'), (36, N'Điện Biên'), (36, N'Hưng Yên'), (36, N'Lai Châu'), (36, N'Lạng Sơn'), (36, N'Lào Cai'), (36, N'Ninh Bình'), (36, N'Phú Thọ'), (36, N'Quảng Ninh'), (36, N'Sơn La'), (36, N'Thái Nguyên'), (36, N'Tuyên Quang');
 GO
 
 
 -- 8. KhuyenMai (Nhiều hơn)
 INSERT INTO KhuyenMai(MaKhuyenMai, TenChienDich, KieuApDung, GiaTri, BatDauLuc, KetThucLuc, TrangThai, TongTienToiThieu, GiamToiDa) VALUES
-('KHAOHE', N'Khảo hè giảm 15%', 1, 15, '2025-06-01', '2025-07-01', 1, 300000, 100000),
-('GIAM20K', N'Giảm 20K cho đơn từ 200K', 0, 20000, '2025-01-01', '2025-12-31', 1, 200000, NULL),
-('FREESHIPMAX', N'Miễn phí vận chuyển tối đa 25K', 0, 25000, '2025-01-01', '2025-12-31', 1, 150000, 25000),
-('HETHAN', N'Voucher 10.10 đã hết hạn', 0, 100000, '2024-10-10', '2024-10-11', 0, 500000, NULL);
+('KHAOHE', N'Khảo hè giảm 15%', 0, 15, '2025-06-01', '2025-07-01', 1, 300000, 100000),
+('GIAM20K', N'Giảm 20K cho đơn từ 200K', 1, 20000, '2025-01-01', '2025-12-31', 1, 200000, NULL),
+('FREESHIPMAX', N'Miễn phí vận chuyển tối đa 25K', 1, 25000, '2025-01-01', '2025-12-31', 1, 150000, 25000),
+('HETHAN', N'Voucher 10.10 đã hết hạn', 1, 100000, '2024-10-10', '2024-10-11', 0, 500000, NULL);
 GO
 
 -- 9. NguoiDung (Nhiều hơn, với điểm tích lũy)

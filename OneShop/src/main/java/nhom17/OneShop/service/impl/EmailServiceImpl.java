@@ -1,10 +1,13 @@
 package nhom17.OneShop.service.impl;
 
+import jakarta.mail.internet.MimeMessage;
+import nhom17.OneShop.entity.User;
 import nhom17.OneShop.service.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -56,6 +59,41 @@ public class EmailServiceImpl implements EmailService {
         } catch (Exception e) {
             System.err.println("❌ Lỗi khi gửi email: " + e.getMessage());
             throw new RuntimeException("Không thể gửi email. Vui lòng thử lại sau.");
+        }
+    }
+
+    @Override
+    public void sendContactEmail(User user, String subject, String message) {
+        try {
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
+
+            helper.setTo(this.fromAddress);
+            helper.setFrom(this.fromAddress, this.fromName + " - Khách Liên Hệ");
+
+            helper.setReplyTo(user.getEmail());
+
+            helper.setSubject("[Liên Hệ OneShop] - " + subject);
+
+            String htmlContent = "<html><body>"
+                    + "<h3>Bạn có một tin nhắn liên hệ mới:</h3>"
+                    + "<p><strong>Khách hàng:</strong> " + user.getHoTen() + "</p>"
+                    + "<p><strong>Email:</strong> " + user.getEmail() + "</p>"
+                    + "<p><strong>Số điện thoại:</strong> " + (user.getSoDienThoai() != null ? user.getSoDienThoai() : "Chưa cập nhật") + "</p>"
+                    + "<p><strong>Chủ đề:</strong> " + subject + "</p>"
+                    + "<hr>"
+                    + "<p><strong>Nội dung:</strong></p>"
+                    + "<p style=\"white-space: pre-wrap;\">" + message + "</p>"
+                    + "</body></html>";
+
+            helper.setText(htmlContent, true);
+
+            mailSender.send(mimeMessage);
+            System.out.println("✅ Đã gửi email LIÊN HỆ đến shop từ: " + user.getEmail());
+
+        } catch (Exception e) {
+            System.err.println("❌ Lỗi khi gửi email LIÊN HỆ: " + e.getMessage());
+            throw new RuntimeException("Không thể gửi email liên hệ: " + e.getMessage(), e);
         }
     }
 }
