@@ -22,52 +22,64 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
 
     boolean existsByNguoiDung_MaNguoiDung(Integer userId);
 
-    @Query(value = "SELECT COALESCE(SUM(o.TongTien), 0), COUNT(o.MaDonHang) " +
-            "FROM DonHang o " + // SỬA LẠI: orders -> DonHang
-            "WHERE o.TrangThai = N'Đã giao' AND o.NgayDat >= :startDate AND o.NgayDat < :endDate",
+    @Query(value = "SELECT SUM(d.TongTien) AS TotalRevenue, COUNT(d.MaDonHang) AS TotalOrders " +
+            "FROM DonHang d " +
+            "JOIN VanChuyen v ON d.MaDonHang = v.MaDonHang " +
+            "WHERE d.TrangThai = N'Đã giao' " +
+            "AND v.GiaoLuc BETWEEN :startDate AND :endDate",
             nativeQuery = true)
     List<Object[]> findKpiDataBetween(@Param("startDate") Timestamp startDate, @Param("endDate") Timestamp endDate);
 
-    @Query(value = "WITH LatestImportPrice AS ( " +
-            "    SELECT MaSanPham, GiaNhap, ROW_NUMBER() OVER(PARTITION BY MaSanPham ORDER BY MaPhieuNhap DESC) as rn " +
-            "    FROM ChiTietPhieuNhap " + // SỬA LẠI: import_details -> ChiTietPhieuNhap
-            ") " +
-            "SELECT COALESCE(SUM(od.SoLuong), 0), COALESCE(SUM(od.SoLuong * lip.GiaNhap), 0) " +
-            "FROM DonHang o " + // SỬA LẠI: orders -> DonHang
-            "JOIN DonHang_ChiTiet od ON o.MaDonHang = od.MaDonHang " + // SỬA LẠI: order_details -> DonHang_ChiTiet
-            "LEFT JOIN LatestImportPrice lip ON od.MaSanPham = lip.MaSanPham AND lip.rn = 1 " +
-            "WHERE o.TrangThai = N'Đã giao' AND o.NgayDat >= :startDate AND o.NgayDat < :endDate",
+    @Query(value = "SELECT COALESCE(SUM(dt.SoLuong), 0) AS TotalProductsSold, COALESCE(SUM(dt.SoLuong * ctn.GiaNhapTrungBinh), 0) AS TotalCOGS " +
+            "FROM DonHang d " +
+            "JOIN VanChuyen v ON d.MaDonHang = v.MaDonHang " +
+            "JOIN DonHang_ChiTiet dt ON d.MaDonHang = dt.MaDonHang " +
+            "LEFT JOIN ( " +
+            "    SELECT MaSanPham, AVG(GiaNhap) AS GiaNhapTrungBinh " +
+            "    FROM ChiTietPhieuNhap " +
+            "    GROUP BY MaSanPham " +
+            ") ctn ON dt.MaSanPham = ctn.MaSanPham " +
+            "WHERE d.TrangThai = N'Đã giao' " +
+            "AND v.GiaoLuc BETWEEN :startDate AND :endDate",
             nativeQuery = true)
     List<Object[]> findProductsAndCogsDataBetween(@Param("startDate") Timestamp startDate, @Param("endDate") Timestamp endDate);
 
-    @Query(value = "SELECT CAST(o.NgayDat AS DATE) as OrderDate, SUM(o.TongTien) as DailyRevenue " +
-            "FROM DonHang o " + // SỬA LẠI: orders -> DonHang
-            "WHERE o.TrangThai = N'Đã giao' AND o.NgayDat >= :startDate AND o.NgayDat < :endDate " +
-            "GROUP BY CAST(o.NgayDat AS DATE) ORDER BY OrderDate ASC",
+
+    @Query(value = "SELECT CAST(v.GiaoLuc AS DATE) AS Ngay, SUM(d.TongTien) AS DoanhThu " +
+            "FROM DonHang d " +
+            "JOIN VanChuyen v ON d.MaDonHang = v.MaDonHang " +
+            "WHERE d.TrangThai = N'Đã giao' " +
+            "AND v.GiaoLuc BETWEEN :startDate AND :endDate " +
+            "GROUP BY CAST(v.GiaoLuc AS DATE) " +
+            "ORDER BY Ngay",
             nativeQuery = true)
     List<Object[]> findRevenueByDayBetween(@Param("startDate") Timestamp startDate, @Param("endDate") Timestamp endDate);
 
-    @Query(value = "WITH RankedProducts AS ( " +
-            "    SELECT p.TenSanPham, p.HinhAnh, SUM(od.SoLuong) as TotalQuantity, SUM(od.ThanhTien) as TotalRevenue, " +
-            "           ROW_NUMBER() OVER (ORDER BY SUM(od.SoLuong) DESC) as rn " +
-            "    FROM DonHang o JOIN DonHang_ChiTiet od ON o.MaDonHang = od.MaDonHang JOIN SanPham p ON od.MaSanPham = p.MaSanPham " + // SỬA LẠI
-            "    WHERE o.TrangThai = N'Đã giao' AND o.NgayDat >= :startDate AND o.NgayDat < :endDate " +
-            "    GROUP BY p.TenSanPham, p.HinhAnh " +
-            ") " +
-            "SELECT rp.TenSanPham, rp.HinhAnh, rp.TotalQuantity, rp.TotalRevenue FROM RankedProducts rp WHERE rp.rn <= :limit",
+    @Query(value = "SELECT sp.TenSanPham, sp.HinhAnh, SUM(dt.SoLuong) AS TongSoLuong, SUM(dt.ThanhTien) AS TongDoanhThu " +
+            "FROM DonHang d " +
+            "JOIN VanChuyen v ON d.MaDonHang = v.MaDonHang " +
+            "JOIN DonHang_ChiTiet dt ON d.MaDonHang = dt.MaDonHang " +
+            "JOIN SanPham sp ON dt.MaSanPham = sp.MaSanPham " +
+            "WHERE d.TrangThai = N'Đã giao' " +
+            "AND v.GiaoLuc BETWEEN :startDate AND :endDate " + 
+            "GROUP BY sp.MaSanPham, sp.TenSanPham, sp.HinhAnh " +
+            "ORDER BY TongSoLuong DESC " +
+            "OFFSET 0 ROWS FETCH NEXT :limit ROWS ONLY",
             nativeQuery = true)
     List<Object[]> findTopSellingProductsBetween(@Param("startDate") Timestamp startDate, @Param("endDate") Timestamp endDate, @Param("limit") int limit);
 
-    @Query(value = "SELECT c.TenDanhMuc, SUM(od.ThanhTien) as CategoryRevenue " +
-            "FROM DonHang o " + // SỬA LẠI
-            "JOIN DonHang_ChiTiet od ON o.MaDonHang = od.MaDonHang " + // SỬA LẠI
-            "JOIN SanPham p ON od.MaSanPham = p.MaSanPham " + // SỬA LẠI
-            "JOIN DanhMuc c ON p.MaDanhMuc = c.MaDanhMuc " + // SỬA LẠI
-            "WHERE o.TrangThai = N'Đã giao' AND o.NgayDat >= :startDate AND o.NgayDat < :endDate " +
-            "GROUP BY c.TenDanhMuc ORDER BY CategoryRevenue DESC",
+    @Query(value = "SELECT dm.TenDanhMuc, SUM(dt.ThanhTien) AS TongDoanhThu " +
+            "FROM DonHang d " +
+            "JOIN VanChuyen v ON d.MaDonHang = v.MaDonHang " +
+            "JOIN DonHang_ChiTiet dt ON d.MaDonHang = dt.MaDonHang " +
+            "JOIN SanPham sp ON dt.MaSanPham = sp.MaSanPham " +
+            "JOIN DanhMuc dm ON sp.MaDanhMuc = dm.MaDanhMuc " +
+            "WHERE d.TrangThai = N'Đã giao' " +
+            "AND v.GiaoLuc BETWEEN :startDate AND :endDate " +
+            "GROUP BY dm.MaDanhMuc, dm.TenDanhMuc " +
+            "ORDER BY TongDoanhThu DESC",
             nativeQuery = true)
     List<Object[]> findRevenueByCategoryBetween(@Param("startDate") Timestamp startDate, @Param("endDate") Timestamp endDate);
-
 
     @Query(value = "SELECT CAST(CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END AS BIT) " +
             "FROM DonHang o " +
@@ -76,4 +88,3 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
             nativeQuery = true)
     boolean hasCompletedPurchase(@Param("userId") Integer userId, @Param("productId") Integer productId);
 }
-
