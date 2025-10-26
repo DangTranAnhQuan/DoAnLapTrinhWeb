@@ -12,4 +12,6 @@ public class ShippingOptionDTO {
     private Integer ngayGiaoMuonNhat;
     private String donViThoiGian;
     private String tenNVC;
+
+
 }

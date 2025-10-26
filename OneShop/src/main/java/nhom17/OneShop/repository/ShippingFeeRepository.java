@@ -25,4 +25,7 @@ public interface ShippingFeeRepository extends JpaRepository<ShippingFee, Intege
     List<String> findDistinctPhuongThucVanChuyen();
     @Query("SELECT sf FROM ShippingFee sf JOIN sf.cacTinhApDung ap WHERE ap.id.tenTinhThanh = :province ORDER BY sf.chiPhi ASC")
     List<ShippingFee> findApplicableFeesByProvinceOrderedByCost(@Param("province") String tenTinhThanh);
+
+    @Query("SELECT sf FROM ShippingFee sf JOIN FETCH sf.nhaVanChuyen nvc JOIN sf.cacTinhApDung ap WHERE ap.id.tenTinhThanh = :province")
+    List<ShippingFee> findShippingFeesByProvince(@Param("province") String province);
 }
