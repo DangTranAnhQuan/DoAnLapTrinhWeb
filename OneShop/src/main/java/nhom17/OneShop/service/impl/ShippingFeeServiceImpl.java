@@ -31,6 +31,8 @@
 //    @Autowired private ShippingCarrierRepository shippingCarrierRepository;
 //    @Autowired private CartService cartService;
 //
+//    // --- CÁC PHƯƠNG THỨC QUẢN LÝ (ADMIN) ---
+//
 //    @Override
 //    public List<ShippingFee> findAllByProvider(int providerId) {
 //        return shippingFeeRepository.findByNhaVanChuyen_MaNVCOrderByMaChiPhiVCDesc(providerId);
@@ -48,7 +50,7 @@
 //        validateRequest(request);
 //        ShippingFee entity = prepareEntity(request);
 //        mapToEntity(request, entity);
-//        // shippingFeeRepository.save(entity); // Sẽ được lưu trong updateAppliedProvinces
+//        // Logic save đã nằm trong updateAppliedProvinces
 //    }
 //
 //    private void validateRequest(ShippingFeeRequest request) {
@@ -81,7 +83,6 @@
 //
 //                for (AppliedProvince province : fee.getCacTinhApDung()) {
 //                    if (request.getCacTinhApDung().contains(province.getId().getTenTinhThanh())) {
-//                        // Sửa logic: Lỗi nếu cùng Tỉnh và cùng Phương thức (bất kể Tên gói cước)
 //                        if (fee.getPhuongThucVanChuyen().equalsIgnoreCase(request.getPhuongThucVanChuyen().trim())) {
 //                            throw new IllegalArgumentException("Tỉnh '" + province.getId().getTenTinhThanh() + "' đã được áp dụng cho phương thức '" + fee.getPhuongThucVanChuyen() + "' trong gói '" + fee.getTenGoiCuoc() + "'.");
 //                        }
@@ -103,7 +104,7 @@
 //        ShippingCarrier provider = shippingCarrierRepository.findById(request.getMaNVC())
 //                .orElseThrow(() -> new NotFoundException("Không tìm thấy nhà vận chuyển với ID: " + request.getMaNVC()));
 //
-//        entity.setTenGoiCuoc(request.getTenGoiCuoc().trim()); // Trim whitespace
+//        entity.setTenGoiCuoc(request.getTenGoiCuoc().trim());
 //        entity.setNhaVanChuyen(provider);
 //        entity.setPhuongThucVanChuyen(request.getPhuongThucVanChuyen());
 //        entity.setChiPhi(request.getChiPhi());
@@ -117,18 +118,16 @@
 //    private void updateAppliedProvinces(ShippingFeeRequest request, ShippingFee entity) {
 //        boolean isNew = entity.getMaChiPhiVC() == null;
 //        if (isNew) {
-//            shippingFeeRepository.saveAndFlush(entity); // Save và lấy ID
+//            shippingFeeRepository.saveAndFlush(entity);
 //        }
 //
 //        if (entity.getCacTinhApDung() == null) {
 //            entity.setCacTinhApDung(new HashSet<>());
 //        }
 //
-//        // Tạo Set các tỉnh thành mới
 //        Set<AppliedProvince> newProvinces = new HashSet<>();
 //        if (request.getCacTinhApDung() != null) {
 //            for (String tenTinhThanh : request.getCacTinhApDung()) {
-//                // Sử dụng MaChiPhiVC đã có
 //                AppliedProvinceId appliedId = new AppliedProvinceId(entity.getMaChiPhiVC(), tenTinhThanh);
 //                AppliedProvince appliedProvince = new AppliedProvince(appliedId, entity);
 //                newProvinces.add(appliedProvince);
@@ -138,7 +137,7 @@
 //        entity.getCacTinhApDung().clear();
 //        entity.getCacTinhApDung().addAll(newProvinces);
 //
-//        if (!isNew) { // Chỉ save lại nếu là cập nhật
+//        if (!isNew) {
 //            shippingFeeRepository.save(entity);
 //        }
 //    }
@@ -152,36 +151,48 @@
 //        shippingFeeRepository.deleteById(id);
 //    }
 //
+//    // --- CÁC PHƯƠNG THỨC CHO CHECKOUT (LOGIC CỦA BẠN) ---
+//
 //    @Override
 //    public Optional<ShippingOptionDTO> findCheapestShippingOption(String province, BigDecimal subtotal) {
-//        List<ShippingFee> applicableFees = shippingFeeRepository.findApplicableFeesByProvinceOrderedByCost(province);
-//
-//        if (applicableFees.isEmpty()) {
+//        // Phương thức này giờ sẽ gọi logic mới và lấy phần tử đầu tiên
+//        List<ShippingOptionDTO> options = findAvailableShippingOptions(province);
+//        if (options.isEmpty()) {
 //            return Optional.empty();
 //        }
-//
-//        ShippingFee cheapestFeeEntity = applicableFees.get(0);
-//        BigDecimal finalCost = calculateFinalShippingCost(subtotal, cheapestFeeEntity.getChiPhi());
-//
-//        ShippingOptionDTO dto = convertToDTO(cheapestFeeEntity); // Gọi hàm helper đã sửa
-//        dto.setChiPhi(finalCost); // Ghi đè chi phí bằng chi phí cuối cùng
-//
-//        return Optional.of(dto);
+//        return Optional.of(options.get(0)); // Trả về gói rẻ nhất sau khi đã lọc
 //    }
 //
+//    // <<< PHƯƠNG THỨC ĐÃ SỬA THEO YÊU CẦU MỚI >>>
 //    @Override
 //    public List<ShippingOptionDTO> findAvailableShippingOptions(String province) {
+//        // 1. Lấy tất cả các gói cước áp dụng cho tỉnh/thành
 //        List<ShippingFee> applicableFees = shippingFeeRepository.findShippingFeesByProvince(province);
+//
+//        // 2. Lấy subtotal để tính giảm giá
 //        BigDecimal subtotal = cartService.getSubtotal();
 //
-//        List<ShippingOptionDTO> options = applicableFees.stream()
+//        // 3. Nhóm theo Phương thức vận chuyển (Tiết Kiệm, Nhanh, v.v.)
+//        //    và chỉ chọn ra gói rẻ nhất (ChiPhi gốc) từ mỗi nhóm
+//        Map<String, Optional<ShippingFee>> cheapestFeesByMethod = applicableFees.stream()
+//                .collect(Collectors.groupingBy(
+//                        ShippingFee::getPhuongThucVanChuyen, // Nhóm theo "Tiết Kiệm", "Nhanh", "Tiêu Chuẩn"
+//                        Collectors.minBy(Comparator.comparing(ShippingFee::getChiPhi)) // Chỉ lấy gói rẻ nhất trong nhóm
+//                ));
+//
+//        // 4. Chuyển đổi Map<String, Optional<ShippingFee>> thành List<ShippingOptionDTO>
+//        List<ShippingOptionDTO> options = cheapestFeesByMethod.values().stream()
+//                .filter(Optional::isPresent) // Lọc bỏ các nhóm không có giá trị
+//                .map(Optional::get) // Lấy ShippingFee từ Optional
 //                .map(fee -> {
-//                    ShippingOptionDTO dto = convertToDTO(fee); // Chuyển đổi cơ bản
+//                    // Chuyển đổi sang DTO
+//                    ShippingOptionDTO dto = convertToDTO(fee); // Gọi hàm helper đã sửa
+//                    // Tính toán chi phí cuối cùng (đã giảm giá/freeship)
 //                    BigDecimal finalCost = calculateFinalShippingCost(subtotal, fee.getChiPhi());
 //                    dto.setChiPhi(finalCost); // Cập nhật chi phí cuối cùng
 //                    return dto;
 //                })
-//                .sorted(Comparator.comparing(ShippingOptionDTO::getChiPhi)) // Sắp xếp theo giá cuối cùng
+//                .sorted(Comparator.comparing(ShippingOptionDTO::getChiPhi)) // Sắp xếp theo giá cuối cùng tăng dần
 //                .collect(Collectors.toList());
 //
 //        return options;
@@ -201,13 +212,13 @@
 //        }
 //    }
 //
-//    // <<< HÀM HELPER ĐÃ SỬA ĐỂ KHỚP VỚI DTO CỦA BẠN >>>
+//    // <<< HÀM HELPER ĐÃ SỬA ĐỂ KHỚP VỚI ShippingOptionDTO.java CỦA BẠN >>>
 //    private ShippingOptionDTO convertToDTO(ShippingFee fee) {
 //        ShippingOptionDTO dto = new ShippingOptionDTO();
 //
 //        // Gán vào các trường TỒN TẠI trong DTO của bạn
 //        dto.setMaChiPhiVC(fee.getMaChiPhiVC());
-//        dto.setChiPhi(fee.getChiPhi()); // Phí gốc (sẽ bị ghi đè bên ngoài nếu cần)
+//        dto.setChiPhi(fee.getChiPhi()); // Phí gốc (sẽ bị ghi đè bên ngoài)
 //        dto.setNgayGiaoSomNhat(fee.getNgayGiaoSomNhat());
 //        dto.setNgayGiaoMuonNhat(fee.getNgayGiaoMuonNhat());
 //        dto.setDonViThoiGian(fee.getDonViThoiGian());
@@ -215,7 +226,7 @@
 //        String carrierName = (fee.getNhaVanChuyen() != null) ? fee.getNhaVanChuyen().getTenNVC() : "N/A";
 //        dto.setTenNVC(carrierName);
 //
-//        // Gán tên kết hợp vào 'tenGoiCuoc'
+//        // Gán tên kết hợp (VD: "GHTK - Tiết Kiệm") vào trường 'tenGoiCuoc'
 //        dto.setTenGoiCuoc(carrierName + " - " + fee.getPhuongThucVanChuyen());
 //
 //        return dto;
@@ -254,8 +265,7 @@ public class ShippingFeeServiceImpl implements ShippingFeeService {
     @Autowired private ShippingCarrierRepository shippingCarrierRepository;
     @Autowired private CartService cartService;
 
-    // --- CÁC PHƯƠNG THỨC QUẢN LÝ (ADMIN) ---
-
+    // --- CÁC PHƯƠNG THỨC QUẢN LÝ (ADMIN) - GIỮ NGUYÊN ---
     @Override
     public List<ShippingFee> findAllByProvider(int providerId) {
         return shippingFeeRepository.findByNhaVanChuyen_MaNVCOrderByMaChiPhiVCDesc(providerId);
@@ -374,52 +384,7 @@ public class ShippingFeeServiceImpl implements ShippingFeeService {
         shippingFeeRepository.deleteById(id);
     }
 
-    // --- CÁC PHƯƠNG THỨC CHO CHECKOUT (LOGIC CỦA BẠN) ---
-
-    @Override
-    public Optional<ShippingOptionDTO> findCheapestShippingOption(String province, BigDecimal subtotal) {
-        // Phương thức này giờ sẽ gọi logic mới và lấy phần tử đầu tiên
-        List<ShippingOptionDTO> options = findAvailableShippingOptions(province);
-        if (options.isEmpty()) {
-            return Optional.empty();
-        }
-        return Optional.of(options.get(0)); // Trả về gói rẻ nhất sau khi đã lọc
-    }
-
-    // <<< PHƯƠNG THỨC ĐÃ SỬA THEO YÊU CẦU MỚI >>>
-    @Override
-    public List<ShippingOptionDTO> findAvailableShippingOptions(String province) {
-        // 1. Lấy tất cả các gói cước áp dụng cho tỉnh/thành
-        List<ShippingFee> applicableFees = shippingFeeRepository.findShippingFeesByProvince(province);
-
-        // 2. Lấy subtotal để tính giảm giá
-        BigDecimal subtotal = cartService.getSubtotal();
-
-        // 3. Nhóm theo Phương thức vận chuyển (Tiết Kiệm, Nhanh, v.v.)
-        //    và chỉ chọn ra gói rẻ nhất (ChiPhi gốc) từ mỗi nhóm
-        Map<String, Optional<ShippingFee>> cheapestFeesByMethod = applicableFees.stream()
-                .collect(Collectors.groupingBy(
-                        ShippingFee::getPhuongThucVanChuyen, // Nhóm theo "Tiết Kiệm", "Nhanh", "Tiêu Chuẩn"
-                        Collectors.minBy(Comparator.comparing(ShippingFee::getChiPhi)) // Chỉ lấy gói rẻ nhất trong nhóm
-                ));
-
-        // 4. Chuyển đổi Map<String, Optional<ShippingFee>> thành List<ShippingOptionDTO>
-        List<ShippingOptionDTO> options = cheapestFeesByMethod.values().stream()
-                .filter(Optional::isPresent) // Lọc bỏ các nhóm không có giá trị
-                .map(Optional::get) // Lấy ShippingFee từ Optional
-                .map(fee -> {
-                    // Chuyển đổi sang DTO
-                    ShippingOptionDTO dto = convertToDTO(fee); // Gọi hàm helper đã sửa
-                    // Tính toán chi phí cuối cùng (đã giảm giá/freeship)
-                    BigDecimal finalCost = calculateFinalShippingCost(subtotal, fee.getChiPhi());
-                    dto.setChiPhi(finalCost); // Cập nhật chi phí cuối cùng
-                    return dto;
-                })
-                .sorted(Comparator.comparing(ShippingOptionDTO::getChiPhi)) // Sắp xếp theo giá cuối cùng tăng dần
-                .collect(Collectors.toList());
-
-        return options;
-    }
+    // --- CÁC PHƯƠNG THỨC CHO CHECKOUT ---
 
     // Hàm helper tính toán phí ship (tách logic)
     private BigDecimal calculateFinalShippingCost(BigDecimal subtotal, BigDecimal originalCost) {
@@ -435,11 +400,9 @@ public class ShippingFeeServiceImpl implements ShippingFeeService {
         }
     }
 
-    // <<< HÀM HELPER ĐÃ SỬA ĐỂ KHỚP VỚI ShippingOptionDTO.java CỦA BẠN >>>
     private ShippingOptionDTO convertToDTO(ShippingFee fee) {
         ShippingOptionDTO dto = new ShippingOptionDTO();
 
-        // Gán vào các trường TỒN TẠI trong DTO của bạn
         dto.setMaChiPhiVC(fee.getMaChiPhiVC());
         dto.setChiPhi(fee.getChiPhi()); // Phí gốc (sẽ bị ghi đè bên ngoài)
         dto.setNgayGiaoSomNhat(fee.getNgayGiaoSomNhat());
@@ -447,11 +410,53 @@ public class ShippingFeeServiceImpl implements ShippingFeeService {
         dto.setDonViThoiGian(fee.getDonViThoiGian());
 
         String carrierName = (fee.getNhaVanChuyen() != null) ? fee.getNhaVanChuyen().getTenNVC() : "N/A";
-        dto.setTenNVC(carrierName);
+        dto.setTenNVC(carrierName); // Gán tên nhà vận chuyển
 
-        // Gán tên kết hợp (VD: "GHTK - Tiết Kiệm") vào trường 'tenGoiCuoc'
-        dto.setTenGoiCuoc(carrierName + " - " + fee.getPhuongThucVanChuyen());
+        // Gán TÊN PHƯƠNG THỨC (Tiết Kiệm, Nhanh) vào 'tenGoiCuoc'
+        dto.setTenGoiCuoc(fee.getPhuongThucVanChuyen());
 
         return dto;
+    }
+
+    @Override
+    public Optional<ShippingOptionDTO> findCheapestShippingOption(String province, BigDecimal subtotal) {
+        List<ShippingOptionDTO> options = findAvailableShippingOptions(province);
+        if (options.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(options.get(0)); // Trả về gói rẻ nhất sau khi đã lọc
+    }
+
+    @Override
+    public List<ShippingOptionDTO> findAvailableShippingOptions(String province) {
+        List<ShippingFee> applicableFees = shippingFeeRepository.findShippingFeesByProvince(province);
+        BigDecimal subtotal = cartService.getSubtotal();
+
+        // Nhóm theo Phương thức vận chuyển và chỉ chọn gói rẻ nhất
+        Map<String, Optional<ShippingFee>> cheapestFeesByMethod = applicableFees.stream()
+                .collect(Collectors.groupingBy(
+                        ShippingFee::getPhuongThucVanChuyen,
+                        Collectors.minBy(Comparator.comparing(ShippingFee::getChiPhi))
+                ));
+
+        // Chuyển đổi Map sang List DTO và tính phí cuối cùng
+        List<ShippingOptionDTO> options = cheapestFeesByMethod.values().stream()
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .map(fee -> {
+                    ShippingOptionDTO dto = convertToDTO(fee); // Gọi hàm helper đã sửa
+                    BigDecimal finalCost = calculateFinalShippingCost(subtotal, fee.getChiPhi());
+                    dto.setChiPhi(finalCost); // Cập nhật chi phí cuối cùng
+                    return dto;
+                })
+                .sorted(Comparator.comparing(ShippingOptionDTO::getChiPhi)) // Sắp xếp theo giá
+                .collect(Collectors.toList());
+
+        return options;
+    }
+
+    @Override
+    public List<String> findDistinctShippingMethods() {
+        return shippingFeeRepository.findDistinctPhuongThucVanChuyen();
     }
 }

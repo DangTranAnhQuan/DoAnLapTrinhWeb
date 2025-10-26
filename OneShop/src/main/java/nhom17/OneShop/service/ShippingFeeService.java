@@ -15,4 +15,5 @@ public interface ShippingFeeService {
     Optional<ShippingOptionDTO> findCheapestShippingOption(String province, BigDecimal subtotal);
 
     List<ShippingOptionDTO> findAvailableShippingOptions(String province);
+    List<String> findDistinctShippingMethods();
 }

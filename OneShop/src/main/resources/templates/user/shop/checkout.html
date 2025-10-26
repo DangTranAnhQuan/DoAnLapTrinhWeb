@@ -6,6 +6,7 @@
 <head>
     <title>Thanh toán</title>
     <style>
+        /* ============ CSS (Giữ nguyên các style cũ) ============ */
         .axil-order-summery .summery-table th:nth-child(2),
         .axil-order-summery .summery-table td:nth-child(2) {
             text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums;
@@ -19,13 +20,37 @@
             position: static !important; top: 0 !important; vertical-align: baseline !important; font-size: 1em !important; line-height: 1 !important;
         }
         .axil-order-summery { width: 100%; }
+
+        /* Style cho địa chỉ được chọn */
         .custom-address-option input[type="radio"]:checked + label {
-            border-color: var(--color-primary); box-shadow: 0 0 0 0px var(--color-primary);
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 0px var(--color-primary);
         }
+
+        /* === BỎ VIỀN XANH KHI FOCUS === */
+        .custom-address-option .address-radio:focus,
+        .custom-address-option .address-radio:focus-visible {
+             outline: none;
+             box-shadow: none;
+        }
+        /* Chỉ áp dụng viền đỏ khi ĐÃ CHỌN (checked) */
+         .custom-address-option .address-radio:checked + label,
+         .custom-address-option .address-radio:focus + label { /* Thêm :focus ở đây để thay thế */
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 1px var(--color-primary);
+        }
+        /* Đảm bảo label thường không có viền khi radio không được check */
+         .custom-address-option .address-radio:not(:checked):focus + label {
+             border-color: #f1f1f1; /* Màu viền mặc định của bạn */
+             box-shadow: none;
+         }
+        /* === KẾT THÚC BỎ VIỀN XANH === */
+
         #shipping-options-loading, #shipping-methods-loading { display: none; }
         #shipping-info-display { margin-top: 5px; font-size: 0.9em; color: #555; }
         #shipping-error, #shipping-methods-error { margin-top: 10px; }
 
+        /* === CSS MỚI CHO PHƯƠNG THỨC VẬN CHUYỂN === */
         #shipping-method-selection { border-top: 1px solid #e5e5e5; padding-top: 20px; margin-top: 30px; }
         .shipping-method-option { margin-bottom: 15px; }
         .shipping-method-option input[type="radio"] { margin-right: 10px; }
@@ -58,6 +83,7 @@
         .shipping-method-option input[type="radio"]:checked + label {
              color: var(--color-primary);
         }
+        /* === KẾT THÚC CSS MỚI === */
     </style>
 </head>
 
@@ -100,7 +126,6 @@
                                     <a th:href="@{/checkout/edit-address/{id}(id=${address.maDiaChi})}" class="btn-sm address-edit-btn">Sửa</a>
                                 </div>
                             </div>
-
                             <div id="shipping-method-selection" class="mt-4">
                                 <h5 class="title mb--20">Phương thức vận chuyển</h5>
                                 <div id="shipping-methods-loading" class="text-center">
@@ -112,7 +137,6 @@
                                     <p class="text-muted" id="shipping-placeholder">Vui lòng chọn địa chỉ giao hàng để xem các tùy chọn vận chuyển.</p>
                                 </div>
                             </div>
-
                             <div class="form-group mt-4">
                                 <label>Ghi chú đơn hàng (tùy chọn)</label>
                                 <textarea name="notes" rows="2" placeholder="Ghi chú về đơn hàng của bạn..."></textarea>
@@ -264,11 +288,16 @@
                         radioInput.type = 'radio';
                         radioInput.name = 'shipping_option';
 
-                        // === SỬA LỖI: ĐỌC ĐÚNG TÊN TRƯỜNG TỪ DTO ===
-                        radioInput.id = `shipping_opt_${option.maChiPhiVC}`; // Dùng maChiPhiVC
-                        radioInput.value = option.maChiPhiVC; // Dùng maChiPhiVC
-                        radioInput.dataset.fee = option.chiPhi; // Dùng chiPhi
-                        radioInput.dataset.name = option.tenGoiCuoc; // Dùng tenGoiCuoc (đã chứa tên kết hợp)
+                        // === SỬA LOGIC: ĐỌC DTO ĐÚNG ===
+                        radioInput.id = `shipping_opt_${option.maChiPhiVC}`;
+                        radioInput.value = option.maChiPhiVC;
+                        radioInput.dataset.fee = option.chiPhi;
+                        // DTO của bạn gửi "J&T Express" trong tenNVC và "Tiết Kiệm" trong tenGoiCuoc
+                        radioInput.dataset.name = (option.tenNVC || '') + ' - ' + (option.tenGoiCuoc || '');
+
+                        // <<< THÊM DÒNG NÀY >>>
+                        // Lưu riêng tên phương thức (VD: "Tiết Kiệm")
+                        radioInput.dataset.method = option.tenGoiCuoc || '';
                         // === KẾT THÚC SỬA ===
 
                         const label = document.createElement('label');
@@ -279,12 +308,14 @@
 
                         const nameSpan = document.createElement('span');
                         nameSpan.className = 'method-name';
-                        // === SỬA LỖI: ĐỌC ĐÚNG TÊN TRƯỜNG TỪ DTO ===
-                        nameSpan.textContent = option.tenGoiCuoc || 'Gói vận chuyển'; // Dùng tenGoiCuoc
+
+                        // === SỬA LOGIC: CHỈ HIỂN THỊ PHƯƠNG THỨC (THEO YÊU CẦU MỚI) ===
+                        // DTO của bạn đang lưu "Tiết Kiệm", "Nhanh" trong tenGoiCuoc
+                        nameSpan.textContent = option.tenGoiCuoc || 'Gói vận chuyển';
                         detailsSpan.appendChild(nameSpan);
 
-                        // === SỬA LỖI: XÂY DỰNG CHUỖI THỜI GIAN TỪ CÁC TRƯỜNG CỦA DTO ===
-                        if (option.ngayGiaoSomNhat && option.ngayGiaoMuonNhat && option.donViThoiGian) {
+                        // === SỬA LOGIC: TẠO CHUỖI THỜI GIAN ===
+                        if (option.ngayGiaoSomNhat != null && option.ngayGiaoMuonNhat != null && option.donViThoiGian) {
                             const timeSpan = document.createElement('span');
                             timeSpan.className = 'method-time';
                             timeSpan.textContent = `(Dự kiến ${option.ngayGiaoSomNhat}-${option.ngayGiaoMuonNhat} ${option.donViThoiGian})`;
@@ -294,9 +325,7 @@
 
                         const feeSpan = document.createElement('span');
                         feeSpan.className = 'method-fee';
-                        // === SỬA LỖI: ĐỌC ĐÚNG TÊN TRƯỜNG TỪ DTO ===
                         feeSpan.textContent = formatCurrency(option.chiPhi); // Dùng chiPhi
-                        // === KẾT THÚC SỬA ===
 
                         label.appendChild(detailsSpan);
                         label.appendChild(feeSpan);
@@ -309,7 +338,11 @@
                             if (this.checked) {
                                 currentShippingFee = parseFloat(this.dataset.fee) || 0;
                                 calculatedShippingFeeInput.value = currentShippingFee.toFixed(0);
-                                shippingMethodNameInput.value = this.dataset.name || '';
+
+                                // <<< SỬA DÒNG NÀY >>>
+                                // Chỉ lưu tên phương thức (VD: "Tiết Kiệm")
+                                shippingMethodNameInput.value = this.dataset.method || '';
+
                                 shippingOptionIdInput.value = this.value || '';
                                 shippingFeeElement.textContent = formatCurrency(currentShippingFee);
                                 updateTotalAmount();

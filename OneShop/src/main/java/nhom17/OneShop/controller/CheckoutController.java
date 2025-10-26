@@ -81,31 +81,6 @@ public class CheckoutController {
         return "user/shop/checkout";
     }
 
-    // ===== START: MODIFIED API - works with DTO =====
-//    @GetMapping("/api/shipping-options")
-//    @ResponseBody
-//    public ResponseEntity<?> getShippingOptions(@RequestParam("province") String province) {
-//        try {
-//            BigDecimal subtotal = cartService.getSubtotal();
-//            // Service now returns Optional<ShippingOptionDTO>
-//            Optional<ShippingOptionDTO> cheapestOptionDto = shippingFeeService.findCheapestShippingOption(province, subtotal);
-//
-//            if (cheapestOptionDto.isPresent()) {
-//                // Return the DTO
-//                return ResponseEntity.ok(cheapestOptionDto.get());
-//            } else {
-//                Map<String, String> errorResponse = new HashMap<>();
-//                errorResponse.put("error", "Không tìm thấy phương thức vận chuyển phù hợp cho tỉnh/thành này.");
-//                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
-//            }
-//        } catch (Exception e) {
-//            Map<String, String> errorResponse = new HashMap<>();
-//            errorResponse.put("error", "Lỗi khi tính phí vận chuyển: " + e.getMessage());
-//            e.printStackTrace(); // Print stack trace for debugging
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-//        }
-//    }
-    // ===== END: MODIFIED API =====
     @GetMapping("/api/available-shipping-options") // <<< SỬA URL ENDPOINT
     @ResponseBody
     public ResponseEntity<?> getAvailableShippingOptions(@RequestParam("province") String province) { // <<< SỬA TÊN PHƯƠNG THỨC

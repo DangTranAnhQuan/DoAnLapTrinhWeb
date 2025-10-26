@@ -241,7 +241,6 @@ public class OrderServiceImpl implements OrderService {
         DashboardDataDTO data = new DashboardDataDTO();
         YearMonth yearMonth = YearMonth.of(year, month);
 
-        // ✅ THAY ĐỔI: Chuyển đổi sang Timestamp để truyền vào query
         Timestamp startOfMonth = Timestamp.valueOf(yearMonth.atDay(1).atStartOfDay());
         Timestamp endOfMonth = Timestamp.valueOf(yearMonth.atEndOfMonth().plusDays(1).atStartOfDay());
 
