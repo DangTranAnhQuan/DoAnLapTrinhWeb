@@ -36,6 +36,11 @@ public class ShippingFeeServiceImpl implements ShippingFeeService {
     }
 
     @Override
+    public List<String> findDistinctShippingMethods() {
+        return shippingFeeRepository.findDistinctPhuongThucVanChuyen();
+    }
+
+    @Override
     public ShippingFee findById(int id) {
         return shippingFeeRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy gói phí vận chuyển với ID: " + id));

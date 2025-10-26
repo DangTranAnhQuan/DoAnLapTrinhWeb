@@ -3,6 +3,8 @@ package nhom17.OneShop.service;
 import nhom17.OneShop.entity.Product;
 import nhom17.OneShop.request.ProductRequest;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
+
 import java.math.BigDecimal;
 import java.util.List; // QUAN TRỌNG: Thêm import này
 
@@ -14,7 +16,7 @@ public interface ProductService {
     // PHƯƠNG THỨC MỚI CHO TÌM KIẾM HEADER
     Page<Product> searchProductsForUser(String keyword, int page, int size);
     Product findById(int id);
-
+    List<Product> findAll(Sort sort);
     void save(ProductRequest productRequest);
     void delete(int id);
 

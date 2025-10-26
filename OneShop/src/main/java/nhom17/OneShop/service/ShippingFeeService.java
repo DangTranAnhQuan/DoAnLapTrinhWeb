@@ -9,6 +9,7 @@ import java.util.Optional;
 
 public interface ShippingFeeService {
     List<ShippingFee> findAllByProvider(int providerId);
+    List<String> findDistinctShippingMethods();
     ShippingFee findById(int id);
     void save(ShippingFeeRequest request);
     void delete(int id);

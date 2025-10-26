@@ -1,10 +1,7 @@
 package nhom17.OneShop.service;
 
-import nhom17.OneShop.entity.Order;
+import nhom17.OneShop.entity.*;
 import nhom17.OneShop.dto.DashboardDataDTO;
-import nhom17.OneShop.entity.ShippingCarrier;
-import nhom17.OneShop.entity.ShippingFee;
-import nhom17.OneShop.entity.User;
 import nhom17.OneShop.request.OrderUpdateRequest;
 import org.springframework.data.domain.Page;
 
@@ -17,7 +14,7 @@ public interface OrderService {
 
 //    Admin
     Page<Order> findAll(String keyword, String status, String paymentMethod, String paymentStatus, String shippingMethod, int page, int size);
-
+    List<OrderStatusHistory> findHistoryByOrderId(long orderId);
     Order findById(long id);
     public Map<Long, List<ShippingFee>> getCarriersWithFeesByOrder(List<Order> danhSachDonHang);
     void updateLoyaltyPoints(Order order, String oldStatus, String newStatus);

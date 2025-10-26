@@ -6,6 +6,8 @@ import nhom17.OneShop.entity.ShippingCarrier;
 import nhom17.OneShop.repository.ShippingCarrierRepository;
 import nhom17.OneShop.repository.ShippingFeeRepository;
 import nhom17.OneShop.request.ShippingRequest;
+import nhom17.OneShop.service.ShippingCarrierService;
+import nhom17.OneShop.service.ShippingFeeService;
 import nhom17.OneShop.service.ShippingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -26,9 +28,9 @@ public class ShippingController {
     @Autowired
     private ShippingService shippingService;
     @Autowired
-    private ShippingCarrierRepository shippingCarrierRepository;
+    private ShippingCarrierService shippingCarrierService; // ✅ Đã thay thế
     @Autowired
-    private ShippingFeeRepository shippingFeeRepository;
+    private ShippingFeeService shippingFeeService;
 
     @GetMapping
     public String listShippings(@RequestParam(required = false) String keyword,
@@ -39,9 +41,9 @@ public class ShippingController {
                                 @RequestParam(defaultValue = "10") int size, // Tăng size mặc định
                                 Model model) {
         Page<Shipping> shippingPage = shippingService.search(keyword, carrierId, status, shippingMethod, page, size);
-        List<String> shippingMethods = shippingFeeRepository.findDistinctPhuongThucVanChuyen();
+        List<String> shippingMethods = shippingFeeService.findDistinctShippingMethods();
         model.addAttribute("shippingPage", shippingPage);
-        model.addAttribute("carriers", shippingCarrierRepository.findAll());
+        model.addAttribute("carriers", shippingCarrierService.findAll());
         if (!model.containsAttribute("shippingRequest")) {
             model.addAttribute("shippingRequest", new ShippingRequest());
         }

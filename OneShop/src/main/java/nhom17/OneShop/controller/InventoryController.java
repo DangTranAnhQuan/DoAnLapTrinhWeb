@@ -1,7 +1,6 @@
 package nhom17.OneShop.controller;
 
 import nhom17.OneShop.entity.Inventory;
-import nhom17.OneShop.repository.InventoryRepository;
 import nhom17.OneShop.service.InventoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;

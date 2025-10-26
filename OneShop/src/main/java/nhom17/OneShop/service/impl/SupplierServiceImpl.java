@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -34,6 +35,11 @@ public class SupplierServiceImpl implements SupplierService {
             return supplierRepository.findByTenNCCContainingIgnoreCase(keyword, pageable);
         }
         return supplierRepository.findAll(pageable);
+    }
+
+    @Override
+    public List<Supplier> findAll(Sort sort) {
+        return supplierRepository.findAll(sort);
     }
 
     @Override

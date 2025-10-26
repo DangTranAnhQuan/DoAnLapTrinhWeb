@@ -8,8 +8,7 @@ import nhom17.OneShop.repository.BrandRepository;
 import nhom17.OneShop.repository.CategoryRepository;
 import nhom17.OneShop.repository.RatingRepository;
 import nhom17.OneShop.request.ProductRequest;
-import nhom17.OneShop.service.ProductService;
-import nhom17.OneShop.service.StorageService;
+import nhom17.OneShop.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
@@ -28,13 +27,13 @@ public class ProductController {
     @Autowired
     private ProductService productService;
     @Autowired
-    private CategoryRepository categoryRepository;
-    @Autowired
-    private BrandRepository brandRepository;
-    @Autowired
     private StorageService storageService;
     @Autowired
-    private RatingRepository danhGiaRepository;
+    private CategoryService categoryService;
+    @Autowired
+    private BrandService brandService;
+    @Autowired
+    private RatingService ratingService;
 
     @GetMapping
     public String listProducts(@RequestParam(required = false) String keyword,
@@ -48,8 +47,8 @@ public class ProductController {
         // ✅ Truyền các tham số mới vào service
         Page<Product> productPage = productService.searchProducts(keyword, status, categoryId, brandId, sort, page, size);
 
-        model.addAttribute("categories", categoryRepository.findAll());
-        model.addAttribute("brands", brandRepository.findAll());
+        model.addAttribute("categories", categoryService.findAll());
+        model.addAttribute("brands", brandService.findAll());
 
         model.addAttribute("productPage", productPage);
         model.addAttribute("keyword", keyword);
@@ -66,7 +65,7 @@ public class ProductController {
         if (product == null) {
             return "redirect:/admin/product";
         }
-        List<Rating> reviews = danhGiaRepository.findBySanPham_MaSanPhamOrderByNgayTaoDesc(id);
+        List<Rating> reviews = ratingService.findByProductId(id);
         model.addAttribute("product", product);
         model.addAttribute("reviews", reviews);
         return "admin/products/productDetail";
@@ -98,8 +97,8 @@ public class ProductController {
         }
 
         model.addAttribute("product", productRequest);
-        model.addAttribute("categories", categoryRepository.findAll());
-        model.addAttribute("brands", brandRepository.findAll());
+        model.addAttribute("categories", categoryService.findAll());
+        model.addAttribute("brands", brandService.findAll());
 
         // Giữ lại state của trang danh sách
         model.addAttribute("keyword", keyword);
@@ -127,8 +126,8 @@ public class ProductController {
                               @RequestParam(defaultValue = "5") int size) {
         if (bindingResult.hasErrors()) {
             model.addAttribute("errorMessage", bindingResult.getAllErrors().get(0).getDefaultMessage());
-            model.addAttribute("categories", categoryRepository.findAll());
-            model.addAttribute("brands", brandRepository.findAll());
+            model.addAttribute("categories", categoryService.findAll());
+            model.addAttribute("brands", brandService.findAll());
             return "admin/products/addOrEditProduct";
         }
 
@@ -149,8 +148,8 @@ public class ProductController {
             return "redirect:/admin/product";
         } catch (Exception e) {
             model.addAttribute("errorMessage", e.getMessage());
-            model.addAttribute("categories", categoryRepository.findAll());
-            model.addAttribute("brands", brandRepository.findAll());
+            model.addAttribute("categories", categoryService.findAll());
+            model.addAttribute("brands", brandService.findAll());
             return "admin/products/addOrEditProduct";
         }
     }

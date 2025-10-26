@@ -70,6 +70,11 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public List<Product> findAll(Sort sort) {
+        return productRepository.findAll(sort);
+    }
+
+    @Override
     public Product findById(int id) {
         return productRepository.findById(id).orElse(null);
     }

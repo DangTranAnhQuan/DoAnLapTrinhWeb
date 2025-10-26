@@ -10,6 +10,8 @@ import nhom17.OneShop.repository.SupplierRepository;
 import nhom17.OneShop.request.ImportDetailRequest;
 import nhom17.OneShop.request.ImportRequest;
 import nhom17.OneShop.service.ImportService;
+import nhom17.OneShop.service.ProductService;
+import nhom17.OneShop.service.SupplierService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
@@ -23,17 +25,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Controller
-@RequestMapping("/admin/import") // Sử dụng "/import" như bạn yêu cầu
+@RequestMapping("/admin/import")
 public class ImportController {
 
     @Autowired
     private ImportService importService;
-
     @Autowired
-    private SupplierRepository supplierRepository;
-
+    private SupplierService supplierService;
     @Autowired
-    private ProductRepository productRepository;
+    private ProductService productService;
 
     @GetMapping
     public String listImports(@RequestParam(required = false) String keyword,
@@ -43,10 +43,10 @@ public class ImportController {
                               Model model) {
         Page<Import> importPage = importService.findAll(keyword, supplierId, page, size);
         model.addAttribute("importPage", importPage);
-        model.addAttribute("suppliers", supplierRepository.findAll(Sort.by("tenNCC")));
+        model.addAttribute("suppliers", supplierService.findAll(Sort.by("tenNCC")));
         model.addAttribute("keyword", keyword);
         model.addAttribute("supplierId", supplierId);
-        return "admin/warehouse/imports"; // Trả về file view mới
+        return "admin/warehouse/imports";
     }
 
     @GetMapping("/{id}")
@@ -67,8 +67,8 @@ public class ImportController {
                               @RequestParam(defaultValue = "1") int page,
                               @RequestParam(defaultValue = "5") int size) {
         model.addAttribute("importRequest", new ImportRequest());
-        model.addAttribute("suppliers", supplierRepository.findAll(Sort.by("tenNCC")));
-        model.addAttribute("products", productRepository.findAll(Sort.by("tenSanPham")));
+        model.addAttribute("suppliers", supplierService.findAll(Sort.by("tenNCC")));
+        model.addAttribute("products", productService.findAll(Sort.by("tenSanPham")));
         model.addAttribute("keyword", keyword);
         model.addAttribute("supplierId", supplierId);
         model.addAttribute("page", page);
@@ -101,8 +101,8 @@ public class ImportController {
         request.setChiTietPhieuNhapList(detailRequests);
 
         model.addAttribute("importRequest", request);
-        model.addAttribute("suppliers", supplierRepository.findAll(Sort.by("tenNCC")));
-        model.addAttribute("products", productRepository.findAll(Sort.by("tenSanPham")));
+        model.addAttribute("suppliers", supplierService.findAll(Sort.by("tenNCC")));
+        model.addAttribute("products", productService.findAll(Sort.by("tenSanPham")));
         model.addAttribute("keyword", keyword);
         model.addAttribute("supplierId", supplierId);
         model.addAttribute("page", page);
@@ -113,8 +113,7 @@ public class ImportController {
     @GetMapping("/history/{productId}")
     public String showImportHistory(@PathVariable Integer productId, Model model) {
         // Lấy thông tin sản phẩm để hiển thị tên
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new NotFoundException("Không tìm thấy sản phẩm"));
+        Product product = productService.findById(productId);
         List<ImportDetail> historyList = importService.getHistoryForProduct(productId);
         model.addAttribute("product", product);
         model.addAttribute("historyList", historyList);
@@ -135,8 +134,8 @@ public class ImportController {
 
             model.addAttribute("errorMessage", errorMessage);
 
-            model.addAttribute("suppliers", supplierRepository.findAll(Sort.by("tenNCC")));
-            model.addAttribute("products", productRepository.findAll(Sort.by("tenSanPham")));
+            model.addAttribute("suppliers", supplierService.findAll(Sort.by("tenNCC")));
+            model.addAttribute("products", productService.findAll(Sort.by("tenSanPham")));
             model.addAttribute("keyword", keyword);
             model.addAttribute("supplierId", supplierId);
             model.addAttribute("page", page);
@@ -158,8 +157,8 @@ public class ImportController {
         } catch (Exception e) {
             model.addAttribute("errorMessage", e.getMessage());
 
-            model.addAttribute("suppliers", supplierRepository.findAll(Sort.by("tenNCC")));
-            model.addAttribute("products", productRepository.findAll(Sort.by("tenSanPham")));
+            model.addAttribute("suppliers", supplierService.findAll(Sort.by("tenNCC")));
+            model.addAttribute("products", productService.findAll(Sort.by("tenSanPham")));
             model.addAttribute("keyword", keyword);
             model.addAttribute("supplierId", supplierId);
             model.addAttribute("page", page);

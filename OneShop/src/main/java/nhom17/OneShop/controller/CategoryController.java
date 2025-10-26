@@ -23,7 +23,7 @@ public class CategoryController {
     private CategoryService categoryService;
 
     @Autowired
-    private StorageService storageService; // Tiêm StorageService
+    private StorageService storageService;
 
     @GetMapping
     public String listCategories(@RequestParam(required = false) String keyword,

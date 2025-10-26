@@ -7,6 +7,7 @@ import nhom17.OneShop.repository.ShippingFeeRepository;
 import nhom17.OneShop.request.OrderUpdateRequest;
 import nhom17.OneShop.request.ShippingRequest;
 import nhom17.OneShop.service.OrderService;
+import nhom17.OneShop.service.ShippingFeeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
@@ -18,14 +19,13 @@ import java.util.List;
 import java.util.Map;
 
 @Controller
-@RequestMapping("/admin/order") // Controller này chỉ dành cho admin
+@RequestMapping("/admin/order")
 public class OrderController {
 
-    @Autowired private OrderService orderService;
-    @Autowired private OrderStatusHistoryRepository historyRepository;
-    @Autowired private ShippingCarrierRepository shippingCarrierRepository;
     @Autowired
-    private ShippingFeeRepository shippingFeeRepository;
+    private OrderService orderService;
+    @Autowired
+    private ShippingFeeService shippingFeeService;
 
 
     @GetMapping
@@ -40,7 +40,7 @@ public class OrderController {
 
         Page<Order> orderPage = orderService.findAll(keyword, status, paymentMethod, paymentStatus, shippingMethod, page, size);
         Map<Long, List<ShippingFee>> carriersWithFeesByOrder = orderService.getCarriersWithFeesByOrder(orderPage.getContent());
-        List<String> shippingMethods = shippingFeeRepository.findDistinctPhuongThucVanChuyen();
+        List<String> shippingMethods = shippingFeeService.findDistinctShippingMethods();
         model.addAttribute("carriersWithFeesByOrder", carriersWithFeesByOrder);
         model.addAttribute("orderPage", orderPage);
         model.addAttribute("keyword", keyword);
@@ -96,7 +96,7 @@ public class OrderController {
         if (order == null) {
             return "redirect:/admin/order";
         }
-        List<OrderStatusHistory> historyList = historyRepository.findByDonHang_MaDonHangOrderByThoiDiemThayDoiDesc(id);
+        List<OrderStatusHistory> historyList = orderService.findHistoryByOrderId(id);
         model.addAttribute("order", order);
         model.addAttribute("historyList", historyList);
         model.addAttribute("keyword", keyword);

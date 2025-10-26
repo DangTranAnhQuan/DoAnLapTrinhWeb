@@ -70,6 +70,11 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public List<OrderStatusHistory> findHistoryByOrderId(long orderId) {
+        return historyRepository.findByDonHang_MaDonHangOrderByThoiDiemThayDoiDesc(orderId);
+    }
+
+    @Override
     public Order findById(long id) {
         return orderRepository.findById(id).orElse(null);
     }

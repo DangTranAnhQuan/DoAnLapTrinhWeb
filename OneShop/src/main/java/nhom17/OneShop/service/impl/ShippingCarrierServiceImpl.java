@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.util.List;
+
 @Service
 public class ShippingCarrierServiceImpl implements ShippingCarrierService {
 
@@ -28,6 +30,11 @@ public class ShippingCarrierServiceImpl implements ShippingCarrierService {
             return shippingCarrierRepository.findByTenNVCContainingIgnoreCase(keyword, pageable);
         }
         return shippingCarrierRepository.findAll(pageable);
+    }
+
+    @Override
+    public List<ShippingCarrier> findAll() {
+        return shippingCarrierRepository.findAll();
     }
 
     @Override
