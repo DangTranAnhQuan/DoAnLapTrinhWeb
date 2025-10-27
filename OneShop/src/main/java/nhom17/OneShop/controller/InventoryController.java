@@ -27,14 +27,6 @@ public class InventoryController {
                                 @RequestParam(defaultValue = "1") int page,
                                 @RequestParam(defaultValue = "5") int size,
                                 Model model) {
-        Pageable pageable = PageRequest.of(page - 1, size);
-
-        Specification<Inventory> spec = (root, query, cb) -> cb.conjunction();
-        if (StringUtils.hasText(keyword)) {
-            spec = spec.and((root, query, cb) ->
-                    cb.like(root.get("sanPham").get("tenSanPham"), "%" + keyword + "%")
-            );
-        }
 
         Page<Inventory> inventoryPage = inventoryService.findAll(keyword, sort, page, size);
         model.addAttribute("inventoryPage", inventoryPage);

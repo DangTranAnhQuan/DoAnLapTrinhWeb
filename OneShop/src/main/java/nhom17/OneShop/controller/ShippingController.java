@@ -28,7 +28,7 @@ public class ShippingController {
     @Autowired
     private ShippingService shippingService;
     @Autowired
-    private ShippingCarrierService shippingCarrierService; // ✅ Đã thay thế
+    private ShippingCarrierService shippingCarrierService;
     @Autowired
     private ShippingFeeService shippingFeeService;
 
@@ -50,7 +50,7 @@ public class ShippingController {
         model.addAttribute("keyword", keyword);
         model.addAttribute("carrierId", carrierId);
         model.addAttribute("status", status);
-        model.addAttribute("shippingMethod", shippingMethod); // <-- THÊM VÀO
+        model.addAttribute("shippingMethod", shippingMethod);
         model.addAttribute("shippingMethods", shippingMethods);
 
         return "admin/orders/shippings";
