@@ -12,6 +12,7 @@ import nhom17.OneShop.repository.OrderStatusHistoryRepository;
 import nhom17.OneShop.repository.RatingRepository;
 import nhom17.OneShop.request.OrderUpdateRequest;
 import nhom17.OneShop.dto.TopSellingProductDTO;
+import nhom17.OneShop.service.CartService;
 import nhom17.OneShop.service.OrderService;
 import nhom17.OneShop.specification.OrderSpecification;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +49,9 @@ public class OrderServiceImpl implements OrderService {
     private RatingRepository ratingRepository;
 
     @Autowired
+    private CartService cartService;
+
+    @Autowired
     private OrderStatusHistoryRepository historyRepository;
 
     @Autowired
@@ -58,6 +62,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     private InventoryRepository inventoryRepository;
+
+    @Autowired
+    private UserRepository nguoiDungRepository;
 
     @Override
     public Page<Order> findAll(String keyword, String status, String paymentMethod, String paymentStatus, String shippingMethod, int page, int size) {
@@ -246,7 +253,6 @@ public class OrderServiceImpl implements OrderService {
         DashboardDataDTO data = new DashboardDataDTO();
         YearMonth yearMonth = YearMonth.of(year, month);
 
-        // ✅ THAY ĐỔI: Chuyển đổi sang Timestamp để truyền vào query
         Timestamp startOfMonth = Timestamp.valueOf(yearMonth.atDay(1).atStartOfDay());
         Timestamp endOfMonth = Timestamp.valueOf(yearMonth.atEndOfMonth().plusDays(1).atStartOfDay());
 
@@ -305,12 +311,12 @@ public class OrderServiceImpl implements OrderService {
     }
 
 //    User
-    @Autowired private UserRepository nguoiDungRepository;
 
     @Override
-    public List<Order> findOrdersForCurrentUser() {
+    public Page<Order> findOrdersForCurrentUser(int page, int size) {
         User currentUser = getCurrentUser();
-        return orderRepository.findByNguoiDungOrderByNgayDatDesc(currentUser);
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("ngayDat").descending());
+        return orderRepository.findByNguoiDung(currentUser, pageable);
     }
 
     @Override
@@ -350,6 +356,59 @@ public class OrderServiceImpl implements OrderService {
         // Kiểm tra xem đã đánh giá sản phẩm này bao giờ chưa
         boolean hasReviewed = ratingRepository.existsByNguoiDung_MaNguoiDungAndSanPham_MaSanPham(userId, productId);
         return !hasReviewed;
+    }
+
+    @Override
+    @Transactional
+    public void processSepayPayment(Long orderId, BigDecimal amountPaid) {
+        // 1. Tìm đơn hàng
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new NotFoundException("Webhook: Không tìm thấy đơn hàng #" + orderId));
+
+        // 2. Kiểm tra nếu đã thanh toán rồi thì bỏ qua
+        if ("Đã thanh toán".equalsIgnoreCase(order.getTrangThaiThanhToan())) {
+            System.out.println("Webhook: Đơn hàng #" + orderId + " đã được thanh toán trước đó. Bỏ qua.");
+            return; // Đã xử lý rồi
+        }
+
+        // 3. Kiểm tra số tiền (rất quan trọng)
+        // Dùng compareTo() cho BigDecimal
+        if (order.getTongTien().compareTo(amountPaid) != 0) {
+            throw new IllegalStateException("Webhook: Số tiền thanh toán không khớp. Đơn hàng "
+                    + order.getTongTien() + " | Đã trả " + amountPaid);
+        }
+
+        // 4. Kiểm tra trạng thái
+        if (!"Chưa thanh toán".equalsIgnoreCase(order.getTrangThaiThanhToan())) {
+            throw new IllegalStateException("Webhook: Đơn hàng không ở trạng thái 'Chưa thanh toán'.");
+        }
+
+        // 5. Cập nhật trạng thái
+        String oldStatus = order.getTrangThai();
+        order.setTrangThaiThanhToan("Đã thanh toán");
+
+        // Nếu đơn hàng đang là "Đang xử lý" thì có thể chuyển thành "Đã xác nhận"
+        if("Đang xử lý".equals(oldStatus) || "Chưa thanh toán".equals(oldStatus)) {
+            order.setTrangThai("Đã thanh toán");
+        }
+
+        orderRepository.save(order);
+        System.out.println("Webhook: Đã cập nhật thanh toán thành công cho đơn hàng #" + orderId);
+
+        try {
+            User orderUser = order.getNguoiDung();
+            if (orderUser != null) {
+                cartService.clearCart();
+
+                System.out.println("Webhook: Đã xóa giỏ hàng cho người dùng của đơn hàng #" + orderId);
+
+            } else {
+                System.err.println("Webhook Warning: Không tìm thấy người dùng cho đơn hàng #" + orderId + " để xóa giỏ hàng.");
+            }
+        } catch (Exception e) {
+            System.err.println("Webhook Error: Lỗi khi xóa giỏ hàng cho đơn hàng #" + orderId + ": " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
 }

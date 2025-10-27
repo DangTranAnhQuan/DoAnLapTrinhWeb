@@ -5,11 +5,12 @@ import nhom17.OneShop.dto.DashboardDataDTO;
 import nhom17.OneShop.request.OrderUpdateRequest;
 import org.springframework.data.domain.Page;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
 public interface OrderService {
-    List<Order> findOrdersForCurrentUser();
+    Page<Order> findOrdersForCurrentUser(int page, int size);
     Order findOrderByIdForCurrentUser(Long orderId);
 
 //    Admin
@@ -20,6 +21,7 @@ public interface OrderService {
     void updateLoyaltyPoints(Order order, String oldStatus, String newStatus);
     void update(Long orderId, OrderUpdateRequest request);
     void cancelOrder(Long orderId, User currentUser);
+    void processSepayPayment(Long orderId, BigDecimal amountPaid);
 
     DashboardDataDTO getDashboardData(int year, int month);
     boolean hasCompletedPurchase(Integer userId, Integer productId);

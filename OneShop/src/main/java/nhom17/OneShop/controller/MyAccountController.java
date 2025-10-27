@@ -1,13 +1,17 @@
 package nhom17.OneShop.controller;
 
 import nhom17.OneShop.entity.Address;
+import nhom17.OneShop.entity.MembershipTier;
 import nhom17.OneShop.entity.Order; // Thêm import
 import nhom17.OneShop.entity.User;
 import nhom17.OneShop.repository.AddressRepository;
+import nhom17.OneShop.repository.MembershipTierRepository;
 import nhom17.OneShop.repository.UserRepository;
 import nhom17.OneShop.service.OrderService; // Thêm import
 import nhom17.OneShop.service.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,6 +31,17 @@ public class MyAccountController {
     @Autowired private PasswordEncoder passwordEncoder;
     @Autowired private StorageService storageService;
     @Autowired private OrderService orderService;
+    @Autowired private MembershipTierRepository membershipTierRepository;
+
+    @GetMapping("/my-membership")
+    public String membershipPage(Model model) {
+        User currentUser = getCurrentUser();
+        List<MembershipTier> allTiers = membershipTierRepository.findAll(Sort.by("diemToiThieu").ascending());
+
+        model.addAttribute("user", currentUser);
+        model.addAttribute("allTiers", allTiers);
+        return "user/account/membership";
+    }
 
     // My Account (tab-panel)
     @GetMapping("/my-account")
@@ -103,9 +118,6 @@ public class MyAccountController {
         return "redirect:/my-account?tab=addresses";
     }
 
-    /**
-     * Xử lý việc cập nhật ảnh đại diện.
-     */
     @PostMapping("/my-account/update-avatar")
     public String updateAvatar(@RequestParam("avatarFile") MultipartFile avatarFile,
                                RedirectAttributes redirectAttributes) {
@@ -129,12 +141,16 @@ public class MyAccountController {
         return "redirect:/my-account?tab=account";
     }
 
-    //  ================== CÁC PHƯƠNG THỨC ĐƠN HÀNG CỦA USER ==================
     @GetMapping("/my-orders")
-    public String myOrders(Model model) {
+    public String myOrders(Model model, @RequestParam(name = "page", defaultValue = "1") int page) {
+        int size = 5;
         User currentUser = getCurrentUser();
+
+        Page<Order> orderPage = orderService.findOrdersForCurrentUser(page, size);
+
         model.addAttribute("user", currentUser);
-        model.addAttribute("orders", orderService.findOrdersForCurrentUser());
+        model.addAttribute("orderPage", orderPage);
+
         return "user/account/my-orders";
     }
 
@@ -145,7 +161,6 @@ public class MyAccountController {
             model.addAttribute("order", order);
             return "user/account/order-details";
         } catch (Exception e) {
-            // Có thể thêm redirectAttributes để hiển thị lỗi chi tiết hơn
             return "redirect:/my-orders";
         }
     }

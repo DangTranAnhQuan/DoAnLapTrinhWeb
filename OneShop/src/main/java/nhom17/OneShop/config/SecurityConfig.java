@@ -18,7 +18,11 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                .csrf(csrf -> csrf.disable())
+
                 .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/payment/ipn/sepay").permitAll()
+
                         .requestMatchers(
                                 "/", "/shop/**", "/product/**", "/sign-in", "/sign-up", "/forgot-password/**",
                                 "/verify-otp", "/resend-otp",
@@ -29,24 +33,26 @@ public class SecurityConfig {
                                 "/admin/assets/**",
                                 "/api/**", "/api/quick-view/**",
                                 "/api/chat/**",
-                                "/ws/**"
+                                "/ws/**",
+                                "/api/vouchers/available"
                         ).permitAll()
                         .requestMatchers("/my-orders/**").authenticated()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
+
                 .formLogin(form -> form
                         .loginPage("/sign-in")
                         .loginProcessingUrl("/login")
                         .successHandler(authenticationSuccessHandler)
                         .permitAll()
                 )
+
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/sign-in?logout")
                         .permitAll()
-                )
-                .csrf(csrf -> csrf.disable());
+                );
 
         return http.build();
     }

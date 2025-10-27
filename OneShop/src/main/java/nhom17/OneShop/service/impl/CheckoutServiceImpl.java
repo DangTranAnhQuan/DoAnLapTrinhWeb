@@ -60,32 +60,83 @@ public class CheckoutServiceImpl implements CheckoutService {
         BigDecimal actualCouponDiscount = BigDecimal.ZERO;
         String appliedCouponCode = (String) httpSession.getAttribute("appliedCouponCode");
         Voucher appliedVoucher = null; // Khởi tạo voucher áp dụng là null
+
+        // Biến để lưu thông báo lỗi nếu có
+        String voucherErrorMessage = null;
+
         if (appliedCouponCode != null) {
-            Optional<Voucher> voucherOpt = voucherRepository.findByMaKhuyenMaiAndTrangThai(appliedCouponCode, 1);
-            // Kiểm tra lại điều kiện voucher tại thời điểm đặt hàng
+            Optional<Voucher> voucherOpt = voucherRepository.findByMaKhuyenMaiAndTrangThai(appliedCouponCode, 1); // Tìm voucher đang active
+
+            // 1. Kiểm tra cơ bản (Tồn tại, còn hạn, đủ tiền tối thiểu)
             if (voucherOpt.isPresent()
                     && voucherOpt.get().getBatDauLuc().isBefore(LocalDateTime.now())
                     && voucherOpt.get().getKetThucLuc().isAfter(LocalDateTime.now())
                     && (voucherOpt.get().getTongTienToiThieu() == null || priceAfterMembership.compareTo(voucherOpt.get().getTongTienToiThieu()) >= 0))
             {
-                appliedVoucher = voucherOpt.get(); // Gán voucher nếu hợp lệ
-                BigDecimal discountValue = appliedVoucher.getGiaTri();
-                // Tính giá trị giảm thực tế
-                if (appliedVoucher.getKieuApDung() != null && appliedVoucher.getKieuApDung() == 0) { // Percentage
-                    actualCouponDiscount = priceAfterMembership.multiply(discountValue.divide(new BigDecimal("100"), 4, RoundingMode.HALF_UP));
-                    if (appliedVoucher.getGiamToiDa() != null && actualCouponDiscount.compareTo(appliedVoucher.getGiamToiDa()) > 0) {
-                        actualCouponDiscount = appliedVoucher.getGiamToiDa();
+                Voucher voucher = voucherOpt.get(); // Lấy voucher ra
+
+                // ==== BẮT ĐẦU THÊM KIỂM TRA GIỚI HẠN ====
+                boolean limitsOk = true; // Mặc định là OK
+
+                // 2. Kiểm tra giới hạn tổng số lượt sử dụng
+                Integer totalLimit = voucher.getGioiHanTongSoLan();
+                if (totalLimit != null && totalLimit > 0) { // Chỉ kiểm tra nếu có giới hạn > 0
+                    long totalUses = orderRepository.countByKhuyenMai_MaKhuyenMaiAndTrangThaiNot(voucher.getMaKhuyenMai(), "Đã hủy");
+                    if (totalUses >= totalLimit) {
+                        voucherErrorMessage = "Mã khuyến mãi '" + voucher.getMaKhuyenMai() + "' đã hết lượt sử dụng.";
+                        limitsOk = false;
                     }
-                } else { // Fixed amount
-                    actualCouponDiscount = discountValue;
                 }
-                actualCouponDiscount = actualCouponDiscount.min(priceAfterMembership); // Đảm bảo không âm
-            } else {
-                // Nếu coupon không còn hợp lệ, xóa khỏi session và không áp dụng
+
+                // 3. Kiểm tra giới hạn mỗi người (chỉ kiểm tra nếu giới hạn tổng OK)
+                Integer userLimit = voucher.getGioiHanMoiNguoi();
+                if (limitsOk && userLimit != null && userLimit > 0) { // Chỉ kiểm tra nếu có giới hạn > 0
+                    long userUses = orderRepository.countByNguoiDungAndKhuyenMai_MaKhuyenMaiAndTrangThaiNot(currentUser, voucher.getMaKhuyenMai(), "Đã hủy");
+                    if (userUses >= userLimit) {
+                        voucherErrorMessage = "Bạn đã hết lượt sử dụng mã khuyến mãi '" + voucher.getMaKhuyenMai() + "'.";
+                        limitsOk = false;
+                    }
+                }
+                // ==== KẾT THÚC THÊM KIỂM TRA GIỚI HẠN ====
+
+                // 4. Nếu tất cả đều OK -> Tính giảm giá
+                if (limitsOk) {
+                    appliedVoucher = voucher; // Gán voucher hợp lệ
+                    BigDecimal discountValue = appliedVoucher.getGiaTri();
+                    // Tính giá trị giảm thực tế
+                    if (appliedVoucher.getKieuApDung() != null && appliedVoucher.getKieuApDung() == 0) { // Percentage
+                        actualCouponDiscount = priceAfterMembership.multiply(discountValue.divide(new BigDecimal("100"), 4, RoundingMode.HALF_UP));
+                        if (appliedVoucher.getGiamToiDa() != null && actualCouponDiscount.compareTo(appliedVoucher.getGiamToiDa()) > 0) {
+                            actualCouponDiscount = appliedVoucher.getGiamToiDa();
+                        }
+                    } else { // Fixed amount
+                        actualCouponDiscount = discountValue;
+                    }
+                    actualCouponDiscount = actualCouponDiscount.min(priceAfterMembership); // Đảm bảo không âm
+                }
+                // Nếu không OK (limitsOk == false), không làm gì cả, appliedVoucher vẫn là null, actualCouponDiscount là 0
+
+            } else { // Nếu voucher không hợp lệ ngay từ đầu (hết hạn, ko đủ tiền...)
+                if (voucherOpt.isPresent()) { // Chỉ đặt thông báo lỗi nếu voucher tồn tại nhưng ko hợp lệ
+                    voucherErrorMessage = "Mã khuyến mãi '" + appliedCouponCode + "' không hợp lệ hoặc không đủ điều kiện.";
+                } else {
+                    voucherErrorMessage = "Không tìm thấy mã khuyến mãi '" + appliedCouponCode + "'.";
+                }
+            }
+
+            // 5. Nếu có lỗi (không hợp lệ HOẶC hết lượt) -> Xóa khỏi session
+            if (appliedVoucher == null) { // appliedVoucher chỉ được gán nếu mọi thứ OK
                 httpSession.removeAttribute("cartDiscount");
                 httpSession.removeAttribute("appliedCouponCode");
-                appliedVoucher = null; // Đảm bảo voucher là null
-                actualCouponDiscount = BigDecimal.ZERO;
+                actualCouponDiscount = BigDecimal.ZERO; // Đảm bảo không có giảm giá
+
+                // QUAN TRỌNG: Ném Exception để báo lỗi cho người dùng biết tại sao mã bị gỡ
+                if (voucherErrorMessage != null) {
+                    throw new IllegalStateException(voucherErrorMessage);
+                } else if(appliedCouponCode != null) {
+                    // Trường hợp lỗi không xác định
+                    throw new IllegalStateException("Mã khuyến mãi '" + appliedCouponCode + "' không thể áp dụng.");
+                }
             }
         }
         BigDecimal finalTotal = priceAfterMembership.subtract(actualCouponDiscount).add(shippingFee).max(BigDecimal.ZERO);
@@ -141,11 +192,18 @@ public class CheckoutServiceImpl implements CheckoutService {
 
         orderDetailRepository.saveAll(orderDetails);
 
-        cartService.clearCart(); // Xóa giỏ hàng
+        if ("COD".equalsIgnoreCase(paymentMethod)) {
+            cartService.clearCart(); // Xóa giỏ hàng cho người dùng hiện tại
 
-        // Xóa thông tin giảm giá khỏi session
-        httpSession.removeAttribute("cartDiscount");
-        httpSession.removeAttribute("appliedCouponCode");
+            // Xóa thông tin giảm giá khỏi session (chỉ khi COD thành công)
+            httpSession.removeAttribute("cartDiscount");
+            httpSession.removeAttribute("appliedCouponCode");
+            System.out.println("Giỏ hàng đã được xóa cho đơn hàng COD #" + savedOrder.getMaDonHang());
+        } else {
+            // Đối với thanh toán ONLINE, không xóa giỏ hàng ở đây.
+            // Giỏ hàng sẽ được xóa sau khi Webhook xác nhận thanh toán thành công.
+            System.out.println("Đơn hàng ONLINE #" + savedOrder.getMaDonHang() + " được tạo, giỏ hàng chưa xóa.");
+        }
 
         return savedOrder;
     }

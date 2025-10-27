@@ -1,6 +1,6 @@
 package nhom17.OneShop.service;
 
-import nhom17.OneShop.dto.ShippingOptionDTO; // Import DTO
+import nhom17.OneShop.dto.ShippingOptionDTO;
 import nhom17.OneShop.entity.ShippingFee;
 import nhom17.OneShop.request.ShippingFeeRequest;
 import java.math.BigDecimal;
@@ -14,4 +14,6 @@ public interface ShippingFeeService {
     void save(ShippingFeeRequest request);
     void delete(int id);
     Optional<ShippingOptionDTO> findCheapestShippingOption(String province, BigDecimal subtotal);
+
+    List<ShippingOptionDTO> findAvailableShippingOptions(String province);
 }

@@ -81,18 +81,16 @@ public class CheckoutController {
         return "user/shop/checkout";
     }
 
-    // ===== START: MODIFIED API - works with DTO =====
-    @GetMapping("/api/shipping-options")
+    @GetMapping("/api/available-shipping-options") // <<< SỬA URL ENDPOINT
     @ResponseBody
-    public ResponseEntity<?> getShippingOptions(@RequestParam("province") String province) {
+    public ResponseEntity<?> getAvailableShippingOptions(@RequestParam("province") String province) { // <<< SỬA TÊN PHƯƠNG THỨC
         try {
-            BigDecimal subtotal = cartService.getSubtotal();
-            // Service now returns Optional<ShippingOptionDTO>
-            Optional<ShippingOptionDTO> cheapestOptionDto = shippingFeeService.findCheapestShippingOption(province, subtotal);
+            // Gọi service mới để lấy danh sách các lựa chọn (đã bao gồm freeship/giảm giá)
+            List<ShippingOptionDTO> options = shippingFeeService.findAvailableShippingOptions(province);
 
-            if (cheapestOptionDto.isPresent()) {
-                // Return the DTO
-                return ResponseEntity.ok(cheapestOptionDto.get());
+            if (options != null && !options.isEmpty()) {
+                // Trả về danh sách DTO
+                return ResponseEntity.ok(options);
             } else {
                 Map<String, String> errorResponse = new HashMap<>();
                 errorResponse.put("error", "Không tìm thấy phương thức vận chuyển phù hợp cho tỉnh/thành này.");
@@ -100,12 +98,12 @@ public class CheckoutController {
             }
         } catch (Exception e) {
             Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", "Lỗi khi tính phí vận chuyển: " + e.getMessage());
-            e.printStackTrace(); // Print stack trace for debugging
+            errorResponse.put("error", "Lỗi khi lấy phương thức vận chuyển: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
-    // ===== END: MODIFIED API =====
+
 
     // ===== START: MODIFIED placeOrder - accepts shipping details =====
     @PostMapping("/place-order")

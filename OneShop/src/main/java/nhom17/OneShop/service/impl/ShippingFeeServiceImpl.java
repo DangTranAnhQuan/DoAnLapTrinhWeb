@@ -21,6 +21,7 @@ import java.util.List;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
+import java.util.Comparator;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,14 +31,10 @@ public class ShippingFeeServiceImpl implements ShippingFeeService {
     @Autowired private ShippingCarrierRepository shippingCarrierRepository;
     @Autowired private CartService cartService;
 
+    // --- CÁC PHƯƠNG THỨC QUẢN LÝ (ADMIN) - GIỮ NGUYÊN ---
     @Override
     public List<ShippingFee> findAllByProvider(int providerId) {
         return shippingFeeRepository.findByNhaVanChuyen_MaNVCOrderByMaChiPhiVCDesc(providerId);
-    }
-
-    @Override
-    public List<String> findDistinctShippingMethods() {
-        return shippingFeeRepository.findDistinctPhuongThucVanChuyen();
     }
 
     @Override
@@ -52,7 +49,7 @@ public class ShippingFeeServiceImpl implements ShippingFeeService {
         validateRequest(request);
         ShippingFee entity = prepareEntity(request);
         mapToEntity(request, entity);
-        shippingFeeRepository.save(entity);
+        // Logic save đã nằm trong updateAppliedProvinces
     }
 
     private void validateRequest(ShippingFeeRequest request) {
@@ -85,9 +82,8 @@ public class ShippingFeeServiceImpl implements ShippingFeeService {
 
                 for (AppliedProvince province : fee.getCacTinhApDung()) {
                     if (request.getCacTinhApDung().contains(province.getId().getTenTinhThanh())) {
-                        if (!fee.getTenGoiCuoc().equalsIgnoreCase(request.getTenGoiCuoc().trim())) {
-                            throw new IllegalArgumentException("Tỉnh '" + province.getId().getTenTinhThanh() + "' đã thuộc gói phí '" + fee.getTenGoiCuoc() + "'."
-                            );
+                        if (fee.getPhuongThucVanChuyen().equalsIgnoreCase(request.getPhuongThucVanChuyen().trim())) {
+                            throw new IllegalArgumentException("Tỉnh '" + province.getId().getTenTinhThanh() + "' đã được áp dụng cho phương thức '" + fee.getPhuongThucVanChuyen() + "' trong gói '" + fee.getTenGoiCuoc() + "'.");
                         }
                     }
                 }
@@ -107,7 +103,7 @@ public class ShippingFeeServiceImpl implements ShippingFeeService {
         ShippingCarrier provider = shippingCarrierRepository.findById(request.getMaNVC())
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy nhà vận chuyển với ID: " + request.getMaNVC()));
 
-        entity.setTenGoiCuoc(request.getTenGoiCuoc());
+        entity.setTenGoiCuoc(request.getTenGoiCuoc().trim());
         entity.setNhaVanChuyen(provider);
         entity.setPhuongThucVanChuyen(request.getPhuongThucVanChuyen());
         entity.setChiPhi(request.getChiPhi());
@@ -119,18 +115,29 @@ public class ShippingFeeServiceImpl implements ShippingFeeService {
     }
 
     private void updateAppliedProvinces(ShippingFeeRequest request, ShippingFee entity) {
+        boolean isNew = entity.getMaChiPhiVC() == null;
+        if (isNew) {
+            shippingFeeRepository.saveAndFlush(entity);
+        }
+
         if (entity.getCacTinhApDung() == null) {
             entity.setCacTinhApDung(new HashSet<>());
         }
-        entity.getCacTinhApDung().clear();
-        shippingFeeRepository.flush();
 
-        for (String tenTinhThanh : request.getCacTinhApDung()) {
-            AppliedProvinceId appliedId = new AppliedProvinceId(entity.getMaChiPhiVC(), tenTinhThanh);
-            AppliedProvince appliedProvince = new AppliedProvince();
-            appliedProvince.setId(appliedId);
-            appliedProvince.setPhiVanChuyen(entity);
-            entity.getCacTinhApDung().add(appliedProvince);
+        Set<AppliedProvince> newProvinces = new HashSet<>();
+        if (request.getCacTinhApDung() != null) {
+            for (String tenTinhThanh : request.getCacTinhApDung()) {
+                AppliedProvinceId appliedId = new AppliedProvinceId(entity.getMaChiPhiVC(), tenTinhThanh);
+                AppliedProvince appliedProvince = new AppliedProvince(appliedId, entity);
+                newProvinces.add(appliedProvince);
+            }
+        }
+
+        entity.getCacTinhApDung().clear();
+        entity.getCacTinhApDung().addAll(newProvinces);
+
+        if (!isNew) {
+            shippingFeeRepository.save(entity);
         }
     }
 
@@ -143,40 +150,79 @@ public class ShippingFeeServiceImpl implements ShippingFeeService {
         shippingFeeRepository.deleteById(id);
     }
 
-    @Override
-    public Optional<ShippingOptionDTO> findCheapestShippingOption(String province, BigDecimal subtotal) {
-        List<ShippingFee> applicableFees = shippingFeeRepository.findApplicableFeesByProvinceOrderedByCost(province);
+    // --- CÁC PHƯƠNG THỨC CHO CHECKOUT ---
 
-        if (applicableFees.isEmpty()) {
-            return Optional.empty();
-        }
-
-        ShippingFee cheapestFeeEntity = applicableFees.get(0);
-
-        BigDecimal finalCost;
+    // Hàm helper tính toán phí ship (tách logic)
+    private BigDecimal calculateFinalShippingCost(BigDecimal subtotal, BigDecimal originalCost) {
         BigDecimal oneMillion = new BigDecimal("1000000");
         BigDecimal fiveHundredThousand = new BigDecimal("500000");
-        BigDecimal originalCost = cheapestFeeEntity.getChiPhi();
 
-        if (subtotal.compareTo(oneMillion) > 0) {
-            finalCost = BigDecimal.ZERO;
-        } else if (subtotal.compareTo(fiveHundredThousand) > 0) {
-            finalCost = originalCost.multiply(new BigDecimal("0.5")).setScale(0, RoundingMode.HALF_UP);
+        if (subtotal.compareTo(oneMillion) >= 0) {
+            return BigDecimal.ZERO;
+        } else if (subtotal.compareTo(fiveHundredThousand) >= 0) {
+            return originalCost.multiply(new BigDecimal("0.5")).setScale(0, RoundingMode.HALF_UP);
         } else {
-            finalCost = originalCost;
+            return originalCost;
         }
+    }
 
+    private ShippingOptionDTO convertToDTO(ShippingFee fee) {
         ShippingOptionDTO dto = new ShippingOptionDTO();
-        dto.setMaChiPhiVC(cheapestFeeEntity.getMaChiPhiVC());
-        dto.setTenGoiCuoc(cheapestFeeEntity.getTenGoiCuoc());
-        dto.setChiPhi(finalCost);
-        dto.setNgayGiaoSomNhat(cheapestFeeEntity.getNgayGiaoSomNhat());
-        dto.setNgayGiaoMuonNhat(cheapestFeeEntity.getNgayGiaoMuonNhat());
-        dto.setDonViThoiGian(cheapestFeeEntity.getDonViThoiGian());
 
-        ShippingCarrier carrier = cheapestFeeEntity.getNhaVanChuyen();
-        dto.setTenNVC(carrier != null ? carrier.getTenNVC() : "Không xác định");
+        dto.setMaChiPhiVC(fee.getMaChiPhiVC());
+        dto.setChiPhi(fee.getChiPhi()); // Phí gốc (sẽ bị ghi đè bên ngoài)
+        dto.setNgayGiaoSomNhat(fee.getNgayGiaoSomNhat());
+        dto.setNgayGiaoMuonNhat(fee.getNgayGiaoMuonNhat());
+        dto.setDonViThoiGian(fee.getDonViThoiGian());
 
-        return Optional.of(dto);
+        String carrierName = (fee.getNhaVanChuyen() != null) ? fee.getNhaVanChuyen().getTenNVC() : "N/A";
+        dto.setTenNVC(carrierName); // Gán tên nhà vận chuyển
+
+        // Gán TÊN PHƯƠNG THỨC (Tiết Kiệm, Nhanh) vào 'tenGoiCuoc'
+        dto.setTenGoiCuoc(fee.getPhuongThucVanChuyen());
+
+        return dto;
+    }
+
+    @Override
+    public Optional<ShippingOptionDTO> findCheapestShippingOption(String province, BigDecimal subtotal) {
+        List<ShippingOptionDTO> options = findAvailableShippingOptions(province);
+        if (options.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(options.get(0)); // Trả về gói rẻ nhất sau khi đã lọc
+    }
+
+    @Override
+    public List<ShippingOptionDTO> findAvailableShippingOptions(String province) {
+        List<ShippingFee> applicableFees = shippingFeeRepository.findShippingFeesByProvince(province);
+        BigDecimal subtotal = cartService.getSubtotal();
+
+        // Nhóm theo Phương thức vận chuyển và chỉ chọn gói rẻ nhất
+        Map<String, Optional<ShippingFee>> cheapestFeesByMethod = applicableFees.stream()
+                .collect(Collectors.groupingBy(
+                        ShippingFee::getPhuongThucVanChuyen,
+                        Collectors.minBy(Comparator.comparing(ShippingFee::getChiPhi))
+                ));
+
+        // Chuyển đổi Map sang List DTO và tính phí cuối cùng
+        List<ShippingOptionDTO> options = cheapestFeesByMethod.values().stream()
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .map(fee -> {
+                    ShippingOptionDTO dto = convertToDTO(fee); // Gọi hàm helper đã sửa
+                    BigDecimal finalCost = calculateFinalShippingCost(subtotal, fee.getChiPhi());
+                    dto.setChiPhi(finalCost); // Cập nhật chi phí cuối cùng
+                    return dto;
+                })
+                .sorted(Comparator.comparing(ShippingOptionDTO::getChiPhi)) // Sắp xếp theo giá
+                .collect(Collectors.toList());
+
+        return options;
+    }
+
+    @Override
+    public List<String> findDistinctShippingMethods() {
+        return shippingFeeRepository.findDistinctPhuongThucVanChuyen();
     }
 }
