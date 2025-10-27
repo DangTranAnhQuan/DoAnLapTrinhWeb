@@ -21,6 +21,8 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
     Optional<Order> findByIdWithDetails(@Param("orderId") Long orderId);
 
     boolean existsByNguoiDung_MaNguoiDung(Integer userId);
+    long countByKhuyenMai_MaKhuyenMaiAndTrangThaiNot(String maKhuyenMai, String trangThaiHuy);
+    long countByNguoiDungAndKhuyenMai_MaKhuyenMaiAndTrangThaiNot(User nguoiDung, String maKhuyenMai, String trangThaiHuy);
 
     @Query(value = "SELECT SUM(d.TongTien) AS TotalRevenue, COUNT(d.MaDonHang) AS TotalOrders " +
             "FROM DonHang d " +
