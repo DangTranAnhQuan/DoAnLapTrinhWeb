@@ -70,14 +70,20 @@ Dự án được phân chia thành hai khu vực chính: giao diện cho khách
 
 ## 🚀 Hướng dẫn cài đặt (Getting Started)
 
-### 1. Yêu cầu (Prerequisites)
-JDK 17+, Maven, SQL Server 2019+, Git, IDE Java.
+### 1. Yêu cầu hệ thống
+Trước khi cài đặt, cần chuẩn bị các công cụ sau:
 
-### 2. Cài đặt (Installation)
+| Thành phần                  | Phiên bản khuyến nghị | Ghi chú                                  |
+| --------------------------- | --------------------- | ---------------------------------------- |
+| **JDK**                     | 17+                   | Thiết lập biến môi trường                |
+| **SQL Server**              | 2019 hoặc mới hơn     | Dùng để lưu trữ dữ liệu ứng dụng         |
+| **Maven**                   | 3.9+                  | Quản lý dependencies                     |
+| **IntelliJ IDEA / Eclipse** | Mới nhất              | IDE để chạy và debug (tùy chọn)          |
+
+### 2. Cài đặt
 ```bash
 git clone https://github.com/DangTranAnhQuan/DoAnLapTrinhWeb.git
 cd DoAnLapTrinhWeb
-git checkout Duy
 ```
 
 ### 3. Cấu hình Database
@@ -130,9 +136,20 @@ server.forward-headers-strategy=framework
 ```
 
 ### 5. Chạy ứng dụng
-```bash
-mvn spring-boot:run
-```
+<details>
+<summary><strong>Sử dụng IDE (IntelliJ IDEA)</strong></summary>
+
+**Bước 1:** Mở dự án trong IntelliJ IDEA
+
+**Bước 2:** Cấu hình Run Application nhanh và tiện hơn
+
+- Vào `Run` → `Edit Configurations` → `Add New Configuration` → `Application` → `Main class`
+- Chọn OneShopApplication, có thể chỉnh `Name` cho phù hợp
+- Sau đó, nhấn `OK`
+
+**Bước 3:** Click `Run` để khởi chạy
+
+</details>
 
 Mở trình duyệt và truy cập các URL sau:
 
