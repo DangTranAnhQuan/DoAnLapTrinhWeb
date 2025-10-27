@@ -25,7 +25,7 @@ Dự án được phân chia thành hai khu vực chính: giao diện cho khách
   * **Yêu thích:** Thêm/xóa sản phẩm khỏi danh sách yêu thích.
   * **Thanh toán:**
       * Quy trình Thanh toán chi tiết.
-      * Hỗ trợ thanh toán khi nhận hàng (COD) và thanh toán Online (VNPAY/MoMo).
+      * Hỗ trợ thanh toán khi nhận hàng (COD) và thanh toán Online (VietinBank).
       * Áp dụng mã giảm giá khi thanh toán.
   * **Quản lý tài khoản:**
       * Cập nhật thông tin cá nhân, thay đổi mật khẩu.
@@ -84,9 +84,7 @@ Thực hiện các bước sau để chạy dự án trên máy cục bộ của
     git clone https://github.com/DangTranAnhQuan/DoAnLapTrinhWeb.git
     ```
 
-    [cite\_start][cite: 52]
-
-2.  **Checkout nhánh `Duy`:** (Đây là nhánh chứa code mới nhất theo yêu cầu)
+2.  **Checkout nhánh `Duy`:**
 
     ```bash
     cd DoAnLapTrinhWeb
