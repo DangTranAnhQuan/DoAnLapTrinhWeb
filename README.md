@@ -140,7 +140,7 @@ Sau khi hoàn tất cài đặt và cấu hình:
 3.  Truy cập ứng dụng:
       * **Trang User:** `http://localhost:8080`
       * **Trang Admin:** `http://localhost:8080/admin`
-      * **Tài khoản Admin (mẫu):** `admin@oneshop.com` (Mật khẩu được mã hóa trong file `dulieumau.sql`)
+      * **Tài khoản Admin (mẫu):** `admin@oneshop.com` (Mật khẩu được mã hóa trong file `dulieumau.sql` là `admin123`)
 
 ## 📂 Cấu trúc thư mục (Project Structure)
 
