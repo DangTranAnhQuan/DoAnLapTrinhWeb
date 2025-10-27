@@ -50,7 +50,7 @@ Dự án được phân chia thành hai khu vực chính: giao diện cho khách
 - Tìm kiếm và lọc sản phẩm.
 
 ### 2. Giao diện Người dùng (User)
-- Xem, thêm giỏ hàng, thanh toán (COD/VietinBank), áp mã giảm giá, quản lý tài khoản, đơn hàng, đánh giá, chat.
+- Xem, thêm giỏ hàng, thanh toán (COD/VNPay), áp mã giảm giá, quản lý tài khoản, đơn hàng, đánh giá, chat.
 
 ### 3. Trang Quản trị (Admin)
 - Dashboard, quản lý người dùng, sản phẩm, danh mục, đơn hàng, khuyến mãi, vận chuyển, kho hàng, hỗ trợ chat.
@@ -85,6 +85,49 @@ Chạy `oneshop.sql` và `dulieumau.sql` trong SSMS.
 
 ### 4. Cấu hình ứng dụng
 Cập nhật file `application.properties` với thông tin SQL Server và Mail.
+```properties
+spring.datasource.url=jdbc:sqlserver://localhost:1433;databaseName=OneShop;encrypt=false;trustServerCertificate=true;sendStringParametersAsUnicode=true
+spring.datasource.username=your-username
+spring.datasource.password=your-password
+spring.datasource.driver-class-name=com.microsoft.sqlserver.jdbc.SQLServerDriver
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.SQLServerDialect
+
+spring.jpa.hibernate.ddl-auto=none
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.format_sql=true
+
+server.servlet.encoding.charset=UTF-8
+server.servlet.encoding.enabled=true
+server.servlet.encoding.force=true
+
+spring.thymeleaf.cache=false
+
+spring.jpa.hibernate.naming.physical-strategy=org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+spring.jpa.hibernate.naming.implicit-strategy=org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
+
+server.port=8080
+
+spring.servlet.multipart.max-file-size=20MB
+spring.servlet.multipart.max-request-size=21MB
+
+spring.mail.host=smtp.gmail.com
+spring.mail.port=465
+spring.mail.username=your-email@gmail.com (admin)
+spring.mail.password=your-google-app-password
+spring.mail.properties.mail.smtp.auth=true
+spring.mail.properties.mail.smtp.ssl.enable=true
+spring.mail.properties.mail.smtp.ssl.trust=smtp.gmail.com
+spring.mail.properties.mail.transport.protocol=smtp
+
+shop.sepay.bank-code=VietinBank
+shop.sepay.account-no=your-account-number
+shop.sepay.account-name=your-account-name
+
+app.mail.from-name=name-app-password
+app.mail.from-address=your-email@gmail.com (admin)
+
+server.forward-headers-strategy=framework
+```
 
 ### 5. Chạy ứng dụng
 ```bash
