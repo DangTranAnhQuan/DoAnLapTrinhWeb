@@ -107,66 +107,6 @@ public class HomeController {
         return "user/shop/shop-sidebar";
     }
 
-//    @GetMapping("/product/{id}")
-//    public String productDetailPage(@PathVariable("id") int productId, Model model, HttpSession session, Principal principal) {
-//        Product product = productService.findById(productId);
-//        if (product == null) {
-//            return "redirect:/shop";
-//        }
-//        model.addAttribute("product", product);
-//
-//        List<Rating> allReviews = ratingRepository.findBySanPham_MaSanPhamOrderByNgayTaoDesc(productId);
-//
-//        boolean canReview = false;
-//        Rating currentUserReview = null;
-//
-//        if (principal != null) {
-//            Optional<User> userOpt = userRepository.findByEmail(principal.getName());
-//            if (userOpt.isPresent()) {
-//                User currentUser = userOpt.get();
-//                Integer currentUserId = currentUser.getMaNguoiDung();
-//
-//                Optional<Rating> reviewOpt = ratingRepository.findByNguoiDung_MaNguoiDungAndSanPham_MaSanPham(currentUserId, productId);
-//                if (reviewOpt.isPresent()) {
-//                    currentUserReview = reviewOpt.get();
-//                    allReviews.remove(currentUserReview);
-//                } else {
-//                    canReview = orderService.hasCompletedPurchase(currentUserId, productId);
-//                }
-//            }
-//        }
-//
-//        model.addAttribute("reviews", allReviews);
-//        model.addAttribute("currentUserReview", currentUserReview);
-//        model.addAttribute("canReview", canReview);
-//
-//        List<Rating> allReviewsForCalculation = ratingRepository.findBySanPham_MaSanPhamOrderByNgayTaoDesc(productId);
-//        double averageRating = allReviewsForCalculation.stream().mapToInt(Rating::getDiemDanhGia).average().orElse(0.0);
-//        model.addAttribute("averageRating", averageRating);
-//        model.addAttribute("totalReviews", allReviewsForCalculation.size());
-//
-//        @SuppressWarnings("unchecked")
-//        List<Integer> viewedProductIds = (List<Integer>) session.getAttribute("viewedProductIds");
-//        if (viewedProductIds == null) viewedProductIds = new LinkedList<>();
-//        viewedProductIds.remove(Integer.valueOf(productId));
-//        viewedProductIds.add(0, productId);
-//        if (viewedProductIds.size() > 10) viewedProductIds = viewedProductIds.subList(0, 10);
-//        session.setAttribute("viewedProductIds", viewedProductIds);
-//
-//        if (viewedProductIds.size() > 1) {
-//            List<Integer> idsToFetch = new ArrayList<>(viewedProductIds);
-//            idsToFetch.remove(Integer.valueOf(productId));
-//            if (!idsToFetch.isEmpty()) {
-//                model.addAttribute("recentlyViewedProducts", productRepository.findAllById(idsToFetch));
-//            } else {
-//                model.addAttribute("recentlyViewedProducts", Collections.emptyList());
-//            }
-//        } else {
-//            model.addAttribute("recentlyViewedProducts", Collections.emptyList());
-//        }
-//
-//        return "user/shop/single-product";
-//    }
     @GetMapping("/product/{id}")
     public String productDetailPage(@PathVariable("id") int productId, Model model, HttpSession session, Principal principal) {
         Product product = productService.findById(productId);

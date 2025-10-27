@@ -64,33 +64,24 @@ public interface ProductRepository extends JpaRepository<Product, Integer>, JpaS
     boolean existsByDanhMuc_MaDanhMuc(Integer categoryId);
     boolean existsByThuongHieu_MaThuongHieu(Integer brandId);
 
-    // Câu này là derived query, Hibernate tự xử lý @Formula, KHÔNG CẦN SỬA
     List<Product> findTop8ByKichHoatIsTrueOrderByNgayTaoDesc();
 
-    // ================================================================
-    // BẮT ĐẦU SỬA LỖI
-    // ================================================================
 
-    // 1. SỬA: Chuyển sang nativeQuery và thêm 3 cột @Formula
     @Query(value = "SELECT p.*, " +
-            /* FORMULA FIELDS */
             "(SELECT SUM(od.SoLuong) FROM DonHang_ChiTiet od JOIN DonHang o ON od.MaDonHang = o.MaDonHang WHERE od.MaSanPham = p.MaSanPham AND o.TrangThai = N'Đã giao') AS totalSold, " +
             "(SELECT COUNT(*) FROM DanhGia dg WHERE dg.MaSanPham = p.MaSanPham) AS reviewCount, " +
             "(SELECT AVG(CAST(dg.DiemDanhGia AS DECIMAL(10,2))) FROM DanhGia dg WHERE dg.MaSanPham = p.MaSanPham) AS averageRating " +
-            /* END FORMULA */
             "FROM SanPham p " +
             "WHERE p.KichHoat = 1 AND p.GiaNiemYet > p.GiaBan " +
             "ORDER BY ((p.GiaNiemYet - p.GiaBan) / p.GiaNiemYet) DESC",
             nativeQuery = true)
     List<Product> findTopDiscountedProducts(Pageable pageable);
 
-    // 2. SỬA: Chuyển sang nativeQuery, thêm JOIN, countQuery, và 3 cột @Formula
     @Query(value = "SELECT p.*, " +
-            /* FORMULA FIELDS */
+
             "(SELECT SUM(od.SoLuong) FROM DonHang_ChiTiet od JOIN DonHang o ON od.MaDonHang = o.MaDonHang WHERE od.MaSanPham = p.MaSanPham AND o.TrangThai = N'Đã giao') AS totalSold, " +
             "(SELECT COUNT(*) FROM DanhGia dg WHERE dg.MaSanPham = p.MaSanPham) AS reviewCount, " +
             "(SELECT AVG(CAST(dg.DiemDanhGia AS DECIMAL(10,2))) FROM DanhGia dg WHERE dg.MaSanPham = p.MaSanPham) AS averageRating " +
-            /* END FORMULA */
             "FROM SanPham p " +
             "LEFT JOIN DanhMuc d ON p.MaDanhMuc = d.MaDanhMuc " +
             "LEFT JOIN ThuongHieu th ON p.MaThuongHieu = th.MaThuongHieu " +
@@ -98,7 +89,6 @@ public interface ProductRepository extends JpaRepository<Product, Integer>, JpaS
             "LOWER(p.TenSanPham) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
             "LOWER(d.TenDanhMuc) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
             "LOWER(th.TenThuongHieu) LIKE LOWER(CONCAT('%', :keyword, '%')))",
-            /* COUNT QUERY */
             countQuery = "SELECT COUNT(p.MaSanPham) " +
                     "FROM SanPham p " +
                     "LEFT JOIN DanhMuc d ON p.MaDanhMuc = d.MaDanhMuc " +
@@ -110,13 +100,10 @@ public interface ProductRepository extends JpaRepository<Product, Integer>, JpaS
             nativeQuery = true)
     Page<Product> searchForUser(@Param("keyword") String keyword, Pageable pageable);
 
-    // 3. SỬA: Thêm 3 cột @Formula vào câu nativeQuery có sẵn
     @Query(value = "SELECT TOP (:limit) p.*, " +
-            /* FORMULA FIELDS */
             "(SELECT SUM(od.SoLuong) FROM DonHang_ChiTiet od JOIN DonHang o ON od.MaDonHang = o.MaDonHang WHERE od.MaSanPham = p.MaSanPham AND o.TrangThai = N'Đã giao') AS totalSold, " +
             "(SELECT COUNT(*) FROM DanhGia dg WHERE dg.MaSanPham = p.MaSanPham) AS reviewCount, " +
             "(SELECT AVG(CAST(dg.DiemDanhGia AS DECIMAL(10,2))) FROM DanhGia dg WHERE dg.MaSanPham = p.MaSanPham) AS averageRating " +
-            /* END FORMULA */
             "FROM SanPham p " +
             "JOIN DonHang_ChiTiet od ON p.MaSanPham = od.MaSanPham " +
             "JOIN DonHang o ON od.MaDonHang = o.MaDonHang " +

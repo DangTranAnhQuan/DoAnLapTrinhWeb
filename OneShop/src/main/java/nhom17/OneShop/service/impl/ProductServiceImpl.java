@@ -172,11 +172,8 @@ public class ProductServiceImpl implements ProductService {
         }
 
         Pageable pageable = PageRequest.of(pageNumber, size, sort);
-
-        // Bắt đầu câu truy vấn với điều kiện cơ bản là sản phẩm phải được kích hoạt
         Specification<Product> spec = (root, query, cb) -> cb.isTrue(root.get("kichHoat"));
 
-        // Thêm các điều kiện lọc nếu chúng tồn tại
         if (categoryId != null) {
             spec = spec.and(ProductSpecification.inCategory(categoryId));
         }
@@ -194,19 +191,16 @@ public class ProductServiceImpl implements ProductService {
     }
     @Override
     public Page<Product> searchProductsForUser(String keyword, int page, int size) {
-        // Sắp xếp theo ngày tạo mới nhất làm mặc định
         Pageable pageable = PageRequest.of(page - 1, size, Sort.by("ngayTao").descending());
         return productRepository.searchForUser(keyword, pageable);
     }
     @Override
     public List<Product> findNewestProducts(int limit) {
-        // Phương thức này đã được định nghĩa sẵn trong Repository, chỉ cần gọi
         return productRepository.findTop8ByKichHoatIsTrueOrderByNgayTaoDesc();
     }
 
     @Override
     public List<Product> findMostDiscountedProducts(int limit) {
-        // Sử dụng Pageable để giới hạn số lượng kết quả trả về
         Pageable pageable = PageRequest.of(0, limit);
         return productRepository.findTopDiscountedProducts(pageable);
     }

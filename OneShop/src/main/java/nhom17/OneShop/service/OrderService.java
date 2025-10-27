@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 public interface OrderService {
-    List<Order> findOrdersForCurrentUser();
+    Page<Order> findOrdersForCurrentUser(int page, int size);
     Order findOrderByIdForCurrentUser(Long orderId);
 
 //    Admin

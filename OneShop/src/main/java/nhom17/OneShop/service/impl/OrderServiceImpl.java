@@ -63,6 +63,9 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     private InventoryRepository inventoryRepository;
 
+    @Autowired
+    private UserRepository nguoiDungRepository;
+
     @Override
     public Page<Order> findAll(String keyword, String status, String paymentMethod, String paymentStatus, String shippingMethod, int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size, Sort.by("ngayDat").descending());
@@ -303,12 +306,12 @@ public class OrderServiceImpl implements OrderService {
     }
 
 //    User
-    @Autowired private UserRepository nguoiDungRepository;
 
     @Override
-    public List<Order> findOrdersForCurrentUser() {
+    public Page<Order> findOrdersForCurrentUser(int page, int size) {
         User currentUser = getCurrentUser();
-        return orderRepository.findByNguoiDungOrderByNgayDatDesc(currentUser);
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("ngayDat").descending());
+        return orderRepository.findByNguoiDung(currentUser, pageable);
     }
 
     @Override
