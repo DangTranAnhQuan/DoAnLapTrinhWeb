@@ -91,9 +91,12 @@ Cập nhật file `application.properties` với thông tin SQL Server và Mail.
 mvn spring-boot:run
 ```
 
-Mở:
-- [User](http://localhost:8080)
-- [Admin](http://localhost:8080/admin)
+Mở trình duyệt và truy cập các URL sau:
+
+| Trang             | URL                                           |
+| ----------------- | --------------------------------------------- |
+| **Trang chủ**     | http://localhost:8080/                        |
+| **Admin Panel**   | http://localhost:8080/admin/dashboard         |
 
 ---
 
