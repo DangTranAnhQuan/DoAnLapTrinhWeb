@@ -163,7 +163,9 @@ Mở trình duyệt và truy cập các URL sau:
 OneShop
  ┣ src/main/java/nhom17/OneShop
  ┃ ┣ config           # Cấu hình Spring Security, MVC
- ┃ ┣ controller       # Xử lý request (Admin, User, Auth...)
+ ┃ ┣ controller       # Xử lý request (Admin, User)
+ ┃ ┃ ┣ admin          
+ ┃ ┃ ┣ user
  ┃ ┣ dto              # Data Transfer Objects (đối tượng truyền dữ liệu)
  ┃ ┣ entity           # Các Entity (ánh xạ bảng trong CSDL)
  ┃ ┣ exception        # Xử lý ngoại lệ tùy chỉnh
