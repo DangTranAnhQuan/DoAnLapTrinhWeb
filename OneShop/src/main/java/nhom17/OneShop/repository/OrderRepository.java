@@ -22,8 +22,8 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
     Optional<Order> findByIdWithDetails(@Param("orderId") Long orderId);
 
     boolean existsByNguoiDung_MaNguoiDung(Integer userId);
-    long countByKhuyenMai_MaKhuyenMaiAndTrangThaiNot(String maKhuyenMai, String trangThaiHuy);
-    long countByNguoiDungAndKhuyenMai_MaKhuyenMaiAndTrangThaiNot(User nguoiDung, String maKhuyenMai, String trangThaiHuy);
+    long countByKhuyenMai_MaKhuyenMaiAndTrangThaiNotIn(String maKhuyenMai, List<String> invalidStates);
+    long countByNguoiDungAndKhuyenMai_MaKhuyenMaiAndTrangThaiNotIn(User nguoiDung, String maKhuyenMai, List<String> invalidStates);
 
     @Query(value = "SELECT SUM(d.TongTien) AS TotalRevenue, COUNT(d.MaDonHang) AS TotalOrders " +
             "FROM DonHang d " +
@@ -90,4 +90,12 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
             "WHERE o.MaNguoiDung = :userId AND od.MaSanPham = :productId AND o.TrangThai = N'Đã giao'",
             nativeQuery = true)
     boolean hasCompletedPurchase(@Param("userId") Integer userId, @Param("productId") Integer productId);
+
+    @Query(value = "SELECT * FROM DonHang o WHERE o.MaNguoiDung = :userId " +
+            "AND NOT (o.PhuongThucThanhToan = N'ONLINE' AND o.TrangThaiThanhToan = N'Chưa thanh toán') /*#pageable*/",
+            countQuery = "SELECT count(*) FROM DonHang o WHERE o.MaNguoiDung = :userId " +
+                    "AND NOT (o.PhuongThucThanhToan = N'ONLINE' AND o.TrangThaiThanhToan = N'Chưa thanh toán')",
+            nativeQuery = true) // Đặt thành true
+        // Đổi tham số User thành userId (vì native query dùng ID)
+    Page<Order> findOrderHistoryForUserNative(@Param("userId") Integer userId, Pageable pageable);
 }

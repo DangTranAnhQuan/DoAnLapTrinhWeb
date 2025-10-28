@@ -1,8 +1,7 @@
-package nhom17.OneShop.controller;
+package nhom17.OneShop.controller.admin;
 
 import jakarta.validation.Valid;
 import nhom17.OneShop.entity.Brand;
-import nhom17.OneShop.exception.DuplicateRecordException;
 import nhom17.OneShop.request.BrandRequest;
 import nhom17.OneShop.service.BrandService;
 import nhom17.OneShop.service.StorageService;

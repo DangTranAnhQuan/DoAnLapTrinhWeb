@@ -177,7 +177,7 @@
 //        return "redirect:/verify-reset-password?email=" + email;
 //    }
 //}
-package nhom17.OneShop.controller;
+package nhom17.OneShop.controller.user;
 
 import nhom17.OneShop.request.SignUpRequest;
 import nhom17.OneShop.service.OtpService;

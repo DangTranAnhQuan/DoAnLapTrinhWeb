@@ -76,22 +76,25 @@ public class CheckoutServiceImpl implements CheckoutService {
                 Voucher voucher = voucherOpt.get(); // Lấy voucher ra
 
                 // ==== BẮT ĐẦU THÊM KIỂM TRA GIỚI HẠN ====
-                boolean limitsOk = true; // Mặc định là OK
+                boolean limitsOk = true;
+                List<String> invalidOrderStatesForUsageCount = List.of("Đã hủy", "Đang xử lý");
 
                 // 2. Kiểm tra giới hạn tổng số lượt sử dụng
                 Integer totalLimit = voucher.getGioiHanTongSoLan();
-                if (totalLimit != null && totalLimit > 0) { // Chỉ kiểm tra nếu có giới hạn > 0
-                    long totalUses = orderRepository.countByKhuyenMai_MaKhuyenMaiAndTrangThaiNot(voucher.getMaKhuyenMai(), "Đã hủy");
+                if (totalLimit != null && totalLimit > 0) {
+                    // Gọi hàm count mới với danh sách trạng thái không hợp lệ
+                    long totalUses = orderRepository.countByKhuyenMai_MaKhuyenMaiAndTrangThaiNotIn(voucher.getMaKhuyenMai(), invalidOrderStatesForUsageCount);
                     if (totalUses >= totalLimit) {
                         voucherErrorMessage = "Mã khuyến mãi '" + voucher.getMaKhuyenMai() + "' đã hết lượt sử dụng.";
                         limitsOk = false;
                     }
                 }
 
-                // 3. Kiểm tra giới hạn mỗi người (chỉ kiểm tra nếu giới hạn tổng OK)
+                // 3. Kiểm tra giới hạn mỗi người
                 Integer userLimit = voucher.getGioiHanMoiNguoi();
-                if (limitsOk && userLimit != null && userLimit > 0) { // Chỉ kiểm tra nếu có giới hạn > 0
-                    long userUses = orderRepository.countByNguoiDungAndKhuyenMai_MaKhuyenMaiAndTrangThaiNot(currentUser, voucher.getMaKhuyenMai(), "Đã hủy");
+                if (limitsOk && userLimit != null && userLimit > 0) {
+                    // Gọi hàm count mới với danh sách trạng thái không hợp lệ
+                    long userUses = orderRepository.countByNguoiDungAndKhuyenMai_MaKhuyenMaiAndTrangThaiNotIn(currentUser, voucher.getMaKhuyenMai(), invalidOrderStatesForUsageCount);
                     if (userUses >= userLimit) {
                         voucherErrorMessage = "Bạn đã hết lượt sử dụng mã khuyến mãi '" + voucher.getMaKhuyenMai() + "'.";
                         limitsOk = false;

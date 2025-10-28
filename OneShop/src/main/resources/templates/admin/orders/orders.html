@@ -115,7 +115,7 @@
                                class="btn btn-sm btn-outline-secondary" title="Xem chi tiết đơn hàng">
                                 <i class="bx bx-show"></i>
                             </a>
-                            <button th:if="${order.shipping == null}" type="button"
+                            <button th:if="${order.shipping == null AND order.trangThai != 'Đã hủy'}" type="button"
                                     class="btn btn-sm btn-outline-primary create-shipping-btn"
                                     data-bs-toggle="modal" data-bs-target="#createShippingModal"
                                     th:data-order-id="${order.maDonHang}"

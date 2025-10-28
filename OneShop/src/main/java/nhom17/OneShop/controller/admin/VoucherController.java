@@ -1,8 +1,7 @@
-package nhom17.OneShop.controller;
+package nhom17.OneShop.controller.admin;
 
 import jakarta.validation.Valid;
 import nhom17.OneShop.entity.Voucher;
-import nhom17.OneShop.exception.DuplicateRecordException;
 import nhom17.OneShop.request.VoucherRequest;
 import nhom17.OneShop.service.VoucherService;
 import org.springframework.beans.factory.annotation.Autowired;

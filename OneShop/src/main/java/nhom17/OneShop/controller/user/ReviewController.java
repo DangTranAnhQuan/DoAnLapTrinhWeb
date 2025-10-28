@@ -1,4 +1,4 @@
-package nhom17.OneShop.controller;
+package nhom17.OneShop.controller.user;
 
 import nhom17.OneShop.entity.User;
 import nhom17.OneShop.entity.Product;
@@ -23,7 +23,7 @@ import java.util.Locale;
 @Controller
 public class ReviewController {
 
-    private static final long MAX_SIZE = 20L * 1024 * 1024; // 20MB
+    private static final long MAX_SIZE = 20L * 1024 * 1024;
 
     @Autowired private RatingRepository ratingRepository;
     @Autowired private UserRepository nguoiDungRepository;
@@ -60,17 +60,14 @@ public class ReviewController {
             rating.setBinhLuan(comment);
             rating.setNgayTao(LocalDateTime.now());
 
-            // Xử lý 1 file duy nhất: ảnh HOẶC video
             if (mediaFile != null && !mediaFile.isEmpty()) {
                 if (mediaFile.getSize() > MAX_SIZE) {
                     redirectAttributes.addFlashAttribute("error", "File vượt quá 20MB. Vui lòng chọn file nhỏ hơn.");
                     return "redirect:/product/" + productId + "#reviews";
                 }
 
-                // Lưu file vào thư mục "reviews" (StorageService sẽ tự tạo thư mục nếu chưa có)
                 String storedName = storageService.storeFile(mediaFile, "reviews");
 
-                // Xác định loại file để set đúng cột
                 String contentType = mediaFile.getContentType();
                 if (contentType == null) contentType = "";
                 String ctype = contentType.toLowerCase(Locale.ROOT);
@@ -117,30 +114,25 @@ public class ReviewController {
             User currentUser = nguoiDungRepository.findByEmail(userDetails.getUsername())
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng."));
 
-            // Tìm bài đánh giá CŨ
             Rating existingRating = ratingRepository
                     .findByNguoiDung_MaNguoiDungAndSanPham_MaSanPham(currentUser.getMaNguoiDung(), productId)
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy bài đánh giá để cập nhật."));
 
-            // Cập nhật thông tin mới
             existingRating.setDiemDanhGia(ratingScore);
             existingRating.setBinhLuan(comment);
-            existingRating.setNgayTao(LocalDateTime.now()); // Cập nhật ngày thành ngày sửa
+            existingRating.setNgayTao(LocalDateTime.now());
 
-            // Xử lý file media nếu người dùng tải lên file mới
             if (mediaFile != null && !mediaFile.isEmpty()) {
                 if (mediaFile.getSize() > MAX_SIZE) {
                     redirectAttributes.addFlashAttribute("error", "File vượt quá 20MB.");
                     return "redirect:/product/" + productId + "#reviews";
                 }
 
-                // Xóa file cũ trước khi lưu file mới
                 String oldFile = existingRating.getImageUrl() != null ? existingRating.getImageUrl() : existingRating.getVideoUrl();
                 if (oldFile != null && !oldFile.isEmpty()) {
                     storageService.deleteFile("reviews/" + oldFile);
                 }
 
-                // Lưu file mới
                 String storedName = storageService.storeFile(mediaFile, "reviews");
                 String contentType = mediaFile.getContentType() != null ? mediaFile.getContentType().toLowerCase(Locale.ROOT) : "";
 
@@ -156,7 +148,7 @@ public class ReviewController {
                 }
             }
 
-            ratingRepository.save(existingRating); // Lưu lại các thay đổi
+            ratingRepository.save(existingRating);
             redirectAttributes.addFlashAttribute("success", "Cập nhật đánh giá thành công!");
 
         } catch (Exception e) {

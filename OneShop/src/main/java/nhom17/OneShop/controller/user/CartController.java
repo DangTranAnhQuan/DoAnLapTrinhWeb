@@ -1,4 +1,4 @@
-package nhom17.OneShop.controller;
+package nhom17.OneShop.controller.user;
 
 import jakarta.servlet.http.HttpSession;
 import nhom17.OneShop.entity.Cart;
@@ -179,14 +179,11 @@ public class CartController {
     public String applyCoupon(@RequestParam("coupon_code") String couponCode, HttpSession session, RedirectAttributes redirectAttributes) {
         Optional<Voucher> couponOpt = khuyenMaiRepository.findByMaKhuyenMaiAndTrangThai(couponCode, 1);
 
-        // **QUAN TRỌNG: Kiểm tra điều kiện coupon trước khi áp dụng**
-        BigDecimal subtotalAfterMembership = BigDecimal.ZERO; // Cần tính lại subtotal sau khi trừ membership
-        // Lấy subtotal gốc
+        BigDecimal subtotalAfterMembership = BigDecimal.ZERO;
         BigDecimal originalSubtotal = cartService.getSubtotal();
-        // Tính lại membership discount (logic tương tự viewCart)
         BigDecimal membershipDiscount = BigDecimal.ZERO;
         User currentUser = null;
-        try { currentUser = getCurrentUser(); } catch (IllegalStateException e) { /* Bỏ qua nếu chưa đăng nhập */ }
+        try { currentUser = getCurrentUser(); } catch (IllegalStateException e) {  }
         if (currentUser != null) {
             Optional<User> userWithTierOpt = userRepository.findByEmailWithMembership(currentUser.getEmail());
             if (userWithTierOpt.isPresent() && userWithTierOpt.get().getHangThanhVien() != null) {
@@ -200,31 +197,27 @@ public class CartController {
 
 
         if (couponOpt.isPresent()
-                && couponOpt.get().getBatDauLuc().isBefore(LocalDateTime.now()) // Đã bắt đầu
-                && couponOpt.get().getKetThucLuc().isAfter(LocalDateTime.now())  // Chưa kết thúc
-                // Kiểm tra tổng tiền tối thiểu (so sánh với giá SAU KHI trừ membership)
+                && couponOpt.get().getBatDauLuc().isBefore(LocalDateTime.now())
+                && couponOpt.get().getKetThucLuc().isAfter(LocalDateTime.now())
                 && (couponOpt.get().getTongTienToiThieu() == null || subtotalAfterMembership.compareTo(couponOpt.get().getTongTienToiThieu()) >= 0)
-            // TODO: Kiểm tra số lần sử dụng tổng và mỗi người nếu cần
         )
         {
             Voucher coupon = couponOpt.get();
             BigDecimal discountAmount = BigDecimal.ZERO;
 
-            // Tính giá trị giảm giá dựa trên kiểu (0: Phần trăm, 1: Số tiền cố định)
-            if (coupon.getKieuApDung() != null && coupon.getKieuApDung() == 0) { // Giảm theo %
+            if (coupon.getKieuApDung() != null && coupon.getKieuApDung() == 0) {
                 discountAmount = subtotalAfterMembership.multiply(coupon.getGiaTri().divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP));
                 // Kiểm tra giới hạn giảm tối đa
                 if (coupon.getGiamToiDa() != null && discountAmount.compareTo(coupon.getGiamToiDa()) > 0) {
                     discountAmount = coupon.getGiamToiDa();
                 }
-            } else if (coupon.getKieuApDung() != null && coupon.getKieuApDung() == 1) { // Giảm số tiền cố định
+            } else if (coupon.getKieuApDung() != null && coupon.getKieuApDung() == 1) {
                 discountAmount = coupon.getGiaTri();
             }
 
-            // Đảm bảo giảm giá không làm âm tiền
             discountAmount = discountAmount.min(subtotalAfterMembership);
 
-            session.setAttribute("cartDiscount", discountAmount); // Lưu giá trị đã tính toán
+            session.setAttribute("cartDiscount", discountAmount);
             session.setAttribute("appliedCouponCode", coupon.getMaKhuyenMai());
             redirectAttributes.addFlashAttribute("success", "Áp dụng mã giảm giá thành công!");
         } else {
@@ -238,7 +231,7 @@ public class CartController {
     private User getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated() || authentication.getPrincipal().equals("anonymousUser")) {
-            throw new IllegalStateException("Người dùng chưa đăng nhập."); // Ném lỗi nếu chưa đăng nhập
+            throw new IllegalStateException("Người dùng chưa đăng nhập.");
         }
         Object principal = authentication.getPrincipal();
         String username;

@@ -1,4 +1,4 @@
-package nhom17.OneShop.controller;
+package nhom17.OneShop.controller.user;
 
 import nhom17.OneShop.dto.QuickViewDTO;
 import nhom17.OneShop.service.QuickViewService;

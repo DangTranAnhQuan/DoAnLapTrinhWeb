@@ -35,6 +35,10 @@
                     <h3 class="title">Đăng nhập vào OneShop.</h3>
                     <p class="b2 mb--55">Nhập thông tin chi tiết của bạn dưới đây</p>
 
+                    <div th:if="${param.disabled}" class="alert alert-danger mb-4">
+                        Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên.
+                    </div>
+
                     <div th:if="${param.error}" class="alert alert-danger mb-4">
                         Sai email hoặc mật khẩu. Vui lòng thử lại.
                     </div>

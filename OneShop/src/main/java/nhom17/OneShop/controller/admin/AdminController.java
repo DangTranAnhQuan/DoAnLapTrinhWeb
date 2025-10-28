@@ -1,4 +1,4 @@
-package nhom17.OneShop.controller;
+package nhom17.OneShop.controller.admin;
 
 import nhom17.OneShop.dto.DashboardDataDTO;
 import nhom17.OneShop.service.OrderService;

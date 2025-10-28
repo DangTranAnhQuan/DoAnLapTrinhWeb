@@ -1,5 +1,6 @@
 package nhom17.OneShop.service.impl;
 
+import jakarta.servlet.http.HttpSession;
 import nhom17.OneShop.entity.*;
 import nhom17.OneShop.repository.*;
 import nhom17.OneShop.dto.DashboardDataDTO;
@@ -65,6 +66,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     private UserRepository nguoiDungRepository;
+
+    @Autowired
+    private HttpSession httpSession;
 
     @Override
     public Page<Order> findAll(String keyword, String status, String paymentMethod, String paymentStatus, String shippingMethod, int page, int size) {
@@ -389,7 +393,7 @@ public class OrderServiceImpl implements OrderService {
 
         // Nếu đơn hàng đang là "Đang xử lý" thì có thể chuyển thành "Đã xác nhận"
         if("Đang xử lý".equals(oldStatus) || "Chưa thanh toán".equals(oldStatus)) {
-            order.setTrangThai("Đã thanh toán");
+            order.setTrangThai("Đã xác nhận");
         }
 
         orderRepository.save(order);
@@ -401,6 +405,15 @@ public class OrderServiceImpl implements OrderService {
                 cartService.clearCart();
 
                 System.out.println("Webhook: Đã xóa giỏ hàng cho người dùng của đơn hàng #" + orderId);
+                Long pendingOrderIdInSession = (Long) httpSession.getAttribute("pendingOnlineOrderId");
+                // Kiểm tra xem ID trong session có khớp với ID đơn hàng vừa xử lý không
+                if (pendingOrderIdInSession != null && pendingOrderIdInSession.equals(orderId)) {
+                    httpSession.removeAttribute("pendingOnlineOrderId");
+                    System.out.println("Webhook: Đã xóa pendingOnlineOrderId khỏi session cho đơn hàng #" + orderId);
+                } else {
+                    // Log cảnh báo nếu không tìm thấy hoặc không khớp (có thể xảy ra nếu user mở nhiều tab)
+                    System.out.println("Webhook: Không tìm thấy hoặc không khớp pendingOnlineOrderId trong session cho đơn hàng #" + orderId);
+                }
 
             } else {
                 System.err.println("Webhook Warning: Không tìm thấy người dùng cho đơn hàng #" + orderId + " để xóa giỏ hàng.");
@@ -408,6 +421,59 @@ public class OrderServiceImpl implements OrderService {
         } catch (Exception e) {
             System.err.println("Webhook Error: Lỗi khi xóa giỏ hàng cho đơn hàng #" + orderId + ": " + e.getMessage());
             e.printStackTrace();
+        }
+    }
+    @Override
+    @Transactional
+    public void cancelOrderIfPendingOnline(Long orderId, User currentUser) {
+        Order order = orderRepository.findById(orderId).orElse(null);
+
+        if (order == null) {
+            System.out.println("cancelOrderIfPendingOnline: Không tìm thấy đơn hàng #" + orderId);
+            return;
+        }
+
+        if (!order.getNguoiDung().getMaNguoiDung().equals(currentUser.getMaNguoiDung())) {
+            System.err.println("cancelOrderIfPendingOnline: User không có quyền hủy đơn #" + orderId);
+            return;
+        }
+
+        // ***Chỉ hủy nếu đúng ONLINE + Chưa thanh toán + Đang xử lý***
+        if ("ONLINE".equalsIgnoreCase(order.getPhuongThucThanhToan()) &&
+                "Chưa thanh toán".equalsIgnoreCase(order.getTrangThaiThanhToan()) &&
+                "Đang xử lý".equals(order.getTrangThai()))
+        {
+            System.out.println("cancelOrderIfPendingOnline: Bắt đầu hủy đơn hàng online chờ #" + orderId);
+            // Hoàn trả số lượng sản phẩm về kho
+            try {
+                // Load lại orderDetails trong transaction nếu cần
+                Order orderWithDetails = orderRepository.findByIdWithDetails(orderId).orElse(order);
+                for (OrderDetail detail : orderWithDetails.getOrderDetails()) { // Lấy từ order có details
+                    // Tìm inventory (nên dùng findById để có lock)
+                    Inventory inventory = inventoryRepository.findById(detail.getSanPham().getMaSanPham())
+                            .orElse(null);
+                    if (inventory != null) {
+                        inventory.setSoLuongTon(inventory.getSoLuongTon() + detail.getSoLuong());
+                        inventoryRepository.saveAndFlush(inventory); // Lưu ngay
+                        System.out.println("Hoàn kho: Sản phẩm #" + detail.getSanPham().getMaSanPham() + " + " + detail.getSoLuong());
+                    } else {
+                        System.err.println("Hoàn kho LỖI: Không tìm thấy inventory cho SP #" + detail.getSanPham().getMaSanPham() + " (Đơn #" + orderId + ")");
+                    }
+                }
+                // Cập nhật trạng thái đơn hàng
+                order.setTrangThai("Đã hủy");
+                orderRepository.save(order);
+                System.out.println("cancelOrderIfPendingOnline: Đã hủy thành công đơn hàng #" + orderId);
+
+            } catch (Exception e) {
+                System.err.println("cancelOrderIfPendingOnline: Lỗi nghiêm trọng khi hoàn kho/hủy đơn #" + orderId + ": " + e.getMessage());
+                e.printStackTrace(); // In stack trace để debug
+                // Giao dịch sẽ tự rollback nếu có lỗi ở đây
+                throw new RuntimeException("Lỗi khi xử lý hủy đơn hàng.", e); // Ném lại lỗi để controller biết
+            }
+
+        } else {
+            System.out.println("cancelOrderIfPendingOnline: Đơn hàng #" + orderId + " không phải ONLINE chờ thanh toán. Không hủy.");
         }
     }
 

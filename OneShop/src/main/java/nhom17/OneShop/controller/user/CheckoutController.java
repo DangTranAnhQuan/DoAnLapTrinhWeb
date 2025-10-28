@@ -1,4 +1,4 @@
-package nhom17.OneShop.controller;
+package nhom17.OneShop.controller.user;
 
 import jakarta.servlet.http.HttpSession;
 import nhom17.OneShop.dto.ShippingOptionDTO;
@@ -11,11 +11,12 @@ import nhom17.OneShop.repository.AddressRepository;
 import nhom17.OneShop.repository.UserRepository;
 import nhom17.OneShop.service.CartService;
 import nhom17.OneShop.service.CheckoutService;
+import nhom17.OneShop.service.OrderService;
 import nhom17.OneShop.service.ShippingFeeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication; // Import if missing
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -37,21 +38,36 @@ public class CheckoutController {
     @Autowired private CheckoutService checkoutService;
     @Autowired private AddressRepository diaChiRepository;
     @Autowired private UserRepository nguoiDungRepository;
-    @Autowired private ShippingFeeService shippingFeeService; // Ensure this is Autowired
+    @Autowired private ShippingFeeService shippingFeeService;
+    @Autowired private OrderService orderService;
 
     @GetMapping("/checkout")
     public String showCheckoutPage(Model model, HttpSession session) {
+        Long pendingOrderId = (Long) session.getAttribute("pendingOnlineOrderId");
+        if (pendingOrderId != null) {
+            System.out.println("CheckoutController: Tìm thấy pendingOnlineOrderId trong session: " + pendingOrderId);
+            session.removeAttribute("pendingOnlineOrderId");
+            try {
+                User currentUser = getCurrentUser();
+                orderService.cancelOrderIfPendingOnline(pendingOrderId, currentUser);
+                model.addAttribute("infoMessage", "Đơn hàng thanh toán online trước đó (#"+ pendingOrderId +") đã được hủy do bạn quay lại.");
+            } catch (IllegalStateException e) {
+                System.err.println("CheckoutController: Lỗi khi hủy đơn hàng online chờ (chưa đăng nhập?): " + e.getMessage());
+            }
+            catch (Exception e) {
+                System.err.println("CheckoutController: Lỗi khi hủy đơn hàng online chờ #" + pendingOrderId + ": " + e.getMessage());
+            }
+        }
         List<Cart> cartItems = cartService.getCartItems();
         if (cartItems.isEmpty()) {
             return "redirect:/cart";
         }
 
-        User currentUser = getCurrentUser(); // Assume user is logged in for checkout
+        User currentUser = getCurrentUser();
         List<Address> addresses = diaChiRepository.findByNguoiDung_MaNguoiDung(currentUser.getMaNguoiDung());
 
-        BigDecimal subtotal = cartService.getSubtotal(); // Use service method
+        BigDecimal subtotal = cartService.getSubtotal();
 
-        // --- Discount Logic (Membership first, then Coupon) ---
         BigDecimal membershipDiscount = BigDecimal.ZERO;
         Optional<User> userOpt = nguoiDungRepository.findByEmailWithMembership(currentUser.getEmail());
         if (userOpt.isPresent() && userOpt.get().getHangThanhVien() != null) {
@@ -65,15 +81,15 @@ public class CheckoutController {
         BigDecimal couponDiscountValue = (BigDecimal) session.getAttribute("cartDiscount");
         couponDiscountValue = (couponDiscountValue == null) ? BigDecimal.ZERO : couponDiscountValue;
         BigDecimal actualCouponDiscount = couponDiscountValue.min(priceAfterMembershipDiscount);
-        // --- End Discount Logic ---
 
-        BigDecimal shippingFee = BigDecimal.ZERO; // Initial shipping fee is 0, JS will update
+
+        BigDecimal shippingFee = BigDecimal.ZERO;
         BigDecimal total = priceAfterMembershipDiscount.subtract(actualCouponDiscount).add(shippingFee).max(BigDecimal.ZERO);
 
         model.addAttribute("cartItems", cartItems);
         model.addAttribute("addresses", addresses);
         model.addAttribute("subtotal", subtotal);
-        model.addAttribute("couponDiscount", actualCouponDiscount); // Send actual applied coupon value
+        model.addAttribute("couponDiscount", actualCouponDiscount);
         model.addAttribute("membershipDiscount", membershipDiscount);
         model.addAttribute("shippingFee", shippingFee);
         model.addAttribute("total", total);
@@ -81,15 +97,13 @@ public class CheckoutController {
         return "user/shop/checkout";
     }
 
-    @GetMapping("/api/available-shipping-options") // <<< SỬA URL ENDPOINT
+    @GetMapping("/api/available-shipping-options")
     @ResponseBody
-    public ResponseEntity<?> getAvailableShippingOptions(@RequestParam("province") String province) { // <<< SỬA TÊN PHƯƠNG THỨC
+    public ResponseEntity<?> getAvailableShippingOptions(@RequestParam("province") String province) {
         try {
-            // Gọi service mới để lấy danh sách các lựa chọn (đã bao gồm freeship/giảm giá)
             List<ShippingOptionDTO> options = shippingFeeService.findAvailableShippingOptions(province);
 
             if (options != null && !options.isEmpty()) {
-                // Trả về danh sách DTO
                 return ResponseEntity.ok(options);
             } else {
                 Map<String, String> errorResponse = new HashMap<>();
@@ -105,14 +119,13 @@ public class CheckoutController {
     }
 
 
-    // ===== START: MODIFIED placeOrder - accepts shipping details =====
     @PostMapping("/place-order")
     public String placeOrder(@RequestParam("shipping_address") Integer diaChiId,
                              @RequestParam("payment_method") String paymentMethod,
                              @RequestParam("calculated_shipping_fee") BigDecimal shippingFee,
                              @RequestParam("shipping_method_name") String shippingMethodName,
                              RedirectAttributes redirectAttributes,
-                             HttpServletRequest request) { // Bỏ HttpServletRequest nếu MOMO ko cần
+                             HttpServletRequest request) {
         try {
             if (shippingMethodName == null || shippingMethodName.isBlank()) {
                 throw new IllegalArgumentException("Chưa chọn được phương thức vận chuyển hợp lệ. Vui lòng chọn lại địa chỉ.");
@@ -143,9 +156,7 @@ public class CheckoutController {
             return "redirect:/checkout";
         }
     }
-    // ===== END: MODIFIED placeOrder =====
 
-    // --- Other methods (Keep existing) ---
     @GetMapping("/order-success")
     public String orderSuccess(@RequestParam(value = "method", required = false) String method, Model model) {
         model.addAttribute("method", method);
@@ -164,7 +175,6 @@ public class CheckoutController {
     public String saveAddress(@ModelAttribute Address address,
                               @RequestParam(value = "return", required = false) String returnUrl,
                               RedirectAttributes ra) {
-        // **IMPORTANT: Set the current user to the address before saving**
         try {
             User currentUser = getCurrentUser();
             address.setNguoiDung(currentUser);
@@ -172,8 +182,6 @@ public class CheckoutController {
             ra.addFlashAttribute("success", "Cập nhật địa chỉ thành công!");
         } catch (Exception e) {
             ra.addFlashAttribute("error", "Lỗi khi cập nhật địa chỉ: " + e.getMessage());
-            // Decide where to redirect on error, maybe back to edit form?
-            // return "redirect:/checkout/edit-address/" + address.getMaDiaChi();
         }
 
 
@@ -181,9 +189,9 @@ public class CheckoutController {
             if (returnUrl.startsWith("/")) {
                 return "redirect:" + returnUrl;
             }
-            return "redirect:/my-account?tab=addresses"; // Fallback
+            return "redirect:/my-account?tab=addresses";
         }
-        return "redirect:/checkout"; // Default redirect
+        return "redirect:/checkout";
     }
 
     @GetMapping("/checkout/momo")
@@ -192,18 +200,17 @@ public class CheckoutController {
     @GetMapping("/checkout/vnpay")
     public String vnpayGuide() { return "user/shop/vnpay-guide"; }
 
-    // Helper method to get current user
     private User getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated() || authentication.getPrincipal().equals("anonymousUser")) {
-            throw new IllegalStateException("Người dùng chưa đăng nhập."); // Throw exception if not logged in
+            throw new IllegalStateException("Người dùng chưa đăng nhập.");
         }
         Object principal = authentication.getPrincipal();
         String username;
         if (principal instanceof UserDetails) {
             username = ((UserDetails) principal).getUsername();
         } else {
-            username = principal.toString(); // Fallback
+            username = principal.toString();
         }
         return nguoiDungRepository.findByEmail(username)
                 .orElseThrow(() -> new IllegalStateException("Không tìm thấy người dùng hiện tại trong CSDL."));

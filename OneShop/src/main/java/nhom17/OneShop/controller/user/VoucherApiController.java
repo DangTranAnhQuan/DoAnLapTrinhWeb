@@ -1,4 +1,4 @@
-package nhom17.OneShop.controller;
+package nhom17.OneShop.controller.user;
 
 import nhom17.OneShop.entity.User;
 import nhom17.OneShop.entity.Voucher;
@@ -46,6 +46,7 @@ public class VoucherApiController {
             List<Voucher> allActiveVouchers = voucherService.findActivePromotions();
 
             LocalDateTime now = LocalDateTime.now();
+            List<String> invalidOrderStatesForUsageCount = List.of("Đã hủy", "Đã xác nhận");
 
             // 2. Lọc voucher dựa trên TẤT CẢ điều kiện
             for (Voucher voucher : allActiveVouchers) {
@@ -64,8 +65,7 @@ public class VoucherApiController {
                 // Kiểm tra Giới hạn Sử dụng Tổng
                 Integer totalLimit = voucher.getGioiHanTongSoLan();
                 if (isEligible && totalLimit != null && totalLimit > 0) {
-                    long totalUses = orderRepository.countByKhuyenMai_MaKhuyenMaiAndTrangThaiNot(voucher.getMaKhuyenMai(), "Đã hủy");
-                    if (totalUses >= totalLimit) {
+                    long totalUses = orderRepository.countByKhuyenMai_MaKhuyenMaiAndTrangThaiNotIn(voucher.getMaKhuyenMai(), invalidOrderStatesForUsageCount);                    if (totalUses >= totalLimit) {
                         isEligible = false;
                     }
                 }
@@ -74,8 +74,7 @@ public class VoucherApiController {
                 Integer userLimit = voucher.getGioiHanMoiNguoi();
                 if (isEligible && currentUserOpt.isPresent() && userLimit != null && userLimit > 0) {
                     User currentUser = currentUserOpt.get();
-                    long userUses = orderRepository.countByNguoiDungAndKhuyenMai_MaKhuyenMaiAndTrangThaiNot(currentUser, voucher.getMaKhuyenMai(), "Đã hủy");
-                    if (userUses >= userLimit) {
+                    long userUses = orderRepository.countByNguoiDungAndKhuyenMai_MaKhuyenMaiAndTrangThaiNotIn(currentUser, voucher.getMaKhuyenMai(), invalidOrderStatesForUsageCount);                    if (userUses >= userLimit) {
                         isEligible = false;
                     }
                 }

@@ -13,7 +13,7 @@ public interface OrderService {
     Page<Order> findOrdersForCurrentUser(int page, int size);
     Order findOrderByIdForCurrentUser(Long orderId);
 
-//    Admin
+    //    Admin
     Page<Order> findAll(String keyword, String status, String paymentMethod, String paymentStatus, String shippingMethod, int page, int size);
     List<OrderStatusHistory> findHistoryByOrderId(long orderId);
     Order findById(long id);
@@ -21,6 +21,7 @@ public interface OrderService {
     void updateLoyaltyPoints(Order order, String oldStatus, String newStatus);
     void update(Long orderId, OrderUpdateRequest request);
     void cancelOrder(Long orderId, User currentUser);
+    void cancelOrderIfPendingOnline(Long orderId, User currentUser);
     void processSepayPayment(Long orderId, BigDecimal amountPaid);
 
     DashboardDataDTO getDashboardData(int year, int month);

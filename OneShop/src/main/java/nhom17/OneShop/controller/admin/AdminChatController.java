@@ -1,4 +1,4 @@
-package nhom17.OneShop.controller;
+package nhom17.OneShop.controller.admin;
 
 import nhom17.OneShop.dto.ChatMessageDTO;
 import nhom17.OneShop.dto.ConversationDTO;

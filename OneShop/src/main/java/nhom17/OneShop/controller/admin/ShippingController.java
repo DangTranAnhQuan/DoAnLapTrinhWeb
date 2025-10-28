@@ -1,10 +1,7 @@
-package nhom17.OneShop.controller;
+package nhom17.OneShop.controller.admin;
 
 import jakarta.validation.Valid;
 import nhom17.OneShop.entity.Shipping;
-import nhom17.OneShop.entity.ShippingCarrier;
-import nhom17.OneShop.repository.ShippingCarrierRepository;
-import nhom17.OneShop.repository.ShippingFeeRepository;
 import nhom17.OneShop.request.ShippingRequest;
 import nhom17.OneShop.service.ShippingCarrierService;
 import nhom17.OneShop.service.ShippingFeeService;
@@ -17,9 +14,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Controller
 @RequestMapping("/admin/shipping")
@@ -38,7 +33,7 @@ public class ShippingController {
                                 @RequestParam(required = false) String status,
                                 @RequestParam(required = false) String shippingMethod,
                                 @RequestParam(defaultValue = "1") int page,
-                                @RequestParam(defaultValue = "10") int size, // Tăng size mặc định
+                                @RequestParam(defaultValue = "10") int size,
                                 Model model) {
         Page<Shipping> shippingPage = shippingService.search(keyword, carrierId, status, shippingMethod, page, size);
         List<String> shippingMethods = shippingFeeService.findDistinctShippingMethods();
@@ -108,7 +103,6 @@ public class ShippingController {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
 
-        // Redirect về trang Orders với đầy đủ state
         redirectAttributes.addAttribute("keyword", keyword);
         redirectAttributes.addAttribute("status", status);
         redirectAttributes.addAttribute("paymentMethod", paymentMethod);

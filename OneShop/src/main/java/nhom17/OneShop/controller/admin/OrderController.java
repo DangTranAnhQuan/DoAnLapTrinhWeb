@@ -1,9 +1,6 @@
-package nhom17.OneShop.controller;
+package nhom17.OneShop.controller.admin;
 
 import nhom17.OneShop.entity.*;
-import nhom17.OneShop.repository.OrderStatusHistoryRepository;
-import nhom17.OneShop.repository.ShippingCarrierRepository;
-import nhom17.OneShop.repository.ShippingFeeRepository;
 import nhom17.OneShop.request.OrderUpdateRequest;
 import nhom17.OneShop.request.ShippingRequest;
 import nhom17.OneShop.service.OrderService;

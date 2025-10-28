@@ -1,4 +1,4 @@
-package nhom17.OneShop.controller;
+package nhom17.OneShop.controller.user;
 
 import nhom17.OneShop.entity.Order;
 import nhom17.OneShop.dto.SepayWebhookDTO;
@@ -10,6 +10,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.*;
@@ -109,9 +110,9 @@ public class PaymentController {
         }
     }
 
-     //HÀM MỚI: Hiển thị trang thanh toán VietQR
+    //HÀM MỚI: Hiển thị trang thanh toán VietQR
     @GetMapping("/thanh-toan/qr")
-    public String showVietQRPage(@RequestParam("orderId") Long orderId, Model model, RedirectAttributes redirectAttributes) {
+    public String showVietQRPage(@RequestParam("orderId") Long orderId, Model model, RedirectAttributes redirectAttributes,HttpSession session) {
         try {
             Order order = orderRepository.findById(orderId)
                     .orElseThrow(() -> new NoSuchElementException("Không tìm thấy đơn hàng " + orderId));
@@ -135,6 +136,9 @@ public class PaymentController {
             model.addAttribute("shopAccountNo", SHOP_ACCOUNT_NO);
             model.addAttribute("shopAccountName", SHOP_ACCOUNT_NAME);
             model.addAttribute("paymentMemo", paymentMemo);
+
+            session.setAttribute("pendingOnlineOrderId", orderId);
+            System.out.println("PaymentController: Lưu pendingOnlineOrderId vào session: " + orderId);
 
             return "user/shop/payment-vietqr";
 

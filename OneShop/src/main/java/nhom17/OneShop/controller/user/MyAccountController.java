@@ -1,4 +1,4 @@
-package nhom17.OneShop.controller;
+package nhom17.OneShop.controller.user;
 
 import nhom17.OneShop.entity.Address;
 import nhom17.OneShop.entity.MembershipTier;
@@ -43,7 +43,6 @@ public class MyAccountController {
         return "user/account/membership";
     }
 
-    // My Account (tab-panel)
     @GetMapping("/my-account")
     public String myAccountPage(Model model,
                                 @RequestParam(name = "tab", required = false, defaultValue = "account") String activeTab) {
@@ -55,7 +54,6 @@ public class MyAccountController {
         return "user/account/my-account";
     }
 
-    // Update profile (ở tab account)
     @PostMapping("/my-account/update-details")
     public String updateDetails(@ModelAttribute User user, RedirectAttributes ra) {
         User currentUser = getCurrentUser();
@@ -66,7 +64,6 @@ public class MyAccountController {
         return "redirect:/my-account?tab=account";
     }
 
-    // Change password (ở tab account)
     @PostMapping("/my-account/change-password")
     public String changePassword(@RequestParam String currentPassword,
                                  @RequestParam String newPassword,
@@ -87,14 +84,12 @@ public class MyAccountController {
         return "redirect:/my-account?tab=account";
     }
 
-    // Add address form
     @GetMapping("/my-account/add-address")
     public String showAddAddressForm(Model model) {
         model.addAttribute("address", new Address());
         return "user/account/address-form";
     }
 
-    // Save address (ở tab addresses)
     @PostMapping("/my-account/add-address")
     public String saveNewAddress(@ModelAttribute Address address, RedirectAttributes ra) {
         User currentUser = getCurrentUser();
@@ -104,7 +99,6 @@ public class MyAccountController {
         return "redirect:/my-account?tab=addresses";
     }
 
-    // Delete address (ở tab addresses)
     @PostMapping("/my-account/delete-address/{id}")
     public String deleteAddress(@PathVariable("id") Integer addressId, RedirectAttributes ra) {
         User currentUser = getCurrentUser();

@@ -182,18 +182,18 @@ public class HomeController {
         return "user/general/contact";
     }
 
-@PostMapping("/contact")
-public String handleContactForm(
-        @RequestParam("contact-subject") String subject,
-        @RequestParam("contact-message") String message,
-        Principal principal,
-        RedirectAttributes redirectAttributes) {
+    @PostMapping("/contact")
+    public String handleContactForm(
+            @RequestParam("contact-subject") String subject,
+            @RequestParam("contact-message") String message,
+            Principal principal,
+            RedirectAttributes redirectAttributes) {
 
-    // Yêu cầu: Chỉ người dùng đã đăng nhập mới được gửi
-    if (principal == null) {
-        redirectAttributes.addFlashAttribute("errorMessage", "Vui lòng đăng nhập để gửi liên hệ.");
-        return "redirect:/sign-in";
-    }
+        // Yêu cầu: Chỉ người dùng đã đăng nhập mới được gửi
+        if (principal == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Vui lòng đăng nhập để gửi liên hệ.");
+            return "redirect:/sign-in";
+        }
 
     Optional<User> userOpt = userRepository.findByEmail(principal.getName());
     if (userOpt.isEmpty()) {

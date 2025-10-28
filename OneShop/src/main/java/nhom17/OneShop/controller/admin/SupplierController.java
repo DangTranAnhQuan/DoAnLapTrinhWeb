@@ -1,9 +1,7 @@
-package nhom17.OneShop.controller;
+package nhom17.OneShop.controller.admin;
 
 import jakarta.validation.Valid;
 import nhom17.OneShop.entity.Supplier;
-import nhom17.OneShop.exception.DuplicateRecordException;
-import nhom17.OneShop.request.ShippingCarrierRequest;
 import nhom17.OneShop.request.SupplierRequest;
 import nhom17.OneShop.service.SupplierService;
 import org.springframework.beans.factory.annotation.Autowired;

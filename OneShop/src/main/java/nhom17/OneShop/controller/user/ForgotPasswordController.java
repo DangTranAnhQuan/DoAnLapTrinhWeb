@@ -1,4 +1,4 @@
-package nhom17.OneShop.controller;
+package nhom17.OneShop.controller.user;
 
 import nhom17.OneShop.service.OtpService;
 import nhom17.OneShop.service.UserService;
@@ -19,17 +19,12 @@ public class ForgotPasswordController {
     @Autowired
     private OtpService otpService;
 
-    /**
-     * Hiển thị trang nhập email để bắt đầu quá trình quên mật khẩu.
-     */
     @GetMapping("/forgot-password")
     public String showForgotPasswordForm() {
         return "user/account/forgot-password";
     }
 
-    /**
-     * Xử lý việc gửi email, tạo và gửi mã OTP.
-     */
+
     @PostMapping("/forgot-password")
     public String processForgotPassword(@RequestParam("email") String email,
                                         RedirectAttributes redirectAttributes,
@@ -44,18 +39,13 @@ public class ForgotPasswordController {
         }
     }
 
-    /**
-     * Hiển thị trang xác thực OTP.
-     */
+
     @GetMapping("/verify-reset-password")
     public String showVerifyResetPasswordForm(@RequestParam("email") String email, Model model) {
         model.addAttribute("email", email);
         return "user/account/verify-reset-password";
     }
 
-    /**
-     * Xử lý xác thực mã OTP người dùng nhập vào.
-     */
     @PostMapping("/verify-reset-password")
     public String verifyResetPasswordOtp(@RequestParam("email") String email,
                                          @RequestParam("otp") String otp,
@@ -77,18 +67,12 @@ public class ForgotPasswordController {
         }
     }
 
-    /**
-     * Hiển thị trang đặt lại mật khẩu mới (sau khi đã xác thực OTP thành công).
-     */
     @GetMapping("/reset-password")
     public String showResetPasswordForm(@RequestParam("email") String email, Model model) {
         model.addAttribute("email", email);
         return "user/account/reset-password";
     }
 
-    /**
-     * ✅ XỬ LÝ LƯU MẬT KHẨU MỚI
-     */
     @PostMapping("/reset-password")
     public String processResetPassword(@RequestParam("email") String email,
                                        @RequestParam("password") String password,
@@ -119,9 +103,6 @@ public class ForgotPasswordController {
         }
     }
 
-    /**
-     * Xử lý yêu cầu gửi lại mã OTP.
-     */
     @GetMapping("/resend-reset-otp")
     public String resendResetOtp(@RequestParam("email") String email,
                                  RedirectAttributes redirectAttributes) {

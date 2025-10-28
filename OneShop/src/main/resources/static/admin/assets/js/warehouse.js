@@ -60,7 +60,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 // Xử lý giá bán
                 const selectedOption = productSelect.querySelector(`option[value="${detail.maSanPham}"]`);
                 if (priceDisplay && selectedOption) {
-                    priceDisplay.value = formatNumber(selectedOption.dataset.price);
+                    const num = parseFloat(selectedOption.dataset.price);
+                    priceDisplay.value = formatNumber(num);
                 }
 
                 // THÊM MỚI: Xử lý nút "Xem lịch sử" khi tải trang
@@ -86,12 +87,33 @@ document.addEventListener('DOMContentLoaded', function () {
         // Nút "Thêm sản phẩm"
         addButton.addEventListener('click', () => addRow(null));
 
-        // Nút "Xóa"
-        container.addEventListener('click', function (event) {
-            if (event.target && event.target.closest('.remove-detail-row')) {
-                event.target.closest('tr').remove();
-            }
-        });
+        function reindexRows() {
+                    const rows = container.querySelectorAll('tr');
+                    rows.forEach((tr, newIndex) => {
+                        // Tìm tất cả input/select trong dòng này
+                        const inputs = tr.querySelectorAll('input, select');
+                        inputs.forEach(input => {
+                            const name = input.name;
+                            if (name) {
+                                // Regex này thay thế chiTietPhieuNhapList[NUMBER] bằng chiTietPhieuNhapList[newIndex]
+                                input.name = name.replace(/^(chiTietPhieuNhapList)\[\d+\]/, `$1[${newIndex}]`);
+                            }
+                        });
+                    });
+                    // Cập nhật lại chỉ số chung để sẵn sàng cho lần "Thêm sản phẩm" tiếp theo
+                    rowIndex = rows.length;
+                }
+       // Nút "Xóa"
+       container.addEventListener('click', function (event) {
+           // Tìm nút xóa gần nhất
+           const removeButton = event.target.closest('.remove-detail-row');
+           if (removeButton) {
+               // Xóa thẻ <tr> cha
+               removeButton.closest('tr').remove();
+               // (THÊM MỚI) Gọi hàm đánh số lại sau khi xóa
+               reindexRows();
+           }
+       });
 
         container.addEventListener('change', function(event) {
         if (event.target && event.target.classList.contains('product-select')) {
@@ -106,7 +128,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Cập nhật giá bán
             if (priceDisplay) {
-                priceDisplay.value = formatNumber(price);
+            const num = parseFloat(price);
+                priceDisplay.value = formatNumber(num);
             }
 
             // THÊM MỚI: Logic hiển thị / ẩn nút "Xem"

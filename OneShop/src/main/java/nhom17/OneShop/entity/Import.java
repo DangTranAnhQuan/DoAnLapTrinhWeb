@@ -26,7 +26,7 @@ public class Import {
     @Formula("(SELECT SUM(ct.SoLuong * ct.GiaNhap) FROM ChiTietPhieuNhap ct WHERE ct.MaPhieuNhap = MaPhieuNhap)")
     private BigDecimal tongTien;
 
-    @OneToMany(mappedBy = "phieuNhap", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "phieuNhap", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<ImportDetail> chiTietPhieuNhapList;
 
     @PrePersist

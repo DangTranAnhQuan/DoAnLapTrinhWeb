@@ -1,12 +1,8 @@
-package nhom17.OneShop.controller;
+package nhom17.OneShop.controller.admin;
 
 import jakarta.validation.Valid;
 import nhom17.OneShop.entity.Rating;
 import nhom17.OneShop.entity.Product;
-import nhom17.OneShop.exception.DuplicateRecordException;
-import nhom17.OneShop.repository.BrandRepository;
-import nhom17.OneShop.repository.CategoryRepository;
-import nhom17.OneShop.repository.RatingRepository;
 import nhom17.OneShop.request.ProductRequest;
 import nhom17.OneShop.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +40,7 @@ public class ProductController {
                                @RequestParam(defaultValue = "1") int page,
                                @RequestParam(defaultValue = "5") int size,
                                Model model) {
-        // ✅ Truyền các tham số mới vào service
+
         Page<Product> productPage = productService.searchProducts(keyword, status, categoryId, brandId, sort, page, size);
 
         model.addAttribute("categories", categoryService.findAll());
@@ -81,9 +77,9 @@ public class ProductController {
                                   @RequestParam(defaultValue = "1") int page,
                                   @RequestParam(defaultValue = "5") int size) {
         ProductRequest productRequest = new ProductRequest();
-        if (id != null) { // Nếu có ID -> Chế độ Sửa
+        if (id != null) {
             Product product = productService.findById(id);
-            // Chuyển đổi Entity sang DTO
+
             productRequest.setMaSanPham(product.getMaSanPham());
             productRequest.setTenSanPham(product.getTenSanPham());
             productRequest.setMoTa(product.getMoTa());
@@ -100,7 +96,6 @@ public class ProductController {
         model.addAttribute("categories", categoryService.findAll());
         model.addAttribute("brands", brandService.findAll());
 
-        // Giữ lại state của trang danh sách
         model.addAttribute("keyword", keyword);
         model.addAttribute("status", status);
         model.addAttribute("categoryId", categoryId);

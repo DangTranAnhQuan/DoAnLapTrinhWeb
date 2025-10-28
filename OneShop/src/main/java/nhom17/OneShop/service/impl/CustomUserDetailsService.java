@@ -3,13 +3,15 @@ package nhom17.OneShop.service.impl;
 import nhom17.OneShop.entity.User;
 import nhom17.OneShop.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
@@ -24,10 +26,19 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         String roleName = nguoiDung.getVaiTro().getTenVaiTro().toUpperCase();
 
-        return new org.springframework.security.core.userdetails.User(
-                nguoiDung.getEmail(),
-                nguoiDung.getMatKhau(),
-                Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + roleName))
-        );
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority("ROLE_" + roleName));
+
+        boolean isEnabled = nguoiDung.getTrangThai() == 1;
+
+        return org.springframework.security.core.userdetails.User
+                .withUsername(nguoiDung.getEmail())
+                .password(nguoiDung.getMatKhau())
+                .authorities(authorities)
+                .accountExpired(false)
+                .accountLocked(false)
+                .credentialsExpired(false)
+                .disabled(!isEnabled)
+                .build();
     }
 }

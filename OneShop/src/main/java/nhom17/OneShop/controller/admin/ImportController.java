@@ -1,12 +1,9 @@
-package nhom17.OneShop.controller;
+package nhom17.OneShop.controller.admin;
 
 import jakarta.validation.Valid;
 import nhom17.OneShop.entity.ImportDetail;
 import nhom17.OneShop.entity.Import;
 import nhom17.OneShop.entity.Product;
-import nhom17.OneShop.exception.NotFoundException;
-import nhom17.OneShop.repository.ProductRepository;
-import nhom17.OneShop.repository.SupplierRepository;
 import nhom17.OneShop.request.ImportDetailRequest;
 import nhom17.OneShop.request.ImportRequest;
 import nhom17.OneShop.service.ImportService;
@@ -59,7 +56,6 @@ public class ImportController {
         return "admin/warehouse/importDetail";
     }
 
-    // ✅ Hiển thị form Thêm mới
     @GetMapping("/add")
     public String showAddForm(Model model,
                               @RequestParam(required = false) String keyword,
@@ -73,10 +69,9 @@ public class ImportController {
         model.addAttribute("supplierId", supplierId);
         model.addAttribute("page", page);
         model.addAttribute("size", size);
-        return "admin/warehouse/importForm"; // Trỏ đến form chung
+        return "admin/warehouse/importForm";
     }
 
-    // ✅ Hiển thị form Sửa
     @GetMapping("/edit/{id}")
     public String showEditForm(@PathVariable int id, Model model,
                                @RequestParam(required = false) String keyword,
@@ -85,7 +80,6 @@ public class ImportController {
                                @RequestParam(defaultValue = "5") int size) {
         Import phieuNhap = importService.findById(id);
 
-        // Chuyển đổi Entity sang DTO để hiển thị
         ImportRequest request = new ImportRequest();
         request.setMaPhieuNhap(phieuNhap.getMaPhieuNhap());
         request.setMaNCC(phieuNhap.getNhaCungCap().getMaNCC());
@@ -107,12 +101,11 @@ public class ImportController {
         model.addAttribute("supplierId", supplierId);
         model.addAttribute("page", page);
         model.addAttribute("size", size);
-        return "admin/warehouse/importForm"; // Dùng chung form
+        return "admin/warehouse/importForm";
     }
 
     @GetMapping("/history/{productId}")
     public String showImportHistory(@PathVariable Integer productId, Model model) {
-        // Lấy thông tin sản phẩm để hiển thị tên
         Product product = productService.findById(productId);
         List<ImportDetail> historyList = importService.getHistoryForProduct(productId);
         model.addAttribute("product", product);
@@ -168,7 +161,6 @@ public class ImportController {
         }
     }
 
-    // ✅ Thêm phương thức Xóa
     @GetMapping("/delete/{id}")
     public String deleteImport(@PathVariable int id,
                                RedirectAttributes redirectAttributes,

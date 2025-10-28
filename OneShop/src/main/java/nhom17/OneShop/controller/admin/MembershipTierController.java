@@ -1,8 +1,7 @@
-package nhom17.OneShop.controller;
+package nhom17.OneShop.controller.admin;
 
 import jakarta.validation.Valid;
 import nhom17.OneShop.entity.MembershipTier;
-import nhom17.OneShop.exception.DuplicateRecordException;
 import nhom17.OneShop.request.MembershipTierRequest;
 import nhom17.OneShop.service.MembershipTierService;
 import org.springframework.beans.factory.annotation.Autowired;

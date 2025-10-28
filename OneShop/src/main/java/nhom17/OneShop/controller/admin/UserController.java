@@ -1,8 +1,7 @@
-package nhom17.OneShop.controller;
+package nhom17.OneShop.controller.admin;
 
 import jakarta.validation.Valid;
 import nhom17.OneShop.entity.User;
-import nhom17.OneShop.exception.DuplicateRecordException;
 import nhom17.OneShop.repository.MembershipTierRepository;
 import nhom17.OneShop.repository.RoleRepository;
 import nhom17.OneShop.request.UserRequest;
@@ -72,9 +71,9 @@ public class UserController {
                                @RequestParam(required = false) Integer tierId,
                                @RequestParam(required = false) Integer status) {
         UserRequest userRequest = new UserRequest();
-        if (id != null) { // Chế độ sửa
+        if (id != null) {
             User user = userService.findById(id);
-            // Chuyển đổi Entity sang DTO
+
             userRequest.setMaNguoiDung(user.getMaNguoiDung());
             userRequest.setHoTen(user.getHoTen());
             userRequest.setEmail(user.getEmail());
