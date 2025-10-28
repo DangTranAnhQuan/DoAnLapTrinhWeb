@@ -55,12 +55,14 @@ Dự án được phân chia thành hai khu vực chính: giao diện cho ngư�
 
 ## 🛠️ Công nghệ sử dụng
 
-- **Backend:** Java 17, Spring Boot 3.x  
-- **Frontend:** Thymeleaf, Bootstrap 5, jQuery  
-- **Database:** SQL Server  
-- **Security:** Spring Security  
-- **Email:** Spring Mail (OTP)  
-- **Build Tool:** Maven
+| **Thành phần**        | **Phiên bản / Công nghệ**     | **Ghi chú** |
+| ---------------------- | ----------------------------- | ------------ |
+| **Backend**            | Java 17, Spring Boot 3.x      | Xử lý logic nghiệp vụ, API, bảo mật và kết nối CSDL |
+| **Frontend**           | Thymeleaf, Bootstrap 5, jQuery | Xây dựng giao diện web động, thân thiện người dùng |
+| **Database**           | Microsoft SQL Server 2019+    | Lưu trữ toàn bộ dữ liệu sản phẩm, người dùng, đơn hàng |
+| **Security**           | Spring Security               | Quản lý xác thực, phân quyền, mã hóa mật khẩu |
+| **Email Service**      | Spring Mail (Gmail SMTP, OTP) | Gửi mã xác thực, thông báo người dùng qua email |
+| **Build Tool**         | Apache Maven 3.9+             | Quản lý dependencies và build dự án tự động |
 
 ---
 
