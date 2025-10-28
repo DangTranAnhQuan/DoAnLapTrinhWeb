@@ -190,7 +190,7 @@ OneShop
 ---
 
 ## 🎥 Video Demo chạy dự án
-Link video: *(chưa cập nhật)*
+Link video: (https://youtu.be/eg9ckERGOBQ)
 
 ---
 
