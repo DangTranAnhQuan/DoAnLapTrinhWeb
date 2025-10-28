@@ -1,5 +1,7 @@
 package nhom17.OneShop.controller.user;
 
+import jakarta.servlet.http.HttpServletResponse;
+import nhom17.OneShop.config.CookieUtil;
 import nhom17.OneShop.entity.Order;
 import nhom17.OneShop.dto.SepayWebhookDTO;
 import nhom17.OneShop.service.OrderService;
@@ -31,6 +33,8 @@ public class PaymentController {
 
     @Autowired
     private OrderService orderService;
+
+    @Autowired private CookieUtil cookieUtil;
 
     @Value("${shop.sepay.bank-code}")
     private String SHOP_BANK_CODE;
@@ -112,7 +116,7 @@ public class PaymentController {
 
     //HÀM MỚI: Hiển thị trang thanh toán VietQR
     @GetMapping("/thanh-toan/qr")
-    public String showVietQRPage(@RequestParam("orderId") Long orderId, Model model, RedirectAttributes redirectAttributes,HttpSession session) {
+    public String showVietQRPage(@RequestParam("orderId") Long orderId, Model model, RedirectAttributes redirectAttributes, HttpServletResponse response) {
         try {
             Order order = orderRepository.findById(orderId)
                     .orElseThrow(() -> new NoSuchElementException("Không tìm thấy đơn hàng " + orderId));
@@ -137,9 +141,10 @@ public class PaymentController {
             model.addAttribute("shopAccountName", SHOP_ACCOUNT_NAME);
             model.addAttribute("paymentMemo", paymentMemo);
 
-            session.setAttribute("pendingOnlineOrderId", orderId);
-            System.out.println("PaymentController: Lưu pendingOnlineOrderId vào session: " + orderId);
+            int expiryInMinutes = 30 * 60;
+            cookieUtil.createCookie(response, "pendingOnlineOrderId", orderId.toString(), expiryInMinutes);
 
+            System.out.println("PaymentController: Lưu pendingOnlineOrderId vào cookie: " + orderId);
             return "user/shop/payment-vietqr";
 
         } catch (NoSuchElementException e) {

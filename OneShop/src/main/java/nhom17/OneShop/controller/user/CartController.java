@@ -1,6 +1,9 @@
 package nhom17.OneShop.controller.user;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import nhom17.OneShop.config.CookieUtil;
 import nhom17.OneShop.entity.Cart;
 import nhom17.OneShop.dto.CartItemDTO;
 import nhom17.OneShop.entity.User; // Import User
@@ -39,9 +42,10 @@ public class CartController {
     @Autowired private CartService cartService;
     @Autowired private VoucherRepository khuyenMaiRepository;
     @Autowired private UserRepository userRepository;
+    @Autowired private CookieUtil cookieUtil;
 
     @GetMapping("/cart")
-    public String viewCart(Model model, HttpSession session) {
+    public String viewCart(Model model, HttpServletRequest request) {
         List<Cart> cartItems = cartService.getCartItems();
 
         BigDecimal subtotal = cartService.getSubtotal();
@@ -74,10 +78,16 @@ public class CartController {
             priceAfterMembershipDiscount = BigDecimal.ZERO;
         }
 
-        BigDecimal couponDiscountValue = (BigDecimal) session.getAttribute("cartDiscount");
-        if (couponDiscountValue == null) {
-            couponDiscountValue = BigDecimal.ZERO;
+        BigDecimal couponDiscountValue = BigDecimal.ZERO;
+        String discountStr = cookieUtil.readCookie(request, "cartDiscount");
+        if (discountStr != null) {
+            try {
+                couponDiscountValue = new BigDecimal(discountStr);
+            } catch (NumberFormatException e) {
+                couponDiscountValue = BigDecimal.ZERO;
+            }
         }
+        String appliedCouponCode = cookieUtil.readCookie(request, "appliedCouponCode");
 
         BigDecimal actualCouponDiscount = couponDiscountValue.min(priceAfterMembershipDiscount);
 
@@ -91,7 +101,7 @@ public class CartController {
         model.addAttribute("membershipDiscount", membershipDiscount);
         model.addAttribute("discount", actualCouponDiscount);
         model.addAttribute("total", total);
-        model.addAttribute("appliedCouponCode", session.getAttribute("appliedCouponCode"));
+        model.addAttribute("appliedCouponCode", appliedCouponCode);
 
         return "user/shop/cart";
     }
@@ -176,7 +186,7 @@ public class CartController {
     }
 
     @PostMapping("/cart/apply-coupon")
-    public String applyCoupon(@RequestParam("coupon_code") String couponCode, HttpSession session, RedirectAttributes redirectAttributes) {
+    public String applyCoupon(@RequestParam("coupon_code") String couponCode, HttpServletResponse response, RedirectAttributes redirectAttributes) {
         Optional<Voucher> couponOpt = khuyenMaiRepository.findByMaKhuyenMaiAndTrangThai(couponCode, 1);
 
         BigDecimal subtotalAfterMembership = BigDecimal.ZERO;
@@ -216,13 +226,16 @@ public class CartController {
             }
 
             discountAmount = discountAmount.min(subtotalAfterMembership);
+            // Đặt thời gian sống cho cookie (ví dụ: 1 giờ)
+            int expiryInSeconds = 60 * 60;
+            cookieUtil.createCookie(response, "cartDiscount", discountAmount.toString(), expiryInSeconds);
+            cookieUtil.createCookie(response, "appliedCouponCode", coupon.getMaKhuyenMai(), expiryInSeconds);
 
-            session.setAttribute("cartDiscount", discountAmount);
-            session.setAttribute("appliedCouponCode", coupon.getMaKhuyenMai());
             redirectAttributes.addFlashAttribute("success", "Áp dụng mã giảm giá thành công!");
         } else {
-            session.removeAttribute("cartDiscount");
-            session.removeAttribute("appliedCouponCode");
+            cookieUtil.deleteCookie(response, "cartDiscount");
+            cookieUtil.deleteCookie(response, "appliedCouponCode");
+
             redirectAttributes.addFlashAttribute("error", "Mã giảm giá không hợp lệ, hết hạn hoặc không đủ điều kiện.");
         }
         return "redirect:/cart";

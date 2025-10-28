@@ -179,10 +179,21 @@
 //}
 package nhom17.OneShop.controller.user;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
+import nhom17.OneShop.config.JwtUtil;
 import nhom17.OneShop.request.SignUpRequest;
 import nhom17.OneShop.service.OtpService;
 import nhom17.OneShop.service.UserService;
+import nhom17.OneShop.service.impl.CustomUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -196,6 +207,18 @@ public class AuthController {
 
     @Autowired
     private OtpService otpService;
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private JwtUtil jwtUtil;
+
+    @Autowired
+    private CustomUserDetailsService userDetailsService;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @GetMapping("/sign-in")
     public String showSignInForm() {
@@ -261,4 +284,54 @@ public class AuthController {
         return "redirect:/verify-otp?email=" + email;
     }
 
+    @PostMapping("/login")
+    public String processLogin(@RequestParam("username") String email,
+                               @RequestParam("password") String password,
+                               HttpServletResponse response,
+                               RedirectAttributes redirectAttributes) {
+
+        try {
+            // 1. Xác thực người dùng (giống hệt FailureHandler cũ)
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(email, password)
+            );
+            // 2. Nếu xác thực thành công, tải UserDetails
+            final UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+            // 3. Tạo JWT Token
+            final String token = jwtUtil.generateToken(userDetails);
+            // 4. Tạo Cookie chứa JWT
+            Cookie jwtCookie = jwtUtil.createJwtCookie(token);
+            // 5. Thêm cookie vào response
+            response.addCookie(jwtCookie);
+            // 6. Logic điều hướng (giống hệt SuccessHandler cũ)
+            for (GrantedAuthority auth : userDetails.getAuthorities()) {
+                if ("ROLE_ADMIN".equals(auth.getAuthority())) {
+                    return "redirect:/admin/dashboard";
+                }
+            }
+            return "redirect:/";
+
+        } catch (DisabledException e) {
+            // Xử lý tài khoản bị khóa (logic từ FailureHandler cũ)
+            redirectAttributes.addFlashAttribute("error", "Tài khoản của bạn đã bị khóa.");
+            return "redirect:/sign-in?disabled=true";
+
+        } catch (Exception e) {
+            // Xử lý sai username/password (logic từ FailureHandler cũ)
+            redirectAttributes.addFlashAttribute("error", "Email hoặc mật khẩu không chính xác.");
+            return "redirect:/sign-in?error=true";
+        }
+    }
+
+    @PostMapping("/logout")
+    public String processLogout(HttpServletResponse response) {
+        // 1. Tạo một cookie rỗng (thời gian sống = 0)
+        Cookie emptyCookie = jwtUtil.createEmptyJwtCookie();
+
+        // 2. Ghi đè cookie cũ bằng cookie rỗng
+        response.addCookie(emptyCookie);
+
+        // 3. Điều hướng về trang đăng nhập
+        return "redirect:/sign-in?logout";
+    }
 }

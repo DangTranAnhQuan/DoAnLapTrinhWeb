@@ -1,6 +1,8 @@
 package nhom17.OneShop.controller.user;
 
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import nhom17.OneShop.config.CookieUtil;
 import nhom17.OneShop.dto.ShippingOptionDTO;
 import nhom17.OneShop.entity.Address;
 import nhom17.OneShop.entity.Cart;
@@ -40,22 +42,26 @@ public class CheckoutController {
     @Autowired private UserRepository nguoiDungRepository;
     @Autowired private ShippingFeeService shippingFeeService;
     @Autowired private OrderService orderService;
+    @Autowired private CookieUtil cookieUtil;
 
     @GetMapping("/checkout")
-    public String showCheckoutPage(Model model, HttpSession session) {
-        Long pendingOrderId = (Long) session.getAttribute("pendingOnlineOrderId");
-        if (pendingOrderId != null) {
-            System.out.println("CheckoutController: Tìm thấy pendingOnlineOrderId trong session: " + pendingOrderId);
-            session.removeAttribute("pendingOnlineOrderId");
+    public String showCheckoutPage(Model model, HttpServletRequest request, HttpServletResponse response) {
+        String pendingOrderIdStr = cookieUtil.readCookie(request, "pendingOnlineOrderId");
+        if (pendingOrderIdStr != null) {
+            System.out.println("CheckoutController: Tìm thấy pendingOnlineOrderId trong cookie: " + pendingOrderIdStr);
+
+            // Xóa cookie ngay lập tức
+            cookieUtil.deleteCookie(response, "pendingOnlineOrderId");
+
             try {
+                Long pendingOrderId = Long.parseLong(pendingOrderIdStr);
                 User currentUser = getCurrentUser();
                 orderService.cancelOrderIfPendingOnline(pendingOrderId, currentUser);
                 model.addAttribute("infoMessage", "Đơn hàng thanh toán online trước đó (#"+ pendingOrderId +") đã được hủy do bạn quay lại.");
             } catch (IllegalStateException e) {
                 System.err.println("CheckoutController: Lỗi khi hủy đơn hàng online chờ (chưa đăng nhập?): " + e.getMessage());
-            }
-            catch (Exception e) {
-                System.err.println("CheckoutController: Lỗi khi hủy đơn hàng online chờ #" + pendingOrderId + ": " + e.getMessage());
+            } catch (Exception e) {
+                System.err.println("CheckoutController: Lỗi khi hủy đơn hàng online chờ #" + pendingOrderIdStr + ": " + e.getMessage());
             }
         }
         List<Cart> cartItems = cartService.getCartItems();
@@ -78,8 +84,15 @@ public class CheckoutController {
             }
         }
         BigDecimal priceAfterMembershipDiscount = subtotal.subtract(membershipDiscount).max(BigDecimal.ZERO);
-        BigDecimal couponDiscountValue = (BigDecimal) session.getAttribute("cartDiscount");
-        couponDiscountValue = (couponDiscountValue == null) ? BigDecimal.ZERO : couponDiscountValue;
+        BigDecimal couponDiscountValue = BigDecimal.ZERO;
+        String discountStr = cookieUtil.readCookie(request, "cartDiscount");
+        if (discountStr != null) {
+            try {
+                couponDiscountValue = new BigDecimal(discountStr);
+            } catch (NumberFormatException e) {
+                couponDiscountValue = BigDecimal.ZERO;
+            }
+        }
         BigDecimal actualCouponDiscount = couponDiscountValue.min(priceAfterMembershipDiscount);
 
 
@@ -125,7 +138,8 @@ public class CheckoutController {
                              @RequestParam("calculated_shipping_fee") BigDecimal shippingFee,
                              @RequestParam("shipping_method_name") String shippingMethodName,
                              RedirectAttributes redirectAttributes,
-                             HttpServletRequest request) {
+                             HttpServletRequest request,
+                             HttpServletResponse response) {
         try {
             if (shippingMethodName == null || shippingMethodName.isBlank()) {
                 throw new IllegalArgumentException("Chưa chọn được phương thức vận chuyển hợp lệ. Vui lòng chọn lại địa chỉ.");
@@ -134,8 +148,14 @@ public class CheckoutController {
                 throw new IllegalArgumentException("Phí vận chuyển không hợp lệ.");
             }
 
-            // 1. TẠO ĐƠN HÀNG TRƯỚC
-            Order order = checkoutService.placeOrder(diaChiId, paymentMethod, shippingFee, shippingMethodName);
+            String couponCode = cookieUtil.readCookie(request, "appliedCouponCode");
+
+            // 1. TẠO ĐƠN HÀNG TRƯỚC (truyền couponCode vào)
+            Order order = checkoutService.placeOrder(diaChiId, paymentMethod, shippingFee, shippingMethodName, couponCode);
+
+            // 2. XÓA COOKIE MÃ GIẢM GIÁ (rất quan trọng)
+            cookieUtil.deleteCookie(response, "appliedCouponCode");
+            cookieUtil.deleteCookie(response, "cartDiscount");
 
             // 2. PHÂN LUỒNG THANH TOÁN
             if ("COD".equalsIgnoreCase(paymentMethod)) {

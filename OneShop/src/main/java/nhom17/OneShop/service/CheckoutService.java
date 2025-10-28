@@ -5,5 +5,5 @@ import java.math.BigDecimal;
 
 public interface CheckoutService {
     // Thêm 2 tham số mới
-    Order placeOrder(Integer diaChiId, String paymentMethod, BigDecimal shippingFee, String shippingMethodName);
+    Order placeOrder(Integer diaChiId, String paymentMethod, BigDecimal shippingFee, String shippingMethodName, String appliedCouponCode);
 }

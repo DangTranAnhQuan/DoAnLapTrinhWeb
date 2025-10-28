@@ -1,6 +1,9 @@
 package nhom17.OneShop.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import nhom17.OneShop.config.CookieUtil;
 import nhom17.OneShop.entity.*;
 import nhom17.OneShop.repository.*;
 import nhom17.OneShop.repository.BrandRepository;
@@ -36,6 +39,7 @@ public class HomeController {
     @Autowired private ContactRepository contactRepository;
     @Autowired private EmailService emailService;
     @Autowired private VoucherService voucherService;
+    @Autowired private CookieUtil cookieUtil;
 
     private Collection<List<Product>> groupProducts(List<Product> products, int chunkSize) {
         if (products == null || products.isEmpty()) {
@@ -108,7 +112,7 @@ public class HomeController {
     }
 
     @GetMapping("/product/{id}")
-    public String productDetailPage(@PathVariable("id") int productId, Model model, HttpSession session, Principal principal) {
+    public String productDetailPage(@PathVariable("id") int productId, Model model, HttpServletRequest request, HttpServletResponse response, Principal principal) {
         Product product = productService.findById(productId);
         if (product == null) {
             return "redirect:/shop";
@@ -143,13 +147,35 @@ public class HomeController {
         // --- Kết thúc code reviews ---
 
         // --- Code xử lý recently viewed (giữ nguyên) ---
-        @SuppressWarnings("unchecked")
-        List<Integer> viewedProductIds = (List<Integer>) session.getAttribute("viewedProductIds");
-        if (viewedProductIds == null) viewedProductIds = new LinkedList<>();
+        String viewedIdsString = cookieUtil.readCookie(request, "viewedProductIds");
+        List<Integer> viewedProductIds = new LinkedList<>();
+
+        if (viewedIdsString != null && !viewedIdsString.isEmpty()) {
+            try {
+                // Chuyển string "5,2,10" thành List<Integer>
+                viewedProductIds = Arrays.stream(viewedIdsString.split("_"))
+                        .map(Integer::parseInt)
+                        .collect(Collectors.toCollection(LinkedList::new));
+            } catch (Exception e) {
+                viewedProductIds = new LinkedList<>(); // Reset nếu cookie bị lỗi
+            }
+        }
+
+        // Logic xử lý list (giống hệt code cũ của bạn)
         viewedProductIds.remove(Integer.valueOf(productId));
         viewedProductIds.add(0, productId);
         if (viewedProductIds.size() > 10) viewedProductIds = viewedProductIds.subList(0, 10);
-        session.setAttribute("viewedProductIds", viewedProductIds);
+
+        // Chuyển List<Integer> thành string "7,5,2,10"
+        String newViewedIdsString = viewedProductIds.stream()
+                .map(String::valueOf)
+                .collect(Collectors.joining("_"));
+
+        // Ghi lại cookie (lưu 30 ngày)
+        int expiryInDays = 30 * 24 * 60 * 60;
+        cookieUtil.createCookie(response, "viewedProductIds", newViewedIdsString, expiryInDays);
+
+        // Logic lấy sản phẩm từ DB (giống hệt code cũ của bạn)
         if (viewedProductIds.size() > 1) {
             List<Integer> idsToFetch = new ArrayList<>(viewedProductIds);
             idsToFetch.remove(Integer.valueOf(productId));

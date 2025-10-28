@@ -30,13 +30,12 @@ public class CheckoutServiceImpl implements CheckoutService {
     @Autowired private UserRepository userRepository;
     @Autowired private ProductRepository productRepository;
     @Autowired private InventoryRepository inventoryRepository;
-    @Autowired private HttpSession httpSession;
     @Autowired private VoucherRepository voucherRepository;
 
 
     @Override
     @Transactional
-    public Order placeOrder(Integer diaChiId, String paymentMethod, BigDecimal shippingFee, String shippingMethodName) {
+    public Order placeOrder(Integer diaChiId, String paymentMethod, BigDecimal shippingFee, String shippingMethodName, String appliedCouponCode) {
         User currentUser = getCurrentUserOptional().orElseThrow(() -> new IllegalStateException("Người dùng chưa đăng nhập."));
         List<Cart> cartItems = cartService.getCartItems();
         if (cartItems.isEmpty()) {
@@ -58,7 +57,6 @@ public class CheckoutServiceImpl implements CheckoutService {
         BigDecimal priceAfterMembership = subtotal.subtract(membershipDiscount).max(BigDecimal.ZERO);
 
         BigDecimal actualCouponDiscount = BigDecimal.ZERO;
-        String appliedCouponCode = (String) httpSession.getAttribute("appliedCouponCode");
         Voucher appliedVoucher = null; // Khởi tạo voucher áp dụng là null
 
         // Biến để lưu thông báo lỗi nếu có
@@ -129,8 +127,6 @@ public class CheckoutServiceImpl implements CheckoutService {
 
             // 5. Nếu có lỗi (không hợp lệ HOẶC hết lượt) -> Xóa khỏi session
             if (appliedVoucher == null) { // appliedVoucher chỉ được gán nếu mọi thứ OK
-                httpSession.removeAttribute("cartDiscount");
-                httpSession.removeAttribute("appliedCouponCode");
                 actualCouponDiscount = BigDecimal.ZERO; // Đảm bảo không có giảm giá
 
                 // QUAN TRỌNG: Ném Exception để báo lỗi cho người dùng biết tại sao mã bị gỡ
@@ -199,8 +195,6 @@ public class CheckoutServiceImpl implements CheckoutService {
             cartService.clearCart(); // Xóa giỏ hàng cho người dùng hiện tại
 
             // Xóa thông tin giảm giá khỏi session (chỉ khi COD thành công)
-            httpSession.removeAttribute("cartDiscount");
-            httpSession.removeAttribute("appliedCouponCode");
             System.out.println("Giỏ hàng đã được xóa cho đơn hàng COD #" + savedOrder.getMaDonHang());
         } else {
             // Đối với thanh toán ONLINE, không xóa giỏ hàng ở đây.

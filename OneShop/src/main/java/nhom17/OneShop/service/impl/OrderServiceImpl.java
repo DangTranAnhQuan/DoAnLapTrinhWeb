@@ -67,9 +67,6 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     private UserRepository nguoiDungRepository;
 
-    @Autowired
-    private HttpSession httpSession;
-
     @Override
     public Page<Order> findAll(String keyword, String status, String paymentMethod, String paymentStatus, String shippingMethod, int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size, Sort.by("ngayDat").descending());
@@ -405,15 +402,6 @@ public class OrderServiceImpl implements OrderService {
                 cartService.clearCart();
 
                 System.out.println("Webhook: Đã xóa giỏ hàng cho người dùng của đơn hàng #" + orderId);
-                Long pendingOrderIdInSession = (Long) httpSession.getAttribute("pendingOnlineOrderId");
-                // Kiểm tra xem ID trong session có khớp với ID đơn hàng vừa xử lý không
-                if (pendingOrderIdInSession != null && pendingOrderIdInSession.equals(orderId)) {
-                    httpSession.removeAttribute("pendingOnlineOrderId");
-                    System.out.println("Webhook: Đã xóa pendingOnlineOrderId khỏi session cho đơn hàng #" + orderId);
-                } else {
-                    // Log cảnh báo nếu không tìm thấy hoặc không khớp (có thể xảy ra nếu user mở nhiều tab)
-                    System.out.println("Webhook: Không tìm thấy hoặc không khớp pendingOnlineOrderId trong session cho đơn hàng #" + orderId);
-                }
 
             } else {
                 System.err.println("Webhook Warning: Không tìm thấy người dùng cho đơn hàng #" + orderId + " để xóa giỏ hàng.");

@@ -69,8 +69,7 @@
                                     </a>
                                     <form th:action="@{/logout}" method="post" class="nav-item" style="padding: 0; border: none; background: none;">
                                         <button type="submit" class="nav-link" style="all: unset; cursor:pointer; display:block; width:100%; text-align:left; padding:15px 25px; color: var(--color-body); border: none; background: none;">
-                                            Đăng xuất
-                                        </button>
+                                            Đăng xuất </button>
                                     </form>
                                 </div>
                             </nav>
@@ -84,6 +83,7 @@
                                 <div class="axil-dashboard-account">
                                     <div th:if="${success} or ${param.success}" class="alert alert-success alert-dismissible fade show" role="alert" data-auto-hide="true" th:text="${success != null ? success : param.success}"><button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>
                                     <div th:if="${error} or ${param.error}" class="alert alert-danger alert-dismissible fade show" role="alert" data-auto-hide="true" th:text="${error != null ? error : param.error}"><button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>
+
                                     <form class="account-details-form" th:action="@{/my-account/update-details}" th:object="${user}" method="post">
                                         <div class="row">
                                             <div class="col-12"><div class="form-group"><label>Họ và Tên</label><input type="text" class="form-control" th:field="*{hoTen}"></div></div>
@@ -116,6 +116,8 @@
                             <div class="tab-pane fade" id="nav-address" role="tabpanel"
                                  th:classappend="${activeTab == 'addresses'} ? ' show active' : ''">
                                 <div class="axil-dashboard-address">
+                                    <div th:if="${success} or ${param.success}" class="alert alert-success alert-dismissible fade show" role="alert" data-auto-hide="true" th:text="${success != null ? success : param.success}"><button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>
+                                    <div th:if="${error} or ${param.error}" class="alert alert-danger alert-dismissible fade show" role="alert" data-auto-hide="true" th:text="${error != null ? error : param.error}"><button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>
                                     <div class="d-flex justify-content-between align-items-center flex-nowrap gap-3 mb-4">
                                         <p class="notice-text mb-0">Các địa chỉ sau sẽ được sử dụng trên trang thanh toán.</p>
                                         <a th:href="@{/my-account/add-address}" class="axil-btn btn-primary btn-sm text-nowrap">Thêm địa chỉ</a>
@@ -123,20 +125,15 @@
                                     <div th:if="${addresses.isEmpty()}"><p>Bạn chưa lưu địa chỉ nào.</p></div>
                                     <div class="row row--30">
                                         <div th:each="address : ${addresses}" class="col-lg-6 mb--40">
-                                            <div class="address-info">
-                                                <div class="addrss-header d-flex align-items-center justify-content-between">
-                                                    <h4 class="title mb-0">Địa chỉ giao hàng</h4>
-                                                    <div class="d-flex align-items-center gap-2">
-                                                        <a th:href="@{/checkout/edit-address/{id}(id=${address.maDiaChi})}" class="address-edit d-inline-flex align-items-center" title="Chỉnh sửa"><i class="far fa-edit"></i></a>
-                                                        <form th:action="@{/my-account/delete-address/{id}(id=${address.maDiaChi})}" method="post" class="m-0 p-0">
-                                                            <button type="submit" class="address-delete btn btn-link p-0 border-0 d-inline-flex align-items-center" style="color:#0d6efd;" onclick="return confirm('Bạn có chắc muốn xóa địa chỉ này?')" title="Xóa"><i class="far fa-trash-alt"></i></button>
-                                                        </form>
-                                                    </div>
+                                            <div class="address-info shadow-sm p-4 bg-light rounded"> <div class="addrss-header d-flex align-items-center justify-content-between mb-3"> <h4 class="title mb-0">Địa chỉ giao hàng</h4>
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <a th:href="@{/my-account/edit-address/{id}(id=${address.maDiaChi})}" class="address-edit d-inline-flex align-items-center" title="Chỉnh sửa"><i class="far fa-edit"></i></a>
+                                                    <form th:action="@{/my-account/delete-address/{id}(id=${address.maDiaChi})}" method="post" class="m-0 p-0 d-inline"> <button type="submit" class="address-delete btn btn-link p-0 border-0 d-inline-flex align-items-center" style="color:#dc3545;" onclick="return confirm('Bạn có chắc muốn xóa địa chỉ này?')" title="Xóa"><i class="far fa-trash-alt"></i></button> </form>
                                                 </div>
-                                                <ul class="address-details">
-                                                    <li th:text="'Tên: ' + ${address.tenNguoiNhan}"></li>
-                                                    <li th:text="'SĐT: ' + ${address.soDienThoai}"></li>
-                                                    <li class="mt--30" th:text="${address.soNhaDuong} + ', ' + ${address.phuongXa} + ', ' + ${address.quanHuyen} + ', ' + ${address.tinhThanh}"></li>
+                                            </div>
+                                                <ul class="address-details list-unstyled mb-0"> <li><strong>Tên:</strong> <span th:text="${address.tenNguoiNhan}"></span></li>
+                                                    <li><strong>SĐT:</strong> <span th:text="${address.soDienThoai}"></span></li>
+                                                    <li class="mt-2" th:text="${address.soNhaDuong} + ', ' + ${address.phuongXa} + ', ' + ${address.quanHuyen} + ', ' + ${address.tinhThanh}"></li>
                                                 </ul>
                                             </div>
                                         </div>
@@ -149,16 +146,28 @@
 
                 <script th:inline="javascript">
                     /*<![CDATA[*/
-                    // ... (Giữ nguyên script cũ) ...
-                     document.addEventListener('DOMContentLoaded', function () {
-                      document.querySelectorAll('.alert[data-auto-hide="true"]').forEach(function (el) {
-                        setTimeout(function () {
-                          try {
-                            if (window.bootstrap && bootstrap.Alert) { bootstrap.Alert.getOrCreateInstance(el).close(); }
-                            else { el.classList.remove('show'); }
-                          } catch (e) {}
-                        }, 4000);
-                      });
+                    // Script tự động ẩn thông báo sau 4 giây
+                    document.addEventListener('DOMContentLoaded', function () {
+                        document.querySelectorAll('.alert[data-auto-hide="true"]').forEach(function (el) {
+                            setTimeout(function () {
+                                try {
+                                    // Sử dụng Bootstrap 5 Alert instance nếu có
+                                    if (window.bootstrap && bootstrap.Alert) {
+                                        var alertInstance = bootstrap.Alert.getOrCreateInstance(el);
+                                        if (alertInstance) {
+                                            alertInstance.close();
+                                        }
+                                    } else {
+                                        // Fallback nếu không có Bootstrap JS
+                                        el.style.display = 'none';
+                                    }
+                                } catch (e) {
+                                    console.error("Error closing alert:", e);
+                                    // Fallback nếu có lỗi
+                                    el.style.display = 'none';
+                                }
+                            }, 4000); // 4 giây
+                        });
                     });
                     /*]]>*/
                 </script>
