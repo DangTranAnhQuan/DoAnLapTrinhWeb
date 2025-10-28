@@ -43,17 +43,13 @@ Hệ thống cũng tích hợp **Spring Security** để xử lý xác thực, p
 
 ## ✨ Tính năng nổi bật
 
-Dự án được phân chia thành hai khu vực chính: giao diện cho khách hàng (User) và trang quản trị (Admin).
+Dự án được phân chia thành hai khu vực chính: giao diện cho người dùng (User) và trang quản trị (Admin).
 
-### 1. Chức năng chung
-- Đăng ký, đăng nhập, đăng xuất, quên mật khẩu, xác thực OTP, mã hóa mật khẩu.
-- Tìm kiếm và lọc sản phẩm.
-
-### 2. Giao diện Người dùng (User)
-- Xem, thêm giỏ hàng, thanh toán (COD/VNPay), áp mã giảm giá, quản lý tài khoản, đơn hàng, đánh giá, chat.
-
-### 3. Trang Quản trị (Admin)
-- Dashboard, quản lý người dùng, sản phẩm, danh mục, đơn hàng, khuyến mãi, vận chuyển, kho hàng, hỗ trợ chat.
+| **Nhóm người dùng / Thành phần** | **Chức năng chính** |
+| -------------------------------- | -------------------- |
+| 🧑‍💼 **Khách hàng (Chưa đăng ký)** | - Đăng ký tài khoản.<br>- Tra cứu / tìm kiếm sản phẩm.<br>- Thêm sản phẩm vào giỏ hàng.<br>- Liên hệ cửa hàng để được tư vấn. |
+| 👤 **Thành viên (Đã đăng ký)** | - Đăng nhập, đăng xuất, quên mật khẩu, xác thực OTP.<br>- Tra cứu và mua sản phẩm trực tuyến.<br>- Quản lý giỏ hàng (thêm / sửa / xóa).<br>- Thanh toán (COD, VNPay hoặc ngân hàng liên kết).<br>- Áp dụng mã giảm giá khi thanh toán.<br>- Cập nhật thông tin tài khoản và địa chỉ nhận hàng.<br>- Theo dõi và quản lý đơn hàng (đang xử lý, đã xác nhận, đang giao, đã giao, hoàn tiền, hủy đơn).<br>- Đánh giá sản phẩm (bình luận, hình ảnh, video).<br>- Chat và liên hệ trực tiếp với cửa hàng. |
+| 🛠️ **Quản trị viên (Admin)** | - Quản lý người dùng và phân quyền.<br>- Quản lý khuyến mãi và mã giảm giá.<br>- Quản lý sản phẩm, danh mục và thương hiệu.<br>- Quản lý đơn hàng, cập nhật trạng thái giao hàng.<br>- Quản lý đơn vận chuyển và nhà vận chuyển.<br>- Quản lý kho hàng, phiếu nhập và nhà cung cấp.<br>- Quản lý gói cước vận chuyển theo khu vực.<br>- Hỗ trợ khách hàng qua chat trực tuyến.<br>- Thống kê doanh thu, đơn hàng, người dùng mới và báo cáo tổng hợp.<br>- Dashboard hiển thị dữ liệu tổng quan. |
 
 ---
 
